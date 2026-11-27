@@ -1,0 +1,191 @@
+{
+  "target": {
+    "path": "artifacts/node/115/hl-node",
+    "size": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "blake3_iv": {
+    "va": "0x457ae0",
+    "words": [
+      "0x6a09e667",
+      "0xbb67ae85",
+      "0x3c6ef372",
+      "0xa54ff53a",
+      "0x510e527f",
+      "0x9b05688c",
+      "0x1f83d9ab",
+      "0x5be0cd19"
+    ]
+  },
+  "fdes": [
+    {
+      "name": "abci_hash_slow_2",
+      "start": "0x548dad0",
+      "end": "0x548dcd3"
+    },
+    {
+      "name": "outer_root_digest",
+      "start": "0x41c5140",
+      "end": "0x41c540a"
+    },
+    {
+      "name": "blake3_platform_detect",
+      "start": "0x160bee0",
+      "end": "0x160bf68"
+    },
+    {
+      "name": "blake3_hasher_update",
+      "start": "0x160b3a0",
+      "end": "0x160bcce"
+    },
+    {
+      "name": "blake3_hasher_finalize",
+      "start": "0x160bcd0",
+      "end": "0x160bda0"
+    }
+  ],
+  "anchors": [
+    {
+      "va": "0x548db1a",
+      "bytes": "ff15009d0501",
+      "fde": "abci_hash_slow_2",
+      "role": "call outer_root_digest via slot 0x64e7820"
+    },
+    {
+      "va": "0x41c52d8",
+      "bytes": "ff15aaa13102",
+      "fde": "outer_root_digest",
+      "role": "call Platform::detect (0x160bee0) via slot 0x64df488"
+    },
+    {
+      "va": "0x41c52f5",
+      "bytes": "0f100de42729fc",
+      "fde": "outer_root_digest",
+      "role": "load BLAKE3 IV[0..4] from .rodata 0x457ae0"
+    },
+    {
+      "va": "0x41c5301",
+      "bytes": "0f1015e82729fc",
+      "fde": "outer_root_digest",
+      "role": "load BLAKE3 IV[4..8] from .rodata 0x457af0"
+    },
+    {
+      "va": "0x41c5367",
+      "bytes": "888424fb000000",
+      "fde": "outer_root_digest",
+      "role": "store platform selector byte at context+0x6b"
+    },
+    {
+      "va": "0x41c5387",
+      "bytes": "ff1583a13102",
+      "fde": "outer_root_digest",
+      "role": "call Hasher::update (0x160b3a0) via slot 0x64df510"
+    },
+    {
+      "va": "0x41c539a",
+      "bytes": "ff1578a13102",
+      "fde": "outer_root_digest",
+      "role": "call Hasher::finalize (0x160bcd0) via slot 0x64df518"
+    },
+    {
+      "va": "0x160b3dc",
+      "bytes": "41bf00040000",
+      "fde": "blake3_hasher_update",
+      "role": "1024-byte (0x400) BLAKE3 chunk length"
+    },
+    {
+      "va": "0x160b412",
+      "bytes": "0c02",
+      "fde": "blake3_hasher_update",
+      "role": "OR domain flag CHUNK_END (0x02)"
+    },
+    {
+      "va": "0x160bd08",
+      "bytes": "0c08",
+      "fde": "blake3_hasher_finalize",
+      "role": "OR domain flag ROOT (0x08)"
+    },
+    {
+      "va": "0x160bd12",
+      "bytes": "488d3533eee5fe",
+      "fde": "blake3_hasher_finalize",
+      "role": "load 5-arm platform finalize jump table 0x46ab4c"
+    },
+    {
+      "va": "0x160bd33",
+      "bytes": "ff15175ced04",
+      "fde": "blake3_hasher_finalize",
+      "role": "call compress_in_place SSE4.1/AVX2 via slot 0x64e1950"
+    },
+    {
+      "va": "0x160bd4c",
+      "bytes": "ff15065ced04",
+      "fde": "blake3_hasher_finalize",
+      "role": "call compress_in_place AVX-512 via slot 0x64e1958"
+    },
+    {
+      "va": "0x160bd65",
+      "bytes": "ff15f55bed04",
+      "fde": "blake3_hasher_finalize",
+      "role": "call compress_in_place portable via slot 0x64e1960"
+    },
+    {
+      "va": "0x160bd7e",
+      "bytes": "ff15e45bed04",
+      "fde": "blake3_hasher_finalize",
+      "role": "call compress_in_place SSE2 via slot 0x64e1968"
+    }
+  ],
+  "relocation_slots": [
+    {
+      "name": "outer_root_digest",
+      "slot": "0x64e7820",
+      "target": "0x41c5140"
+    },
+    {
+      "name": "blake3_platform_detect",
+      "slot": "0x64df488",
+      "target": "0x160bee0"
+    },
+    {
+      "name": "blake3_hasher_update",
+      "slot": "0x64df510",
+      "target": "0x160b3a0"
+    },
+    {
+      "name": "blake3_hasher_finalize",
+      "slot": "0x64df518",
+      "target": "0x160bcd0"
+    },
+    {
+      "name": "compress_portable",
+      "slot": "0x64e1960",
+      "target": "0x160d200"
+    },
+    {
+      "name": "compress_sse2",
+      "slot": "0x64e1968",
+      "target": "0x633d0c0"
+    },
+    {
+      "name": "compress_sse41_avx2",
+      "slot": "0x64e1950",
+      "target": "0x633fac0"
+    },
+    {
+      "name": "compress_avx512",
+      "slot": "0x64e1958",
+      "target": "0x6345bc0"
+    }
+  ],
+  "finalize_jump_table": {
+    "base": "0x46ab4c",
+    "arms": [
+      "0x160bd54",
+      "0x160bd6d",
+      "0x160bd22",
+      "0x160bd22",
+      "0x160bd3b"
+    ]
+  }
+}

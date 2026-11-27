@@ -3,7 +3,8 @@ use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use node115_abci::abci_hash::{
-    ROOT_CAPTURE_SLOT_COUNT, ReductionNode, ReductionRow, encode_reduction_tree,
+    ROOT_CAPTURE_SLOT_COUNT, ReductionNode, ReductionRow, blake3_hash, compute_reduction_tree_root,
+    encode_reduction_tree,
 };
 use node115_abci::checkpoint_replay_fixture::{
     ACTION_TAG_ABCI_DIGEST_VOTE, ExternalDigestVote, SupportContext, restore_checkpoint,
@@ -13,7 +14,9 @@ use node115_abci::engine::{
     AbciEngine, EngineBlock, PRUNE_KEEP_EVM_CHECKPOINTS, TAR_COMPLETE_MARKER,
     build_daily_evm_tar_command, select_checkpoints_to_prune,
 };
-use node115_abci::hash_signature_tracker::{HashSignatureTracker, PRUNE_WINDOW_HEIGHTS};
+use node115_abci::hash_signature_tracker::{
+    HashSignatureTracker, PRUNE_WINDOW_HEIGHTS, timer_is_mature,
+};
 use node115_abci::state::{AbciState, FreezeHeightError};
 
 fn unique_tmp(tag: &str) -> std::path::PathBuf {
@@ -232,4 +235,25 @@ fn engine_offline_replay_freeze_guard_and_checkpoint_maintenance() {
     );
 
     let _ = fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn real_blake3_state_root_and_timer_maturity_end_to_end() {
+    // Build a 59-slot reduction tree and compute its exact node #115 BLAKE3 state root!
+    let rows: Vec<ReductionRow> = (0..ROOT_CAPTURE_SLOT_COUNT as u64)
+        .map(|i| ReductionRow {
+            index: i,
+            value: ReductionNode::Leaf([i as u8; 32]),
+        })
+        .collect();
+    let preimage = encode_reduction_tree(&rows).unwrap();
+    let root = compute_reduction_tree_root(&rows).unwrap();
+    assert_eq!(root, blake3_hash(&preimage));
+
+    // Timer maturity boundary (`0x515218d..0x51522cd`): 10.5 seconds = 10_500_000_000 ns
+    let t0 = 1_700_000_000_000_000_000u64;
+    assert!(!timer_is_mature(t0, 10.5, t0 + 10_499_999_999));
+    assert!(timer_is_mature(t0, 10.5, t0 + 10_500_000_000));
+    assert!(!timer_is_mature(t0, f64::NAN, t0 + 99_999_999_999));
+    assert!(!timer_is_mature(t0, -1.0, t0 + 99_999_999_999));
 }

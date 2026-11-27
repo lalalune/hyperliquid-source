@@ -6,6 +6,7 @@ pub mod engine;
 pub mod hash_signature_tracker;
 pub mod state;
 
+pub use node115_abci_blake3 as blake3;
 pub use node115_abci_checkpoint_replay_fixture as checkpoint_replay_fixture;
 pub use node115_db as db;
 pub use node115_digest_reference_handoff as digest_reference_handoff;

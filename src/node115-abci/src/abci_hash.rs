@@ -6,6 +6,9 @@
 //! - `RE-017-abci-root-tree-115`: 59-slot root capture, MessagePack array/u64/0xd9-hex encoding
 //! - `RE-009-node115-root-digest-selector` / `RE-009-node115-root-digest-cell-writer`
 
+pub use node115_abci_blake3::{
+    Blake3Hasher, IV as BLAKE3_IV, blake3_hash, compute_leaf_root, compute_preimage_root,
+};
 pub use node115_abci_checkpoint_replay_fixture::{
     RootSelectorCell, SelectorTrace, select_root_impl,
 };
@@ -84,6 +87,13 @@ pub fn encode_reduction_tree(rows: &[ReductionRow]) -> Result<Vec<u8>, EncodeErr
     let mut out = Vec::new();
     encode_rows_into(&mut out, rows)?;
     Ok(out)
+}
+
+/// Compute the exact 32-byte node #115 BLAKE3 state root over a reduction tree
+/// (`0x548dad0 -> slot 0x64e7820 -> 0x41c5140 -> 0x160b3a0 / 0x160bcd0`).
+pub fn compute_reduction_tree_root(rows: &[ReductionRow]) -> Result<[u8; 32], EncodeError> {
+    let preimage = encode_reduction_tree(rows)?;
+    Ok(compute_preimage_root(&preimage))
 }
 
 fn encode_rows_into(out: &mut Vec<u8>, rows: &[ReductionRow]) -> Result<(), EncodeError> {

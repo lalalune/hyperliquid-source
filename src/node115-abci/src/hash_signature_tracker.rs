@@ -35,6 +35,30 @@ pub struct RecordVoteResult {
     pub sealed_now: bool,
 }
 
+/// Convert an `f64` delay in seconds (`[tracker + 0x88]`, `0x515218d..0x51521da`)
+/// into nanoseconds saturated to `i64::MAX` (`0x7fff_ffff_ffff_ffff`).
+pub fn delay_secs_to_nanos(delay_secs: f64) -> Option<u64> {
+    if !delay_secs.is_finite() || delay_secs < 0.0 {
+        return None;
+    }
+    let nanos_f = delay_secs * 1_000_000_000.0;
+    let max_i64 = i64::MAX as u64;
+    if nanos_f >= max_i64 as f64 {
+        Some(max_i64)
+    } else {
+        Some(nanos_f as u64)
+    }
+}
+
+/// Timer eligibility predicate observed at `0x515218d..0x51522cd`:
+/// eligible iff `current_nanos >= inserted_nanos + delay_nanos`.
+pub fn timer_is_mature(inserted_nanos: u64, delay_secs: f64, current_nanos: u64) -> bool {
+    let Some(delay_nanos) = delay_secs_to_nanos(delay_secs) else {
+        return false;
+    };
+    current_nanos >= inserted_nanos.saturating_add(delay_nanos)
+}
+
 /// Complete offline logical model of `HashSignatureTracker` (`S + 0x3e50`).
 #[derive(Clone, Debug, Default)]
 pub struct HashSignatureTracker {
