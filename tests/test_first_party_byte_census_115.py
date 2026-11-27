@@ -21,10 +21,10 @@ class FirstPartyByteCensus115Tests(unittest.TestCase):
     def test_committed_packet_verifies_against_authenticated_node115(self):
         result = fp_census.verify_committed(ROOT, rebuild=False)
         totals = result['totals']
-        self.assertEqual(totals['windows'], 66)
-        self.assertEqual(totals['relocation_qualified_windows'], 66)
-        self.assertEqual(totals['components'], 12)
-        self.assertGreater(totals['bytes'], 12000)
+        self.assertEqual(totals['windows'], 92)
+        self.assertEqual(totals['relocation_qualified_windows'], 92)
+        self.assertEqual(totals['components'], 13)
+        self.assertEqual(totals['bytes'], 57572)
         self.assertEqual(totals['raw_equal_windows'], 6)
 
     def test_registry_registers_first_party_windows_separately_from_dependencies(self):
@@ -32,11 +32,11 @@ class FirstPartyByteCensus115Tests(unittest.TestCase):
         coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', components)
         fp_rows = [r for r in coverage['windows'] if 'dependency' not in r]
         dep_rows = [r for r in coverage['windows'] if 'dependency' in r]
-        self.assertEqual(len(fp_rows), 66)
+        self.assertEqual(len(fp_rows), 92)
         self.assertTrue(all(r['id'].startswith('node115-fp-') for r in fp_rows))
         self.assertTrue(all(r['relocation_qualified'] for r in fp_rows))
         self.assertEqual(len(dep_rows), 7885)
-        self.assertEqual(sum(c['windows'] for c in coverage['components'].values()), 66)
+        self.assertEqual(sum(c['windows'] for c in coverage['components'].values()), 92)
         self.assertEqual(
             sum(c['bytes'] for c in coverage['components'].values()),
             sum(r['bytes'] for r in fp_rows),

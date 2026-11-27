@@ -1,21 +1,22 @@
 # RE-001: Node #115 First-Party Compiled-Byte Comparison Census
 
 - Target: Linux x86-64 node #115, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`
-- Source crate: `src/node115-first-party-byte-census/src/lib.rs` (SHA-256 `759ff01967ce2f272d8edd9b891fbb0c4cd0e8d5dd5ab3aec90937c21ed89740`)
+- Source crate: `src/node115-first-party-byte-census/src/lib.rs` (SHA-256 `1bb45d69dccf590b78f97a440d2a27ea0f0116e028d2c166767b25c791ff8019`)
 - Compiler: `rustc 1.95.0 (59807616e 2026-04-14)` with `--edition=2021 --crate-type=rlib --crate-name=node115_first_party_byte_census -C opt-level=3 -C overflow-checks=yes --emit=obj`
 - Scope: independently authored, dependency-free, `#![forbid(unsafe_code)]` Rust implementations compiled to exact raw-equal or relocation-qualified `.text` FDE matches. Static analysis and compilation only; no captured binary is executed.
 
 ## Summary
 
-**66 authenticated first-party `.text` windows · 12,234 bytes compared · 11,359/12,234 (92.85%) raw-equal bytes · 6/66 raw-equal windows · 66/66 (100.00%) relocation-qualified · 12 components.**
+**92 authenticated first-party `.text` windows · 57,572 bytes compared · 54,527/57,572 (94.71%) raw-equal bytes · 6/92 raw-equal windows · 92/92 (100.00%) relocation-qualified · 13 components.**
 
 | Component | Windows | Bytes | Raw-equal bytes | Raw-equal windows | Relocation-qualified |
 | --- | ---: | ---: | ---: | ---: | ---: |
+| `action-dispatch` | 15 | 35,135 | 33,116 (94.25%) | 0/15 | 15/15 |
 | `assets` | 3 | 147 | 147 (100.00%) | 3/3 | 3/3 |
 | `bridge` | 5 | 1,764 | 1,527 (86.56%) | 0/5 | 5/5 |
 | `consensus` | 8 | 1,403 | 1,341 (95.58%) | 0/8 | 8/8 |
-| `constants` | 11 | 1,618 | 1,535 (94.87%) | 0/11 | 11/11 |
-| `dex-registry` | 5 | 926 | 832 (89.85%) | 0/5 | 5/5 |
+| `constants` | 14 | 9,744 | 9,628 (98.81%) | 0/14 | 14/14 |
+| `dex-registry` | 13 | 3,003 | 2,791 (92.94%) | 0/13 | 13/13 |
 | `evm` | 6 | 1,110 | 1,062 (95.68%) | 0/6 | 6/6 |
 | `exchange` | 5 | 1,520 | 1,382 (90.92%) | 0/5 | 5/5 |
 | `fees` | 1 | 113 | 105 (92.92%) | 0/1 | 1/1 |
@@ -94,6 +95,32 @@
 | `consensus` | `0x4d6a370..0x4d6a439` | 201 | 193/201 | 2 | l1/governance ProposalCategory RMP visit_str (0x4d6a370) | `src/node115-governance-codec/README.md` |
 | `consensus` | `0x23c2ed0..0x23c2faf` | 223 | 216/223 | 2 | l1/governance ProposalCategory JSON visit_str (0x23c2ed0) | `src/node115-governance-codec/README.md` |
 | `consensus` | `0x3bd7ba0..0x3bd7c7f` | 223 | 216/223 | 2 | l1/governance ProposalCategory JSON visit_str (0x3bd7ba0) | `src/node115-governance-codec/README.md` |
+| `action-dispatch` | `0x2ba1af0..0x2ba2bde` | 4334 | 4007/4334 | 82 | l1/action Action (92-variant) RMP visit_str (0x2ba1af0) | `research/work-items/RE-010-action-type-matcher-115/README.md` |
+| `action-dispatch` | `0x3662730..0x366381e` | 4334 | 4007/4334 | 82 | l1/action Action (92-variant) RMP visit_str (0x3662730) | `research/work-items/RE-010-action-type-matcher-115/README.md` |
+| `action-dispatch` | `0x4d67530..0x4d6861e` | 4334 | 4006/4334 | 82 | l1/action Action (92-variant) RMP visit_str (0x4d67530) | `research/work-items/RE-010-action-type-matcher-115/README.md` |
+| `action-dispatch` | `0x2ba0a70..0x2ba1aef` | 4223 | 3898/4223 | 82 | l1/action Action (92-variant) JSON visit_str (0x2ba0a70) | `research/work-items/RE-010-action-type-matcher-115/README.md` |
+| `action-dispatch` | `0x36616b0..0x366272f` | 4223 | 3896/4223 | 82 | l1/action Action (92-variant) JSON visit_str (0x36616b0) | `research/work-items/RE-010-action-type-matcher-115/README.md` |
+| `constants` | `0x14c12b0..0x14c1cac` | 2556 | 2544/2556 | 3 | global_constants NodeEnv (79-variant) RMP visit_str (0x14c12b0) | `research/work-items/RE-010-env79-variant-matchers-115/README.md` |
+| `constants` | `0x14c07c0..0x14c12a1` | 2785 | 2774/2785 | 3 | global_constants NodeEnv (79-variant) JSON visit_str (0x14c07c0) | `research/work-items/RE-010-env79-variant-matchers-115/README.md` |
+| `constants` | `0x1774100..0x1774be1` | 2785 | 2775/2785 | 3 | global_constants NodeEnv (79-variant) JSON visit_str (0x1774100) | `research/work-items/RE-010-env79-variant-matchers-115/README.md` |
+| `action-dispatch` | `0x287ec80..0x287f361` | 1761 | 1749/1761 | 3 | l1/action ShortActionTag (114-variant) RMP visit_str (0x287ec80) | `research/work-items/RE-010-enum-variant-matchers-115/README.md` |
+| `action-dispatch` | `0x468fbd0..0x46902b1` | 1761 | 1749/1761 | 3 | l1/action ShortActionTag (114-variant) RMP visit_str (0x468fbd0) | `research/work-items/RE-010-enum-variant-matchers-115/README.md` |
+| `action-dispatch` | `0x5357ff0..0x53586d1` | 1761 | 1749/1761 | 3 | l1/action ShortActionTag (114-variant) RMP visit_str (0x5357ff0) | `research/work-items/RE-010-enum-variant-matchers-115/README.md` |
+| `action-dispatch` | `0x287e450..0x287ec7f` | 2095 | 2084/2095 | 3 | l1/action ShortActionTag (114-variant) JSON visit_str (0x287e450) | `research/work-items/RE-010-enum-variant-matchers-115/README.md` |
+| `action-dispatch` | `0x468f3a0..0x468fbcf` | 2095 | 2083/2095 | 3 | l1/action ShortActionTag (114-variant) JSON visit_str (0x468f3a0) | `research/work-items/RE-010-enum-variant-matchers-115/README.md` |
+| `action-dispatch` | `0x2ba5c90..0x2ba5fd4` | 836 | 764/836 | 18 | l1/exchange PerpDeploy (16-variant + alias) RMP visit_str (0x2ba5c90) | `research/work-items/RE-010-enum-variant-matchers-115/README.md` |
+| `action-dispatch` | `0x444f660..0x444f9a4` | 836 | 780/836 | 18 | l1/exchange PerpDeploy (16-variant + alias) RMP visit_str (0x444f660) | `research/work-items/RE-010-enum-variant-matchers-115/README.md` |
+| `action-dispatch` | `0x5471cb0..0x5471ff4` | 836 | 765/836 | 18 | l1/exchange PerpDeploy (16-variant + alias) RMP visit_str (0x5471cb0) | `research/work-items/RE-010-enum-variant-matchers-115/README.md` |
+| `action-dispatch` | `0x2ba5930..0x2ba5c85` | 853 | 782/853 | 18 | l1/exchange PerpDeploy (16-variant + alias) JSON visit_str (0x2ba5930) | `research/work-items/RE-010-enum-variant-matchers-115/README.md` |
+| `action-dispatch` | `0x444f9b0..0x444fd05` | 853 | 797/853 | 18 | l1/exchange PerpDeploy (16-variant + alias) JSON visit_str (0x444f9b0) | `research/work-items/RE-010-enum-variant-matchers-115/README.md` |
+| `dex-registry` | `0x2ba41c0..0x2ba432e` | 366 | 346/366 | 5 | l1/dex_registry Hip3Star (8-variant) RMP visit_str (0x2ba41c0) | `research/work-items/dex-registry-sub-deployers-115/README.md` |
+| `dex-registry` | `0x444db70..0x444dcde` | 366 | 348/366 | 5 | l1/dex_registry Hip3Star (8-variant) RMP visit_str (0x444db70) | `research/work-items/dex-registry-sub-deployers-115/README.md` |
+| `dex-registry` | `0x5470720..0x547088e` | 366 | 346/366 | 5 | l1/dex_registry Hip3Star (8-variant) RMP visit_str (0x5470720) | `research/work-items/dex-registry-sub-deployers-115/README.md` |
+| `dex-registry` | `0x2ba4030..0x2ba41b5` | 389 | 370/389 | 5 | l1/dex_registry Hip3Star (8-variant) JSON visit_str (0x2ba4030) | `research/work-items/dex-registry-sub-deployers-115/README.md` |
+| `dex-registry` | `0x444dce0..0x444de65` | 389 | 372/389 | 5 | l1/dex_registry Hip3Star (8-variant) JSON visit_str (0x444dce0) | `research/work-items/dex-registry-sub-deployers-115/README.md` |
+| `dex-registry` | `0x2b94d80..0x2b94dc3` | 67 | 59/67 | 2 | l1/dex_registry Main/Hip3 RMP visit_str (0x2b94d80) | `research/work-items/dex-registry-main-hip3-state-codec-115/README.md` |
+| `dex-registry` | `0x4440220..0x4440263` | 67 | 59/67 | 2 | l1/dex_registry Main/Hip3 RMP visit_str (0x4440220) | `research/work-items/dex-registry-main-hip3-state-codec-115/README.md` |
+| `dex-registry` | `0x5469f10..0x5469f53` | 67 | 59/67 | 2 | l1/dex_registry Main/Hip3 RMP visit_str (0x5469f10) | `research/work-items/dex-registry-main-hip3-state-codec-115/README.md` |
 
 ## Reproduce and verify
 

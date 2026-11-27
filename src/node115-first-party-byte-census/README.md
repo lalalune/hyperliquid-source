@@ -11,10 +11,12 @@ complete FDE window(s) in `artifacts/node/115/hl-node`.
 
 ## Scope and limitations
 
-- Covers 14 Hyperliquid enum wire-name `visit_str` codecs (`ChainName`, `SpotMarkKind`,
+- Covers 20 Hyperliquid enum wire-name `visit_str` codecs (`ChainName`, `SpotMarkKind`,
   `Tif`, `OutcomeKind`, `MarginMode`, `Operation`, `BorrowLendField`, `BridgeEvent`,
   `DisabledState`, `EvmTxType`, `ReadPrecompileOutcomeName`, `AbstractionKind`,
-  `VoteChoice`, `ProposalCategory`) and 5 leaf helpers (`slice20_equal`, `fee_window_scan`,
+  `VoteChoice`, `ProposalCategory`, 92-variant `Action`, 79-variant `NodeEnv`,
+  114-variant `ShortActionTag`, 16-variant+alias `PerpDeploy`, 8-variant `Hip3Star`,
+  and `Main/Hip3`) and 5 leaf helpers (`slice20_equal`, `fee_window_scan`,
   `sub256_borrow`, `bounded_offset`, `two_span_projection`).
 - Error return shapes (`RmpErr` and `JsonErr`) model the observed `serde` error ABI
   layouts (`rmp_serde::decode::Error` 9-variant niche tag `0x09` and `serde_json::Error`

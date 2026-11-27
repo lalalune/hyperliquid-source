@@ -16,7 +16,7 @@ Full-scope acceptance reviewed on **2026-11-09**.
 | [Node runtime and gossip](COMPONENTS.md#node-runtime) | 0/4 | 0% | 0 | 0 |
 | [Block execution and state](COMPONENTS.md#abci) | 0/4 | 0% | 0 | 0 |
 | [Action wire and signing](COMPONENTS.md#action-wire) | 0/4 | 0% | 0 | 0 |
-| [Action dispatch and handlers](COMPONENTS.md#action-dispatch) | 0/4 | 0% | 0 | 0 |
+| [Action dispatch and handlers](COMPONENTS.md#action-dispatch) | 0/4 | 0% | 35,135 | 15 |
 | [Exchange orchestration](COMPONENTS.md#exchange) | 0/4 | 0% | 1,520 | 5 |
 | [Order books and matching](COMPONENTS.md#orderbook) | 0/4 | 0% | 1,197 | 5 |
 | [Clearinghouses and risk](COMPONENTS.md#risk) | 0/4 | 0% | 2,153 | 14 |
@@ -26,11 +26,11 @@ Full-scope acceptance reviewed on **2026-11-09**.
 | [Bridge and withdrawals](COMPONENTS.md#bridge) | 0/4 | 0% | 1,764 | 5 |
 | [HyperEVM execution](COMPONENTS.md#evm) | 0/4 | 0% | 1,110 | 6 |
 | [Staking and validator lifecycle](COMPONENTS.md#staking) | 0/4 | 0% | 0 | 0 |
-| [DEX registry](COMPONENTS.md#dex-registry) | 0/4 | 0% | 926 | 5 |
+| [DEX registry](COMPONENTS.md#dex-registry) | 0/4 | 0% | 3,003 | 13 |
 | [Remaining L1 state helpers](COMPONENTS.md#l1-shared) | 0/4 | 0% | 86 | 1 |
 | [Info API](COMPONENTS.md#info-api) | 0/4 | 0% | 0 | 0 |
 | [EVM JSON-RPC](COMPONENTS.md#evm-rpc) | 0/4 | 0% | 0 | 0 |
-| [Global configuration](COMPONENTS.md#constants) | 0/4 | 0% | 1,618 | 11 |
+| [Global configuration](COMPONENTS.md#constants) | 0/4 | 0% | 9,744 | 14 |
 
 Accepted full-scope gates: **0/92**.
 
@@ -61,7 +61,7 @@ Both complete source and target extents are authenticated. These candidates have
 
 ## Full target coverage
 
-Compared .text: 5,330,408/83,719,936 bytes (6.36695%). Raw-equal positions: 4,979,729/83,719,936 (5.94808%). Whole ELF reproduced: no.
+Compared .text: 5,375,746/83,719,936 bytes (6.42111%). Raw-equal positions: 5,022,897/83,719,936 (5.99964%). Whole ELF reproduced: no.
 
 | Whole ELF bytes | .text bytes | Other executable bytes | Allocated data/metadata bytes | Zero-fill bytes |
 | ---: | ---: | ---: | ---: | ---: |
@@ -8022,5 +8022,31 @@ Compared .text: 5,330,408/83,719,936 bytes (6.36695%). Raw-equal positions: 4,97
 | [l1/governance ProposalCategory RMP visit_str (0x4d6a370)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4d6a370..0x4d6a439` | independent-rust-build | 193/201 (96.02%) |
 | [l1/governance ProposalCategory JSON visit_str (0x23c2ed0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x23c2ed0..0x23c2faf` | independent-rust-build | 216/223 (96.86%) |
 | [l1/governance ProposalCategory JSON visit_str (0x3bd7ba0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x3bd7ba0..0x3bd7c7f` | independent-rust-build | 216/223 (96.86%) |
+| [l1/action Action (92-variant) RMP visit_str (0x2ba1af0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2ba1af0..0x2ba2bde` | independent-rust-build | 4,007/4,334 (92.46%) |
+| [l1/action Action (92-variant) RMP visit_str (0x3662730)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x3662730..0x366381e` | independent-rust-build | 4,007/4,334 (92.46%) |
+| [l1/action Action (92-variant) RMP visit_str (0x4d67530)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4d67530..0x4d6861e` | independent-rust-build | 4,006/4,334 (92.43%) |
+| [l1/action Action (92-variant) JSON visit_str (0x2ba0a70)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2ba0a70..0x2ba1aef` | independent-rust-build | 3,898/4,223 (92.30%) |
+| [l1/action Action (92-variant) JSON visit_str (0x36616b0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x36616b0..0x366272f` | independent-rust-build | 3,896/4,223 (92.26%) |
+| [global_constants NodeEnv (79-variant) RMP visit_str (0x14c12b0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x14c12b0..0x14c1cac` | independent-rust-build | 2,544/2,556 (99.53%) |
+| [global_constants NodeEnv (79-variant) JSON visit_str (0x14c07c0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x14c07c0..0x14c12a1` | independent-rust-build | 2,774/2,785 (99.61%) |
+| [global_constants NodeEnv (79-variant) JSON visit_str (0x1774100)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x1774100..0x1774be1` | independent-rust-build | 2,775/2,785 (99.64%) |
+| [l1/action ShortActionTag (114-variant) RMP visit_str (0x287ec80)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x287ec80..0x287f361` | independent-rust-build | 1,749/1,761 (99.32%) |
+| [l1/action ShortActionTag (114-variant) RMP visit_str (0x468fbd0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x468fbd0..0x46902b1` | independent-rust-build | 1,749/1,761 (99.32%) |
+| [l1/action ShortActionTag (114-variant) RMP visit_str (0x5357ff0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x5357ff0..0x53586d1` | independent-rust-build | 1,749/1,761 (99.32%) |
+| [l1/action ShortActionTag (114-variant) JSON visit_str (0x287e450)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x287e450..0x287ec7f` | independent-rust-build | 2,084/2,095 (99.47%) |
+| [l1/action ShortActionTag (114-variant) JSON visit_str (0x468f3a0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x468f3a0..0x468fbcf` | independent-rust-build | 2,083/2,095 (99.43%) |
+| [l1/exchange PerpDeploy (16-variant + alias) RMP visit_str (0x2ba5c90)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2ba5c90..0x2ba5fd4` | independent-rust-build | 764/836 (91.39%) |
+| [l1/exchange PerpDeploy (16-variant + alias) RMP visit_str (0x444f660)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x444f660..0x444f9a4` | independent-rust-build | 780/836 (93.30%) |
+| [l1/exchange PerpDeploy (16-variant + alias) RMP visit_str (0x5471cb0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x5471cb0..0x5471ff4` | independent-rust-build | 765/836 (91.51%) |
+| [l1/exchange PerpDeploy (16-variant + alias) JSON visit_str (0x2ba5930)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2ba5930..0x2ba5c85` | independent-rust-build | 782/853 (91.68%) |
+| [l1/exchange PerpDeploy (16-variant + alias) JSON visit_str (0x444f9b0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x444f9b0..0x444fd05` | independent-rust-build | 797/853 (93.43%) |
+| [l1/dex_registry Hip3Star (8-variant) RMP visit_str (0x2ba41c0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2ba41c0..0x2ba432e` | independent-rust-build | 346/366 (94.54%) |
+| [l1/dex_registry Hip3Star (8-variant) RMP visit_str (0x444db70)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x444db70..0x444dcde` | independent-rust-build | 348/366 (95.08%) |
+| [l1/dex_registry Hip3Star (8-variant) RMP visit_str (0x5470720)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x5470720..0x547088e` | independent-rust-build | 346/366 (94.54%) |
+| [l1/dex_registry Hip3Star (8-variant) JSON visit_str (0x2ba4030)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2ba4030..0x2ba41b5` | independent-rust-build | 370/389 (95.12%) |
+| [l1/dex_registry Hip3Star (8-variant) JSON visit_str (0x444dce0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x444dce0..0x444de65` | independent-rust-build | 372/389 (95.63%) |
+| [l1/dex_registry Main/Hip3 RMP visit_str (0x2b94d80)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2b94d80..0x2b94dc3` | independent-rust-build | 59/67 (88.06%) |
+| [l1/dex_registry Main/Hip3 RMP visit_str (0x4440220)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4440220..0x4440263` | independent-rust-build | 59/67 (88.06%) |
+| [l1/dex_registry Main/Hip3 RMP visit_str (0x5469f10)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x5469f10..0x5469f53` | independent-rust-build | 59/67 (88.06%) |
 
 The window list is not a function census. Data, calls, ABI, relocations and whole-program behavior remain acceptance requirements.
