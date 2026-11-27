@@ -14,3 +14,18 @@ $ make test (session 89182)
 Still running when polled on 2026-11-28 at 169/1,670 modules; latest visible module was test_builder_wrapper_identities_static.py. Two earlier child tests reported `rustc +1.95.0` invocation errors. No terminal result; because the worktree was edited during this run, it is not an immutable-revision result.
 
 No captured executable was run. Static inference identifies the field-object handoff; its concrete callback implementation, emitted value and public/synthetic EIP-712 vector remain unresolved.
+
+$ python3 tools/action_wire_d1_address_encoding_115.py --out research/work-items/RE-005-node115-d1-address-encoding-bridge
+PASS; added exact instruction witnesses at 0x44289cc and 0x4428a32. They show the callback result's pointer/length read, negative-length error branch, nonnegative allocation/copy, and method call at returned-object+0x20. The concrete method implementation and emitted bytes remain unresolved.
+$ python3 -m unittest discover -s tests -p 'test_action_wire_d1_address_encoding_115.py' -v
+PASS; 10 tests, including reproduction and eight byte-corruption controls.
+$ make verify
+PASS; pinned signatures, 32 imported files and 4,851 evidence-packet manifests / 34,473 entries verified after refreshing records.json.
+$ make catalogue-check
+PASS; catalogue and progress tables match pinned inputs.
+$ git diff --check
+PASS.
+$ ps -p 89182 -o pid=,stat=,etime=,command=
+No process row on 2026-11-28. The prior full-suite run's terminal status could not be recovered and is not counted as a pass or failure.
+$ gh pr view 7202 --repo lalalune/hyperliquid-source
+OPEN, mergeable, head f2799892162d9feb97c19efe15b2775f14480b01; static-research run 46045251441 in progress on that SHA.

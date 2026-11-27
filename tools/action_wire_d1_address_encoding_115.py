@@ -49,6 +49,10 @@ TEXT_WITNESSES = {
     # The hash helper preserves the record base and dispatches through its +0x60 object.
     0x4428531: '4989f7',
     0x44289b2: '498b4760498b5768498d7778498b4f70488dbc24a0010000ff10',
+    # After the indirect callback returns, it reads a pointer/length pair and rejects negative lengths.
+    0x44289cc: '4c8bac24a80100004c8ba424b00100004d85e47910',
+    # It then invokes the returned object's method at +0x20 with that pointer/length pair.
+    0x4428a32: '488b8424a0010000488dbc24b80100004c89ee4c89e2ff5020',
 }
 RODATA_WITNESSES = {
     0x5ed61a: b'destinationRecipientaddressEncoding',
@@ -124,15 +128,19 @@ def extract(data, *, expected_digest=TARGET_SHA256):
             {'address': '0x46e6d44', 'fact': 'the bridge wrapper passes that record pointer to 0x4433f90'},
             {'address': '0x44340f2', 'fact': '0x4433f90 forwards the unchanged record pointer through relocation slot 0x64ea978 to typed-data hash helper 0x4428520'},
             {'address': '0x44289ca', 'fact': '0x4428520 loads qwords from record+0x60/+0x68/+0x70, passes record+0x78, and invokes the function pointer at the object stored in record+0x60'},
+            {'address': '0x44289cc', 'fact': 'after that call, the helper reads qwords from callback-result rsp+0x1a8 and rsp+0x1b0; it sign-checks the latter and routes negative values to an error path'},
+            {'address': '0x4428a32', 'fact': 'on the nonnegative path, the helper allocates/copies using the returned pointer and length, then invokes the method at the callback result first-qword object base +0x20 with that pointer and length'},
             {'address': '0x44290c0', 'fact': 'the existing target-bound EIP-712 builder schema orders address_encoding:string immediately after destination_recipient:string and before destination_chain_id:uint32'},
         ],
         'inference': [
             'The serializer and d1 method dispatch tables both bind index 75 to SendToEvmWithData and each arm advances the enum pointer by 8 bytes. Serializer field-name/order evidence places addressEncoding immediately after destinationRecipient; the existing EIP-712 schema places address_encoding in the same relative order. Together these support identifying variant-input+0x60 as the addressEncoding/address_encoding callback field. This is an explicit crosswalk inference: the serializer context pointer at its own +0x60 is not asserted to be the same memory address as the method input.',
             'The 32-byte return from the d1 method callback occupies the address_encoding field slot in the typed-data record and is later consumed as a callable field object by the hash helper. It is not established as a final string hash; the concrete callable target and its output semantics remain unknown.',
+            'The hash helper consumes the callback-produced result as an object with a pointer/length pair and a method dispatched at object-base+0x20. This records the observed ABI flow only; it does not establish a Rust-level type or which bytes the callback produces.',
         ],
         'unresolved': [
             'concrete callback/vtable target and the producer that populates variant-input+0x60',
             'the concrete function pointer and behavior of the field object returned by the d1 callback',
+            "the returned object's concrete method implementation and the bytes emitted for each address-encoding variant",
             'runtime enum values, production digest, signature verification, replay checks, and error ordering',
         ],
         'instruction_witnesses': instruction_evidence,
