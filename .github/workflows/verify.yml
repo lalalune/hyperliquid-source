@@ -10,12 +10,14 @@ jobs:
         with:
           lfs: true
           submodules: recursive
-      - run: sudo apt-get update && sudo apt-get install -y ripgrep gnupg git-lfs llvm
+      - run: sudo apt-get update && sudo apt-get install -y ripgrep gnupg git-lfs llvm bubblewrap
       - run: python3 -m pip install --user --break-system-packages capstone==5.0.7 pytest==8.4.1 numpy==2.3.5
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: make rea-install rea-smoke
-      - run: make verify test catalogue-check index reproduce
+      - run: make verify fde-index test catalogue-check index reproduce
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
 
