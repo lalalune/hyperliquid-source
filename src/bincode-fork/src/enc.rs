@@ -2,7 +2,13 @@
 //! `z_forks/bincode-fork` (`src/enc/write.rs` and varint writers at `0x5822850`/`0x5822910`).
 
 use std::collections::{BTreeMap, BTreeSet};
-use std::time::Duration;
+use std::ffi::{CStr, CString};
+use std::io::Write;
+use std::num::{
+    NonZeroI8, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI128, NonZeroIsize, NonZeroU8,
+    NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU128, NonZeroUsize,
+};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::config::{Configuration, Endian, IntEncoding};
 use crate::error::EncodeError;
@@ -538,5 +544,85 @@ pub struct ByteVec(pub Vec<u8>);
 impl Encode for ByteVec {
     fn encode<W: Writer>(&self, encoder: &mut EncoderImpl<W>) -> Result<(), EncodeError> {
         self.0.as_slice().encode(encoder)
+    }
+}
+
+/// Streaming `std::io::Write` adapter matching `bincode::enc::write::IoWriter`.
+pub struct IoWriter<W> {
+    inner: W,
+    bytes_written: usize,
+}
+
+impl<W> IoWriter<W> {
+    pub const fn new(inner: W) -> Self {
+        Self {
+            inner,
+            bytes_written: 0,
+        }
+    }
+
+    pub const fn bytes_written(&self) -> usize {
+        self.bytes_written
+    }
+
+    pub fn into_inner(self) -> W {
+        self.inner
+    }
+}
+
+impl<W: Write> Writer for IoWriter<W> {
+    fn write(&mut self, bytes: &[u8]) -> Result<(), EncodeError> {
+        self.inner.write_all(bytes).map_err(|inner| EncodeError::Io {
+            inner,
+            index: self.bytes_written,
+        })?;
+        self.bytes_written = self.bytes_written.saturating_add(bytes.len());
+        Ok(())
+    }
+}
+
+macro_rules! impl_encode_nonzero {
+    ($nz:ty) => {
+        impl Encode for $nz {
+            fn encode<W: Writer>(&self, encoder: &mut EncoderImpl<W>) -> Result<(), EncodeError> {
+                self.get().encode(encoder)
+            }
+        }
+    };
+}
+
+impl_encode_nonzero!(NonZeroU8);
+impl_encode_nonzero!(NonZeroU16);
+impl_encode_nonzero!(NonZeroU32);
+impl_encode_nonzero!(NonZeroU64);
+impl_encode_nonzero!(NonZeroU128);
+impl_encode_nonzero!(NonZeroUsize);
+impl_encode_nonzero!(NonZeroI8);
+impl_encode_nonzero!(NonZeroI16);
+impl_encode_nonzero!(NonZeroI32);
+impl_encode_nonzero!(NonZeroI64);
+impl_encode_nonzero!(NonZeroI128);
+impl_encode_nonzero!(NonZeroIsize);
+
+impl Encode for CStr {
+    fn encode<W: Writer>(&self, encoder: &mut EncoderImpl<W>) -> Result<(), EncodeError> {
+        self.to_bytes().encode(encoder)
+    }
+}
+
+impl Encode for CString {
+    fn encode<W: Writer>(&self, encoder: &mut EncoderImpl<W>) -> Result<(), EncodeError> {
+        self.as_bytes().encode(encoder)
+    }
+}
+
+impl Encode for SystemTime {
+    fn encode<W: Writer>(&self, encoder: &mut EncoderImpl<W>) -> Result<(), EncodeError> {
+        let duration = self
+            .duration_since(UNIX_EPOCH)
+            .map_err(|e| EncodeError::InvalidSystemTime {
+                duration: e.duration(),
+            })?;
+        duration.encode(encoder)
     }
 }

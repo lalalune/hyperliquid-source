@@ -3,12 +3,18 @@ use bincode_fork::wire_compat::{
     varint_buffer_writer,
 };
 use bincode_fork::{
-    AllowedEnumVariants, ByteVec, Decode, DecodeError, DecoderImpl, EncodeError, IntegerType,
-    SizeWriter, SliceReader, decode_from_slice, encode_into_slice, encode_size, encode_to_vec,
-    legacy, standard,
+    AllowedEnumVariants, ByteVec, Decode, DecodeError, DecoderImpl, Encode, EncodeError,
+    EncoderImpl, IntegerType, IoReader, IoWriter, SizeWriter, SliceReader, decode_from_slice,
+    encode_into_slice, encode_size, encode_to_vec, legacy, standard,
 };
 use std::collections::{BTreeMap, BTreeSet};
-use std::time::Duration;
+use std::ffi::CString;
+use std::io::{self, Cursor, Read, Write};
+use std::num::{
+    NonZeroI8, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI128, NonZeroIsize, NonZeroU8,
+    NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU128, NonZeroUsize,
+};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[test]
 fn varint_u64_boundaries_match_node115_writer_and_reader() {
@@ -410,4 +416,205 @@ fn vec_decode_preallocation_and_unclaim_limit_accounting() {
         decode_from_slice::<Vec<u64>>(&wire, standard().with_limit_bytes(39)),
         Err(DecodeError::LimitExceeded)
     );
+}
+
+#[test]
+fn all_18_decode_error_tags_and_13_integer_types_display_match_debug() {
+    for raw in 0u8..=12 {
+        let it = IntegerType::from_raw(raw).expect("valid IntegerType raw tag");
+        assert_eq!(it.as_raw(), raw);
+    }
+    assert_eq!(IntegerType::from_raw(13), None);
+    assert_eq!(IntegerType::from_raw(255), None);
+
+    static ALLOWED: AllowedEnumVariants = AllowedEnumVariants::Allowed(&[0, 2]);
+    let bad_utf8_bytes = vec![0xffu8];
+    let utf8_err = std::str::from_utf8(&bad_utf8_bytes).unwrap_err();
+    let all_18: Vec<DecodeError> = vec![
+        DecodeError::UnexpectedEnd { additional: 3 },
+        DecodeError::InvalidBytesLength,
+        DecodeError::LimitExceeded,
+        DecodeError::InvalidIntegerType {
+            expected: IntegerType::U64,
+            found: IntegerType::U128,
+        },
+        DecodeError::NonZeroTypeIsZero {
+            non_zero_type: IntegerType::U32,
+        },
+        DecodeError::UnexpectedVariant {
+            type_name: "TestEnum",
+            allowed: &ALLOWED,
+            found: 9,
+        },
+        DecodeError::Utf8 { inner: utf8_err },
+        DecodeError::InvalidCharEncoding([0xff, 0, 0, 0]),
+        DecodeError::InvalidBooleanValue(42),
+        DecodeError::ArrayLengthMismatch {
+            required: 4,
+            found: 3,
+        },
+        DecodeError::OutsideUsizeRange(u64::MAX),
+        DecodeError::EmptyEnum { type_name: "Never" },
+        DecodeError::InvalidDuration {
+            secs: 1,
+            nanos: 1_000_000_000,
+        },
+        DecodeError::InvalidSystemTime {
+            duration: Duration::MAX,
+        },
+        DecodeError::CStringNulError { position: 2 },
+        DecodeError::Io {
+            inner: io::Error::new(io::ErrorKind::BrokenPipe, "pipe"),
+            additional: 4,
+        },
+        DecodeError::Other("static"),
+        DecodeError::OtherString("owned".to_string()),
+    ];
+
+    assert_eq!(all_18.len(), 18);
+    for (idx, err) in all_18.iter().enumerate() {
+        assert_eq!(err.tag(), idx as u8);
+        // Node #115 `0x1609a70`: `<DecodeError as Display>::fmt` delegates via `write!(f, "{self:?}")`
+        assert_eq!(format!("{err}"), format!("{err:?}"));
+    }
+}
+
+#[test]
+fn nonzero_cstring_systemtime_char_result_and_array_boundaries() {
+    // NonZero* round-trips and tag-4 zero rejections
+    let nz_u8 = NonZeroU8::new(7).unwrap();
+    let nz_u16 = NonZeroU16::new(300).unwrap();
+    let nz_u32 = NonZeroU32::new(70_000).unwrap();
+    let nz_u64 = NonZeroU64::new(1 << 40).unwrap();
+    let nz_u128 = NonZeroU128::new(1 << 80).unwrap();
+    let nz_usize = NonZeroUsize::new(999).unwrap();
+    let nz_i8 = NonZeroI8::new(-5).unwrap();
+    let nz_i16 = NonZeroI16::new(-300).unwrap();
+    let nz_i32 = NonZeroI32::new(-70_000).unwrap();
+    let nz_i64 = NonZeroI64::new(-1_000_000_000_000).unwrap();
+    let nz_i128 = NonZeroI128::new(-(1i128 << 80)).unwrap();
+    let nz_isize = NonZeroIsize::new(-42).unwrap();
+
+    macro_rules! roundtrip_and_reject_zero {
+        ($val:expr, $ty:ty, $it:expr) => {{
+            let wire = encode_to_vec($val, standard()).unwrap();
+            let (dec, used) = decode_from_slice::<$ty>(&wire, standard()).unwrap();
+            assert_eq!(dec, $val);
+            assert_eq!(used, wire.len());
+            let err = decode_from_slice::<$ty>(&[0], standard()).unwrap_err();
+            assert_eq!(err.tag(), 4);
+            assert_eq!(err, DecodeError::NonZeroTypeIsZero { non_zero_type: $it });
+        }};
+    }
+    roundtrip_and_reject_zero!(nz_u8, NonZeroU8, IntegerType::U8);
+    roundtrip_and_reject_zero!(nz_u16, NonZeroU16, IntegerType::U16);
+    roundtrip_and_reject_zero!(nz_u32, NonZeroU32, IntegerType::U32);
+    roundtrip_and_reject_zero!(nz_u64, NonZeroU64, IntegerType::U64);
+    roundtrip_and_reject_zero!(nz_u128, NonZeroU128, IntegerType::U128);
+    roundtrip_and_reject_zero!(nz_usize, NonZeroUsize, IntegerType::Usize);
+    roundtrip_and_reject_zero!(nz_i8, NonZeroI8, IntegerType::I8);
+    roundtrip_and_reject_zero!(nz_i16, NonZeroI16, IntegerType::I16);
+    roundtrip_and_reject_zero!(nz_i32, NonZeroI32, IntegerType::I32);
+    roundtrip_and_reject_zero!(nz_i64, NonZeroI64, IntegerType::I64);
+    roundtrip_and_reject_zero!(nz_i128, NonZeroI128, IntegerType::I128);
+    roundtrip_and_reject_zero!(nz_isize, NonZeroIsize, IntegerType::Isize);
+
+    // CString round-trip + interior NUL (tag 14)
+    let cs = CString::new("hl-node-115").unwrap();
+    let cs_wire = encode_to_vec(&cs, standard()).unwrap();
+    let (cs_dec, cs_used) = decode_from_slice::<CString>(&cs_wire, standard()).unwrap();
+    assert_eq!(cs_dec, cs);
+    assert_eq!(cs_used, cs_wire.len());
+
+    let bad_cs_wire = encode_to_vec(ByteVec(b"ab\0cd".to_vec()), standard()).unwrap();
+    let cs_err = decode_from_slice::<CString>(&bad_cs_wire, standard()).unwrap_err();
+    assert_eq!(cs_err.tag(), 14);
+    assert_eq!(cs_err, DecodeError::CStringNulError { position: 2 });
+
+    // SystemTime round-trip + pre-epoch encode rejection + overflow decode rejection (tag 13)
+    let ts = UNIX_EPOCH + Duration::new(1_730_000_000, 123_456_789);
+    let ts_wire = encode_to_vec(ts, standard()).unwrap();
+    let (ts_dec, ts_used) = decode_from_slice::<SystemTime>(&ts_wire, standard()).unwrap();
+    assert_eq!(ts_dec, ts);
+    assert_eq!(ts_used, ts_wire.len());
+
+    let pre_epoch = UNIX_EPOCH - Duration::from_secs(5);
+    assert_eq!(
+        encode_to_vec(pre_epoch, standard()),
+        Err(EncodeError::InvalidSystemTime {
+            duration: Duration::from_secs(5),
+        })
+    );
+    let huge_ts = encode_to_vec(Duration::new(u64::MAX, 999_999_999), standard()).unwrap();
+    let st_err = decode_from_slice::<SystemTime>(&huge_ts, standard()).unwrap_err();
+    assert_eq!(st_err.tag(), 13);
+
+    // Invalid char encodings (tag 7)
+    let char_err1 = decode_from_slice::<char>(&[0x80], standard()).unwrap_err();
+    assert_eq!(char_err1.tag(), 7);
+    let char_err2 = decode_from_slice::<char>(&[0xc3, 0x28], standard()).unwrap_err();
+    assert_eq!(char_err2.tag(), 7);
+
+    // Invalid Result discriminant (tag 5)
+    let res_err = decode_from_slice::<Result<u8, u8>>(&[2], standard()).unwrap_err();
+    assert_eq!(res_err.tag(), 5);
+
+    // Fixed array [u64; 4] claim/unclaim boundary matching node #115 `0x5821540`
+    let arr = [1u64, 251, 70_000, 1 << 40];
+    let arr_wire = encode_to_vec(arr, standard()).unwrap();
+    let (arr_dec, arr_used) =
+        decode_from_slice::<[u64; 4]>(&arr_wire, standard().with_limit_bytes(32)).unwrap();
+    assert_eq!(arr_dec, arr);
+    assert_eq!(arr_used, arr_wire.len());
+    assert_eq!(
+        decode_from_slice::<[u64; 4]>(&arr_wire, standard().with_limit_bytes(31)),
+        Err(DecodeError::LimitExceeded)
+    );
+}
+
+#[test]
+fn io_reader_writer_and_big_endian_varint_slow_paths() {
+    struct FailIo;
+    impl Read for FailIo {
+        fn read(&mut self, _buf: &mut [u8]) -> io::Result<usize> {
+            Err(io::Error::new(io::ErrorKind::ConnectionReset, "reset"))
+        }
+    }
+    impl Write for FailIo {
+        fn write(&mut self, _buf: &[u8]) -> io::Result<usize> {
+            Err(io::Error::new(io::ErrorKind::BrokenPipe, "broken"))
+        }
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+
+    // Streaming round-trip with big-endian varint (exercises slow-path BE byteswap `0x5822490`/`0x58225c0`)
+    let cfg_be_varint = standard().with_big_endian();
+    let vals = ((0x1234u32, 0x1234_5678u32), (0x0102_0304_0506_0708u64, 70_000usize));
+    let mut enc = EncoderImpl::new(IoWriter::new(Vec::new()), cfg_be_varint);
+    vals.encode(&mut enc).unwrap();
+    let written = enc.writer().bytes_written();
+    let buf = enc.into_writer().into_inner();
+    assert_eq!(written, buf.len());
+
+    let mut dec = DecoderImpl::new(IoReader::new(Cursor::new(buf.as_slice())), cfg_be_varint);
+    let decoded = <((u32, u32), (u64, usize))>::decode(&mut dec).unwrap();
+    assert_eq!(decoded, vals);
+
+    // IoReader EOF -> UnexpectedEnd, IoReader error -> DecodeError::Io (tag 15)
+    let mut short_dec = DecoderImpl::new(IoReader::new(Cursor::new(&[252u8, 1, 2][..])), standard());
+    assert_eq!(
+        u32::decode(&mut short_dec),
+        Err(DecodeError::UnexpectedEnd { additional: 2 })
+    );
+    let mut err_dec = DecoderImpl::new(IoReader::new(FailIo), standard());
+    let io_dec_err = u32::decode(&mut err_dec).unwrap_err();
+    assert_eq!(io_dec_err.tag(), 15);
+    assert!(matches!(io_dec_err, DecodeError::Io { additional: 1, .. }));
+
+    // IoWriter error -> EncodeError::Io
+    let mut err_enc = EncoderImpl::new(IoWriter::new(FailIo), standard());
+    let io_enc_err = 42u64.encode(&mut err_enc).unwrap_err();
+    assert!(matches!(io_enc_err, EncodeError::Io { index: 0, .. }));
 }

@@ -26,8 +26,10 @@ pub mod wire_compat {
 }
 
 pub use config::{Configuration, Endian, IntEncoding, Limit, legacy, standard};
-pub use de::{Decode, DecoderImpl, MAX_PREALLOCATION_SIZE, Reader, SliceReader};
-pub use enc::{ByteVec, Encode, EncoderImpl, SizeWriter, SliceWriter, VecWriter, Writer};
+pub use de::{Decode, DecoderImpl, IoReader, MAX_PREALLOCATION_SIZE, Reader, SliceReader};
+pub use enc::{
+    ByteVec, Encode, EncoderImpl, IoWriter, SizeWriter, SliceWriter, VecWriter, Writer,
+};
 pub use error::{AllowedEnumVariants, DecodeError, EncodeError, IntegerType};
 
 /// Encode `val` into a newly allocated `Vec<u8>`.

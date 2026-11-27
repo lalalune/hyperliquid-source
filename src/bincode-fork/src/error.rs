@@ -224,7 +224,7 @@ impl Eq for DecodeError {}
 
 impl fmt::Display for DecodeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Debug::fmt(self, f)
+        write!(f, "{self:?}")
     }
 }
 
@@ -280,7 +280,7 @@ impl Eq for EncodeError {}
 
 impl fmt::Display for EncodeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Debug::fmt(self, f)
+        write!(f, "{self:?}")
     }
 }
 

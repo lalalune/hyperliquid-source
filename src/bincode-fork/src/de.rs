@@ -3,7 +3,13 @@
 //! `src/de/impls.rs`, and varint readers `0x5821150`/`0x5821250`/`0x5821340`).
 
 use std::collections::{BTreeMap, BTreeSet};
-use std::time::Duration;
+use std::ffi::CString;
+use std::io::Read;
+use std::num::{
+    NonZeroI8, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI128, NonZeroIsize, NonZeroU8,
+    NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU128, NonZeroUsize,
+};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::config::{Configuration, Endian, IntEncoding, Limit};
 use crate::enc::ByteVec;
@@ -1125,5 +1131,87 @@ impl<A: Decode, B: Decode, C: Decode> Decode for (A, B, C) {
         let b = B::decode(decoder)?;
         let c = C::decode(decoder)?;
         Ok((a, b, c))
+    }
+}
+
+/// Streaming `std::io::Read` adapter matching `bincode::de::read::IoReader`.
+pub struct IoReader<R> {
+    inner: R,
+}
+
+impl<R> IoReader<R> {
+    pub const fn new(inner: R) -> Self {
+        Self { inner }
+    }
+
+    pub fn into_inner(self) -> R {
+        self.inner
+    }
+}
+
+impl<R: Read> Reader for IoReader<R> {
+    fn read(&mut self, bytes: &mut [u8]) -> Result<(), DecodeError> {
+        let mut offset = 0usize;
+        while offset < bytes.len() {
+            match self.inner.read(&mut bytes[offset..]) {
+                Ok(0) => {
+                    return Err(DecodeError::UnexpectedEnd {
+                        additional: bytes.len() - offset,
+                    });
+                }
+                Ok(n) => offset += n,
+                Err(inner) => {
+                    return Err(DecodeError::Io {
+                        inner,
+                        additional: bytes.len() - offset,
+                    });
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+macro_rules! impl_decode_nonzero {
+    ($nz:ty, $prim:ty, $tag:expr) => {
+        impl Decode for $nz {
+            fn decode<R: Reader>(decoder: &mut DecoderImpl<R>) -> Result<Self, DecodeError> {
+                let raw = <$prim>::decode(decoder)?;
+                Self::new(raw).ok_or(DecodeError::NonZeroTypeIsZero {
+                    non_zero_type: $tag,
+                })
+            }
+        }
+    };
+}
+
+impl_decode_nonzero!(NonZeroU8, u8, IntegerType::U8);
+impl_decode_nonzero!(NonZeroU16, u16, IntegerType::U16);
+impl_decode_nonzero!(NonZeroU32, u32, IntegerType::U32);
+impl_decode_nonzero!(NonZeroU64, u64, IntegerType::U64);
+impl_decode_nonzero!(NonZeroU128, u128, IntegerType::U128);
+impl_decode_nonzero!(NonZeroUsize, usize, IntegerType::Usize);
+impl_decode_nonzero!(NonZeroI8, i8, IntegerType::I8);
+impl_decode_nonzero!(NonZeroI16, i16, IntegerType::I16);
+impl_decode_nonzero!(NonZeroI32, i32, IntegerType::I32);
+impl_decode_nonzero!(NonZeroI64, i64, IntegerType::I64);
+impl_decode_nonzero!(NonZeroI128, i128, IntegerType::I128);
+impl_decode_nonzero!(NonZeroIsize, isize, IntegerType::Isize);
+
+impl Decode for CString {
+    fn decode<R: Reader>(decoder: &mut DecoderImpl<R>) -> Result<Self, DecodeError> {
+        let bytes = decoder.decode_byte_vec()?;
+        CString::new(bytes).map_err(|err| DecodeError::CStringNulError {
+            position: err.nul_position(),
+        })
+    }
+}
+
+impl Decode for SystemTime {
+    fn decode<R: Reader>(decoder: &mut DecoderImpl<R>) -> Result<Self, DecodeError> {
+        let duration = Duration::decode(decoder)?;
+        UNIX_EPOCH
+            .checked_add(duration)
+            .ok_or(DecodeError::InvalidSystemTime { duration })
     }
 }
