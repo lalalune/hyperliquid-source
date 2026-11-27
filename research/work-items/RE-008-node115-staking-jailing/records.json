@@ -1,0 +1,1133 @@
+{
+  "schema_version": 1,
+  "work_item": "RE-008-node115-staking-jailing",
+  "component": "staking",
+  "target_path": "artifacts/node/115/hl-node",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "capstone_version": "5.0.7",
+  "functions": [
+    {
+      "name": "jailing_apply_action",
+      "start": "0x3c3c260",
+      "end": "0x3c3cfb1",
+      "size": 3409,
+      "instruction_count": 739,
+      "sha256": "b387996ef14332e6b19e43707973a90126307b0471d0d890adae6acc92a196b7"
+    },
+    {
+      "name": "jailing_jail_validator",
+      "start": "0x3c35a10",
+      "end": "0x3c35fdb",
+      "size": 1483,
+      "instruction_count": 319,
+      "sha256": "5038eae4f110122ab3c7f55fc3409642b46e33bab7b778487593ad7cb8a8cc4c"
+    },
+    {
+      "name": "jailing_expire_prune",
+      "start": "0x3c35fe0",
+      "end": "0x3c36b95",
+      "size": 2997,
+      "instruction_count": 581,
+      "sha256": "9db55304d074322b952878b1309ddb101f905ac09bd7fcdf2f7f4296f6b55211"
+    },
+    {
+      "name": "staking_epoch_quorum",
+      "start": "0x36c7f70",
+      "end": "0x36c8424",
+      "size": 1204,
+      "instruction_count": 283,
+      "sha256": "2157f7ef8edbf272d5f0be68209701b117550f6c2983725e4b46561d840a0f04"
+    },
+    {
+      "name": "staking_epoch_profiles",
+      "start": "0x36c7b30",
+      "end": "0x36c7f6d",
+      "size": 1085,
+      "instruction_count": 262,
+      "sha256": "3a2b8249f4de774eb08390b6d17a307dcf34d03829fe66d49cc3d215db5e576d"
+    }
+  ],
+  "windows": [
+    {
+      "label": "jailing_action_dispatch",
+      "fde": [
+        "0x3c3c260",
+        "0x3c3cfb1"
+      ],
+      "start": "0x3c3c28d",
+      "end": "0x3c3c2c1",
+      "sha256": "15b3eef9591443333ca57a0d967bbab07cce6cfb607e9115d36db14cd0c22c22",
+      "rows": [
+        [
+          "0x3c3c28d",
+          "410fb60424",
+          "movzx eax, byte ptr [r12]"
+        ],
+        [
+          "0x3c3c292",
+          "85c0",
+          "test eax, eax"
+        ],
+        [
+          "0x3c3c294",
+          "0f8499070000",
+          "je 0x3c3ca33"
+        ],
+        [
+          "0x3c3c29a",
+          "83f801",
+          "cmp eax, 1"
+        ],
+        [
+          "0x3c3c29d",
+          "7522",
+          "jne 0x3c3c2c1"
+        ],
+        [
+          "0x3c3c29f",
+          "c744242800000000",
+          "mov dword ptr [rsp + 0x28], 0"
+        ],
+        [
+          "0x3c3c2a7",
+          "0fb6f2",
+          "movzx esi, dl"
+        ],
+        [
+          "0x3c3c2aa",
+          "488d4c2428",
+          "lea rcx, [rsp + 0x28]"
+        ],
+        [
+          "0x3c3c2af",
+          "4c89f7",
+          "mov rdi, r14"
+        ],
+        [
+          "0x3c3c2b2",
+          "488b542410",
+          "mov rdx, qword ptr [rsp + 0x10]"
+        ],
+        [
+          "0x3c3c2b7",
+          "e85497ffff",
+          "call 0x3c35a10"
+        ],
+        [
+          "0x3c3c2bc",
+          "e913090000",
+          "jmp 0x3c3cbd4"
+        ]
+      ]
+    },
+    {
+      "label": "jailing_weighted_median_loop",
+      "fde": [
+        "0x3c3c260",
+        "0x3c3cfb1"
+      ],
+      "start": "0x3c3c8a5",
+      "end": "0x3c3c94c",
+      "sha256": "623ff214e5e62da5df460d6a43c774ac51c68c3c1eb8ac0e14ab8d4dd2cebd56",
+      "rows": [
+        [
+          "0x3c3c8a5",
+          "4983fc02",
+          "cmp r12, 2"
+        ],
+        [
+          "0x3c3c8a9",
+          "0f835b060000",
+          "jae 0x3c3cf0a"
+        ],
+        [
+          "0x3c3c8af",
+          "4b8d0464",
+          "lea rax, [r12 + r12*2]"
+        ],
+        [
+          "0x3c3c8b3",
+          "488d04c7",
+          "lea rax, [rdi + rax*8]"
+        ],
+        [
+          "0x3c3c8b7",
+          "4d85e4",
+          "test r12, r12"
+        ],
+        [
+          "0x3c3c8ba",
+          "7429",
+          "je 0x3c3c8e5"
+        ],
+        [
+          "0x3c3c8bc",
+          "31c9",
+          "xor ecx, ecx"
+        ],
+        [
+          "0x3c3c8be",
+          "48c7c2ffffffff",
+          "mov rdx, 0xffffffffffffffff"
+        ],
+        [
+          "0x3c3c8c5",
+          "4889fe",
+          "mov rsi, rdi"
+        ],
+        [
+          "0x3c3c8c8",
+          "4989c8",
+          "mov r8, rcx"
+        ],
+        [
+          "0x3c3c8cb",
+          "4c034610",
+          "add r8, qword ptr [rsi + 0x10]"
+        ],
+        [
+          "0x3c3c8cf",
+          "488d7618",
+          "lea rsi, [rsi + 0x18]"
+        ],
+        [
+          "0x3c3c8d3",
+          "4c89c1",
+          "mov rcx, r8"
+        ],
+        [
+          "0x3c3c8d6",
+          "480f42ca",
+          "cmovb rcx, rdx"
+        ],
+        [
+          "0x3c3c8da",
+          "490f43c8",
+          "cmovae rcx, r8"
+        ],
+        [
+          "0x3c3c8de",
+          "4839c6",
+          "cmp rsi, rax"
+        ],
+        [
+          "0x3c3c8e1",
+          "75e5",
+          "jne 0x3c3c8c8"
+        ],
+        [
+          "0x3c3c8e3",
+          "eb02",
+          "jmp 0x3c3c8e7"
+        ],
+        [
+          "0x3c3c8e5",
+          "31c9",
+          "xor ecx, ecx"
+        ],
+        [
+          "0x3c3c8e7",
+          "488b942490000000",
+          "mov rdx, qword ptr [rsp + 0x90]"
+        ],
+        [
+          "0x3c3c8ef",
+          "4531c0",
+          "xor r8d, r8d"
+        ],
+        [
+          "0x3c3c8f2",
+          "48c7c6ffffffff",
+          "mov rsi, 0xffffffffffffffff"
+        ],
+        [
+          "0x3c3c8f9",
+          "4989fb",
+          "mov r11, rdi"
+        ],
+        [
+          "0x3c3c8fc",
+          "4939c3",
+          "cmp r11, rax"
+        ],
+        [
+          "0x3c3c8ff",
+          "0f84b5000000",
+          "je 0x3c3c9ba"
+        ],
+        [
+          "0x3c3c905",
+          "4d89d9",
+          "mov r9, r11"
+        ],
+        [
+          "0x3c3c908",
+          "458b13",
+          "mov r10d, dword ptr [r11]"
+        ],
+        [
+          "0x3c3c90b",
+          "4585d2",
+          "test r10d, r10d"
+        ],
+        [
+          "0x3c3c90e",
+          "0f84a6000000",
+          "je 0x3c3c9ba"
+        ],
+        [
+          "0x3c3c914",
+          "4d89c3",
+          "mov r11, r8"
+        ],
+        [
+          "0x3c3c917",
+          "4d035910",
+          "add r11, qword ptr [r9 + 0x10]"
+        ],
+        [
+          "0x3c3c91b",
+          "4d89d8",
+          "mov r8, r11"
+        ],
+        [
+          "0x3c3c91e",
+          "4c0f42c6",
+          "cmovb r8, rsi"
+        ],
+        [
+          "0x3c3c922",
+          "4d0f43c3",
+          "cmovae r8, r11"
+        ],
+        [
+          "0x3c3c926",
+          "4d85c0",
+          "test r8, r8"
+        ],
+        [
+          "0x3c3c929",
+          "780d",
+          "js 0x3c3c938"
+        ],
+        [
+          "0x3c3c92b",
+          "4b8d1c00",
+          "lea rbx, [r8 + r8]"
+        ],
+        [
+          "0x3c3c92f",
+          "4d8d5918",
+          "lea r11, [r9 + 0x18]"
+        ],
+        [
+          "0x3c3c933",
+          "4839cb",
+          "cmp rbx, rcx"
+        ],
+        [
+          "0x3c3c936",
+          "72c4",
+          "jb 0x3c3c8fc"
+        ],
+        [
+          "0x3c3c938",
+          "498b4104",
+          "mov rax, qword ptr [r9 + 4]"
+        ],
+        [
+          "0x3c3c93c",
+          "448994241c010000",
+          "mov dword ptr [rsp + 0x11c], r10d"
+        ],
+        [
+          "0x3c3c944",
+          "4889842420010000",
+          "mov qword ptr [rsp + 0x120], rax"
+        ]
+      ]
+    },
+    {
+      "label": "jailing_ok_and_disabled_status",
+      "fde": [
+        "0x3c3c260",
+        "0x3c3cfb1"
+      ],
+      "start": "0x3c3cbcf",
+      "end": "0x3c3cbfc",
+      "sha256": "b797ff9c8539bd54afd6e16f37612ddb09f6f34608ff2fb90c9c1535ba59d359",
+      "rows": [
+        [
+          "0x3c3cbcf",
+          "4c8b7c2420",
+          "mov r15, qword ptr [rsp + 0x20]"
+        ],
+        [
+          "0x3c3cbd4",
+          "6641c707a201",
+          "mov word ptr [r15], 0x1a2"
+        ],
+        [
+          "0x3c3cbda",
+          "4c89f8",
+          "mov rax, r15"
+        ],
+        [
+          "0x3c3cbdd",
+          "4881c428010000",
+          "add rsp, 0x128"
+        ],
+        [
+          "0x3c3cbe4",
+          "5b",
+          "pop rbx"
+        ],
+        [
+          "0x3c3cbe5",
+          "415c",
+          "pop r12"
+        ],
+        [
+          "0x3c3cbe7",
+          "415d",
+          "pop r13"
+        ],
+        [
+          "0x3c3cbe9",
+          "415e",
+          "pop r14"
+        ],
+        [
+          "0x3c3cbeb",
+          "415f",
+          "pop r15"
+        ],
+        [
+          "0x3c3cbed",
+          "5d",
+          "pop rbp"
+        ],
+        [
+          "0x3c3cbee",
+          "c3",
+          "ret"
+        ],
+        [
+          "0x3c3cbef",
+          "4c8b7c2420",
+          "mov r15, qword ptr [rsp + 0x20]"
+        ],
+        [
+          "0x3c3cbf4",
+          "6641c7079900",
+          "mov word ptr [r15], 0x99"
+        ],
+        [
+          "0x3c3cbfa",
+          "ebde",
+          "jmp 0x3c3cbda"
+        ]
+      ]
+    },
+    {
+      "label": "jailing_until_time_cmp",
+      "fde": [
+        "0x3c3c260",
+        "0x3c3cfb1"
+      ],
+      "start": "0x3c3cda6",
+      "end": "0x3c3cdd8",
+      "sha256": "95177ebc634f80e9b74b428f7c7250d915f3ce694bae7ae3c97fade9c173131b",
+      "rows": [
+        [
+          "0x3c3cda6",
+          "8b08",
+          "mov ecx, dword ptr [rax]"
+        ],
+        [
+          "0x3c3cda8",
+          "8b5004",
+          "mov edx, dword ptr [rax + 4]"
+        ],
+        [
+          "0x3c3cdab",
+          "8b4008",
+          "mov eax, dword ptr [rax + 8]"
+        ],
+        [
+          "0x3c3cdae",
+          "488bb42480000000",
+          "mov rsi, qword ptr [rsp + 0x80]"
+        ],
+        [
+          "0x3c3cdb6",
+          "3b0e",
+          "cmp ecx, dword ptr [rsi]"
+        ],
+        [
+          "0x3c3cdb8",
+          "400f9fc7",
+          "setg dil"
+        ],
+        [
+          "0x3c3cdbc",
+          "0f85dd000000",
+          "jne 0x3c3ce9f"
+        ],
+        [
+          "0x3c3cdc2",
+          "3b5604",
+          "cmp edx, dword ptr [rsi + 4]"
+        ],
+        [
+          "0x3c3cdc5",
+          "400f97c7",
+          "seta dil"
+        ],
+        [
+          "0x3c3cdc9",
+          "0f85d0000000",
+          "jne 0x3c3ce9f"
+        ],
+        [
+          "0x3c3cdcf",
+          "3b4608",
+          "cmp eax, dword ptr [rsi + 8]"
+        ],
+        [
+          "0x3c3cdd2",
+          "0f87d0000000",
+          "ja 0x3c3cea8"
+        ]
+      ]
+    },
+    {
+      "label": "jailing_manual_unjail_300s_and_errors",
+      "fde": [
+        "0x3c3c260",
+        "0x3c3cfb1"
+      ],
+      "start": "0x3c3ce45",
+      "end": "0x3c3cf0a",
+      "sha256": "a1b7dd366c12c18ffa7430db59d64ab5de5ddd0e3525a2142f4a5aa5dd8a6ac5",
+      "rows": [
+        [
+          "0x3c3ce45",
+          "f30f7e05f3c081fc",
+          "movq xmm0, qword ptr [rip - 0x37e3f0d]"
+        ],
+        [
+          "0x3c3ce4d",
+          "ff1535b08a02",
+          "call qword ptr [rip + 0x28ab035]"
+        ],
+        [
+          "0x3c3ce53",
+          "8b8424d8000000",
+          "mov eax, dword ptr [rsp + 0xd8]"
+        ],
+        [
+          "0x3c3ce5a",
+          "488b942480000000",
+          "mov rdx, qword ptr [rsp + 0x80]"
+        ],
+        [
+          "0x3c3ce62",
+          "3b02",
+          "cmp eax, dword ptr [rdx]"
+        ],
+        [
+          "0x3c3ce64",
+          "0f9fc0",
+          "setg al"
+        ],
+        [
+          "0x3c3ce67",
+          "0f858e000000",
+          "jne 0x3c3cefb"
+        ],
+        [
+          "0x3c3ce6d",
+          "8b8424dc000000",
+          "mov eax, dword ptr [rsp + 0xdc]"
+        ],
+        [
+          "0x3c3ce74",
+          "3b4204",
+          "cmp eax, dword ptr [rdx + 4]"
+        ],
+        [
+          "0x3c3ce77",
+          "0f97c0",
+          "seta al"
+        ],
+        [
+          "0x3c3ce7a",
+          "757f",
+          "jne 0x3c3cefb"
+        ],
+        [
+          "0x3c3ce7c",
+          "8b8424e0000000",
+          "mov eax, dword ptr [rsp + 0xe0]"
+        ],
+        [
+          "0x3c3ce83",
+          "3b4208",
+          "cmp eax, dword ptr [rdx + 8]"
+        ],
+        [
+          "0x3c3ce86",
+          "7777",
+          "ja 0x3c3ceff"
+        ],
+        [
+          "0x3c3ce88",
+          "488dbc2490000000",
+          "lea rdi, [rsp + 0x90]"
+        ],
+        [
+          "0x3c3ce90",
+          "488db424b0000000",
+          "lea rsi, [rsp + 0xb0]"
+        ],
+        [
+          "0x3c3ce98",
+          "e8d3d52d00",
+          "call 0x3f1a470"
+        ],
+        [
+          "0x3c3ce9d",
+          "eb45",
+          "jmp 0x3c3cee4"
+        ],
+        [
+          "0x3c3ce9f",
+          "4084ff",
+          "test dil, dil"
+        ],
+        [
+          "0x3c3cea2",
+          "0f8430ffffff",
+          "je 0x3c3cdd8"
+        ],
+        [
+          "0x3c3cea8",
+          "6641c707a000",
+          "mov word ptr [r15], 0xa0"
+        ],
+        [
+          "0x3c3ceae",
+          "41894f04",
+          "mov dword ptr [r15 + 4], ecx"
+        ],
+        [
+          "0x3c3ceb2",
+          "41895708",
+          "mov dword ptr [r15 + 8], edx"
+        ],
+        [
+          "0x3c3ceb6",
+          "4189470c",
+          "mov dword ptr [r15 + 0xc], eax"
+        ],
+        [
+          "0x3c3ceba",
+          "e91bfdffff",
+          "jmp 0x3c3cbda"
+        ],
+        [
+          "0x3c3cebf",
+          "488d742430",
+          "lea rsi, [rsp + 0x30]"
+        ],
+        [
+          "0x3c3cec4",
+          "4c8db424b0000000",
+          "lea r14, [rsp + 0xb0]"
+        ],
+        [
+          "0x3c3cecc",
+          "4c89f7",
+          "mov rdi, r14"
+        ],
+        [
+          "0x3c3cecf",
+          "488b942480000000",
+          "mov rdx, qword ptr [rsp + 0x80]"
+        ],
+        [
+          "0x3c3ced7",
+          "e884cf2d00",
+          "call 0x3f19e60"
+        ],
+        [
+          "0x3c3cedc",
+          "4c89f7",
+          "mov rdi, r14"
+        ],
+        [
+          "0x3c3cedf",
+          "e82cd72d00",
+          "call 0x3f1a610"
+        ],
+        [
+          "0x3c3cee4",
+          "488bbc24d0000000",
+          "mov rdi, qword ptr [rsp + 0xd0]"
+        ],
+        [
+          "0x3c3ceec",
+          "488b742410",
+          "mov rsi, qword ptr [rsp + 0x10]"
+        ],
+        [
+          "0x3c3cef1",
+          "e8fa69ccff",
+          "call 0x39038f0"
+        ],
+        [
+          "0x3c3cef6",
+          "e9d9fcffff",
+          "jmp 0x3c3cbd4"
+        ],
+        [
+          "0x3c3cefb",
+          "84c0",
+          "test al, al"
+        ],
+        [
+          "0x3c3cefd",
+          "7489",
+          "je 0x3c3ce88"
+        ],
+        [
+          "0x3c3ceff",
+          "6641c7079f00",
+          "mov word ptr [r15], 0x9f"
+        ],
+        [
+          "0x3c3cf05",
+          "e9d0fcffff",
+          "jmp 0x3c3cbda"
+        ]
+      ]
+    },
+    {
+      "label": "jailing_protected_chain_branch",
+      "fde": [
+        "0x3c35a10",
+        "0x3c35fdb"
+      ],
+      "start": "0x3c35a2e",
+      "end": "0x3c35a65",
+      "sha256": "e6d9f50db185bd248ce67b457422339ba556a49024497b8a48761de800999b04",
+      "rows": [
+        [
+          "0x3c35a2e",
+          "4080fe03",
+          "cmp sil, 3"
+        ],
+        [
+          "0x3c35a32",
+          "8974241c",
+          "mov dword ptr [rsp + 0x1c], esi"
+        ],
+        [
+          "0x3c35a36",
+          "751b",
+          "jne 0x3c35a53"
+        ],
+        [
+          "0x3c35a38",
+          "8b056a818c02",
+          "mov eax, dword ptr [rip + 0x28c816a]"
+        ],
+        [
+          "0x3c35a3e",
+          "85c0",
+          "test eax, eax"
+        ],
+        [
+          "0x3c35a40",
+          "752f",
+          "jne 0x3c35a71"
+        ],
+        [
+          "0x3c35a42",
+          "488d0547818c02",
+          "lea rax, [rip + 0x28c8147]"
+        ],
+        [
+          "0x3c35a49",
+          "488b08",
+          "mov rcx, qword ptr [rax]"
+        ],
+        [
+          "0x3c35a4c",
+          "4885c9",
+          "test rcx, rcx"
+        ],
+        [
+          "0x3c35a4f",
+          "7514",
+          "jne 0x3c35a65"
+        ],
+        [
+          "0x3c35a51",
+          "eb6a",
+          "jmp 0x3c35abd"
+        ],
+        [
+          "0x3c35a53",
+          "400fb6fe",
+          "movzx edi, sil"
+        ],
+        [
+          "0x3c35a57",
+          "ff158b018b02",
+          "call qword ptr [rip + 0x28b018b]"
+        ],
+        [
+          "0x3c35a5d",
+          "488b08",
+          "mov rcx, qword ptr [rax]"
+        ],
+        [
+          "0x3c35a60",
+          "4885c9",
+          "test rcx, rcx"
+        ],
+        [
+          "0x3c35a63",
+          "7458",
+          "je 0x3c35abd"
+        ]
+      ]
+    },
+    {
+      "label": "staking_quorum_missing_epoch_9b",
+      "fde": [
+        "0x36c7f70",
+        "0x36c8424"
+      ],
+      "start": "0x36c80a3",
+      "end": "0x36c80bb",
+      "sha256": "7b43a437bf948ec22a1e927f64569e729b66d50a474b10bf782b206f943d4314",
+      "rows": [
+        [
+          "0x36c80a3",
+          "66c74424209b00",
+          "mov word ptr [rsp + 0x20], 0x9b"
+        ],
+        [
+          "0x36c80aa",
+          "488d7c2420",
+          "lea rdi, [rsp + 0x20]"
+        ],
+        [
+          "0x36c80af",
+          "e87c2d0100",
+          "call 0x36dae30"
+        ],
+        [
+          "0x36c80b4",
+          "31c0",
+          "xor eax, eax"
+        ],
+        [
+          "0x36c80b6",
+          "e9fd020000",
+          "jmp 0x36c83b8"
+        ]
+      ]
+    },
+    {
+      "label": "staking_quorum_weight_cmp_call",
+      "fde": [
+        "0x36c7f70",
+        "0x36c8424"
+      ],
+      "start": "0x36c82d7",
+      "end": "0x36c82f2",
+      "sha256": "5a378fda154e2173cda3a037a21f8447d2d59c26ab3c372f5f4f23b2b0fa5093",
+      "rows": [
+        [
+          "0x36c82d7",
+          "488d7c2420",
+          "lea rdi, [rsp + 0x20]"
+        ],
+        [
+          "0x36c82dc",
+          "488db42490000000",
+          "lea rsi, [rsp + 0x90]"
+        ],
+        [
+          "0x36c82e4",
+          "e8075eb600",
+          "call 0x422e0f0"
+        ],
+        [
+          "0x36c82e9",
+          "488b0c24",
+          "mov rcx, qword ptr [rsp]"
+        ],
+        [
+          "0x36c82ed",
+          "4c39f9",
+          "cmp rcx, r15"
+        ],
+        [
+          "0x36c82f0",
+          "7543",
+          "jne 0x36c8335"
+        ]
+      ]
+    },
+    {
+      "label": "staking_profiles_missing_epoch_9b",
+      "fde": [
+        "0x36c7b30",
+        "0x36c7f6d"
+      ],
+      "start": "0x36c7c0e",
+      "end": "0x36c7c23",
+      "sha256": "d6644f083bb242aac3ca454ab798c01d5caecdbf0fffde89ce5a0ed7a29f4361",
+      "rows": [
+        [
+          "0x36c7c0e",
+          "6641c704249b00",
+          "mov word ptr [r12], 0x9b"
+        ],
+        [
+          "0x36c7c15",
+          "49c744240800000000",
+          "mov qword ptr [r12 + 8], 0"
+        ],
+        [
+          "0x36c7c1e",
+          "e9fd020000",
+          "jmp 0x36c7f20"
+        ]
+      ]
+    },
+    {
+      "label": "staking_profiles_assert_tail",
+      "fde": [
+        "0x36c7b30",
+        "0x36c7f6d"
+      ],
+      "start": "0x36c7f20",
+      "end": "0x36c7f6d",
+      "sha256": "fe67e3ea9890063a623def6208889ca3eecfd8c4dcc01ab6964d982dda30d4c7",
+      "rows": [
+        [
+          "0x36c7f20",
+          "4c89e0",
+          "mov rax, r12"
+        ],
+        [
+          "0x36c7f23",
+          "4881c428010000",
+          "add rsp, 0x128"
+        ],
+        [
+          "0x36c7f2a",
+          "5b",
+          "pop rbx"
+        ],
+        [
+          "0x36c7f2b",
+          "415c",
+          "pop r12"
+        ],
+        [
+          "0x36c7f2d",
+          "415d",
+          "pop r13"
+        ],
+        [
+          "0x36c7f2f",
+          "415e",
+          "pop r14"
+        ],
+        [
+          "0x36c7f31",
+          "415f",
+          "pop r15"
+        ],
+        [
+          "0x36c7f33",
+          "5d",
+          "pop rbp"
+        ],
+        [
+          "0x36c7f34",
+          "c3",
+          "ret"
+        ],
+        [
+          "0x36c7f35",
+          "488d3df45b0dfd",
+          "lea rdi, [rip - 0x2f2a40c]"
+        ],
+        [
+          "0x36c7f3c",
+          "488d15550dda02",
+          "lea rdx, [rip + 0x2da0d55]"
+        ],
+        [
+          "0x36c7f43",
+          "be34000000",
+          "mov esi, 0x34"
+        ],
+        [
+          "0x36c7f48",
+          "ff15e277e102",
+          "call qword ptr [rip + 0x2e177e2]"
+        ],
+        [
+          "0x36c7f4e",
+          "0f0b",
+          "ud2"
+        ],
+        [
+          "0x36c7f50",
+          "eb00",
+          "jmp 0x36c7f52"
+        ],
+        [
+          "0x36c7f52",
+          "4889c3",
+          "mov rbx, rax"
+        ],
+        [
+          "0x36c7f55",
+          "488d7c2458",
+          "lea rdi, [rsp + 0x58]"
+        ],
+        [
+          "0x36c7f5a",
+          "e8e1c52600",
+          "call 0x3934540"
+        ],
+        [
+          "0x36c7f5f",
+          "4889df",
+          "mov rdi, rbx"
+        ],
+        [
+          "0x36c7f62",
+          "e8e98ad202",
+          "call 0x63f0a50"
+        ],
+        [
+          "0x36c7f67",
+          "ff155375e102",
+          "call qword ptr [rip + 0x2e17553]"
+        ]
+      ]
+    }
+  ],
+  "facts": [
+    {
+      "kind": "relocation",
+      "address": "0x64e5be8",
+      "target": "0x46f3fc0",
+      "label": "slot_exempt_validator_set"
+    },
+    {
+      "kind": "relocation",
+      "address": "0x64e7e88",
+      "target": "0x3d66200",
+      "label": "slot_time_add_seconds"
+    },
+    {
+      "kind": "relocation",
+      "address": "0x64e7f00",
+      "target": "0x3c377b0",
+      "label": "slot_protected_validator_guard"
+    },
+    {
+      "kind": "relocation",
+      "address": "0x64df730",
+      "target": "0x1680e60",
+      "label": "slot_core_panic"
+    },
+    {
+      "kind": "bytes",
+      "address": "0x458f40",
+      "hex": "0000000000c07240",
+      "label": "rodata_manual_unjail_300s_f64"
+    },
+    {
+      "kind": "literal",
+      "address": "0x79db30",
+      "ascii": "assertion failed: profiles.insert(validator_profile)",
+      "label": "rodata_profiles_insert_assert"
+    },
+    {
+      "kind": "direct",
+      "address": "0x3c3c2b7",
+      "mnemonic": "call",
+      "target": "0x3c35a10",
+      "label": "self_jail_call"
+    },
+    {
+      "kind": "direct",
+      "address": "0x3c3c890",
+      "mnemonic": "call",
+      "target": "0x3d6f520",
+      "label": "jail_votes_sort_call"
+    },
+    {
+      "kind": "direct",
+      "address": "0x3c3c97b",
+      "mnemonic": "call",
+      "target": "0x3c35a10",
+      "label": "vote_jail_call"
+    },
+    {
+      "kind": "rip",
+      "address": "0x3c3ce45",
+      "mnemonic": "movq",
+      "target": "0x458f40",
+      "label": "manual_unjail_load_300s"
+    },
+    {
+      "kind": "rip",
+      "address": "0x3c3ce4d",
+      "mnemonic": "call",
+      "target": "0x64e7e88",
+      "label": "manual_unjail_time_add_call"
+    },
+    {
+      "kind": "direct",
+      "address": "0x3c3cef1",
+      "mnemonic": "call",
+      "target": "0x39038f0",
+      "label": "manual_unjail_remove_call"
+    },
+    {
+      "kind": "direct",
+      "address": "0x36c7bde",
+      "mnemonic": "call",
+      "target": "0x4551810",
+      "label": "profiles_epoch_ring_search_call"
+    },
+    {
+      "kind": "direct",
+      "address": "0x36c80af",
+      "mnemonic": "call",
+      "target": "0x36dae30",
+      "label": "quorum_missing_epoch_drop_call"
+    },
+    {
+      "kind": "direct",
+      "address": "0x36c82e4",
+      "mnemonic": "call",
+      "target": "0x422e0f0",
+      "label": "quorum_weight_cmp_call"
+    }
+  ]
+}
