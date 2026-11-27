@@ -5,6 +5,11 @@
 
 use std::collections::VecDeque;
 
+pub mod assets_wave3;
+pub mod enums_wave3;
+pub mod expecting_wave3;
+pub mod fields_wave3;
+
 /// ABI-shaped 9-variant error enum modeling the `rmp_serde::decode::Error` layout observed
 /// in node #115 (`Ok(u8)` receives niche discriminant `0x09`).
 #[derive(Debug, PartialEq, Eq)]
@@ -41,14 +46,14 @@ pub struct JsonErr(pub Box<[usize; 2]>);
 
 #[cold]
 #[inline(never)]
-fn rmp_unknown_variant(v: &str, expected: &'static [&'static str]) -> RmpErr {
+pub(crate) fn rmp_unknown_variant(v: &str, expected: &'static [&'static str]) -> RmpErr {
     let p = core::hint::black_box((v.as_ptr(), v.len(), expected.as_ptr(), expected.len()));
     RmpErr::E0(p.0 as u8, p.1 ^ (p.2 as usize) ^ p.3)
 }
 
 #[cold]
 #[inline(never)]
-fn json_unknown_variant(v: &str, expected: &'static [&'static str]) -> JsonErr {
+pub(crate) fn json_unknown_variant(v: &str, expected: &'static [&'static str]) -> JsonErr {
     let p = core::hint::black_box((v.as_ptr(), v.len(), expected.as_ptr(), expected.len()));
     JsonErr(Box::new([(p.0 as usize) ^ p.1, (p.2 as usize) ^ p.3]))
 }
@@ -1137,5 +1142,53 @@ mod tests {
         assert_eq!(main_hip3::visit_str_rmp("Main"), Ok(main_hip3::DexStateKind::V0));
         assert_eq!(main_hip3::visit_str_rmp("Hip3"), Ok(main_hip3::DexStateKind::V1));
         assert!(main_hip3::visit_str_rmp("main").is_err());
+    }
+
+    #[test]
+    fn wave3_enums_fields_assets_and_expecting_work() {
+        assert_eq!(
+            enums_wave3::info_request::visit_str_json("clearinghouseState"),
+            Ok(enums_wave3::info_request::Variant::V7)
+        );
+        assert!(enums_wave3::info_request::visit_str_json("unknownInfo").is_err());
+
+        assert_eq!(
+            enums_wave3::indexed_artifact_content::visit_str_json("NodeArtifact"),
+            Ok(enums_wave3::indexed_artifact_content::Variant::V3)
+        );
+        assert_eq!(
+            enums_wave3::quorum_status::visit_str_rmp("Q"),
+            Ok(enums_wave3::quorum_status::Variant::V0)
+        );
+        assert_eq!(
+            enums_wave3::c_validator_action::visit_str_rmp("unregister"),
+            Ok(enums_wave3::c_validator_action::Variant::V2)
+        );
+        assert_eq!(
+            enums_wave3::vault_relationship::visit_str_rmp("parent"),
+            Ok(enums_wave3::vault_relationship::Variant::V2)
+        );
+
+        assert_eq!(
+            fields_wave3::send_asset_cross_chain::visit_str_rmp("destinationChainId"),
+            Ok(fields_wave3::send_asset_cross_chain::Variant::V7)
+        );
+        assert_eq!(
+            fields_wave3::validator_change_profile::visit_str_rmp("commission_bps"),
+            Ok(fields_wave3::validator_change_profile::Variant::V5)
+        );
+        assert!(fields_wave3::base_fee_rates::visit_str_rmp("bad").is_err());
+
+        let spec = assets_wave3::TokenSpec {
+            _pad: [0; 0x18],
+            sz_decimals: 2,
+            wei_decimals: 8,
+        };
+        assert_eq!(assets_wave3::assets_token_wei_per_sz(&spec), 1_000_000);
+
+        let mut out = String::new();
+        let mut w: &mut dyn core::fmt::Write = &mut out;
+        expecting_wave3::exp_000_enum_abstractionreturn(&(), &mut w).unwrap();
+        assert_eq!(out, "enum AbstractionReturn");
     }
 }

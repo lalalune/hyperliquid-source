@@ -30,6 +30,12 @@ from fde_extents import fde_extents  # noqa: E402
 HERE = Path(__file__).resolve().parent
 TARGET_REL = 'artifacts/node/115/hl-node'
 CRATE_SRC_REL = 'src/node115-first-party-byte-census/src/lib.rs'
+CRATE_SUBMODULES_REL = [
+    'src/node115-first-party-byte-census/src/assets_wave3.rs',
+    'src/node115-first-party-byte-census/src/enums_wave3.rs',
+    'src/node115-first-party-byte-census/src/expecting_wave3.rs',
+    'src/node115-first-party-byte-census/src/fields_wave3.rs',
+]
 RUSTC_FLAGS = [
     '--edition=2021',
     '--crate-type=rlib',
@@ -69,10 +75,10 @@ SPECS = [
     (('spot_mark', 'visit_str_rmp'), 'spot-mark-rmp', 'constants',
      'global_constants SpotMarkKind RMP visit_str',
      [0x22e20d0, 0x3d47cb0, 0x535bee0], 'research/work-items/RE-015-spot-mark-codec-115/README.md'),
-    (('tif', 'visit_str_rmp'), 'tif-rmp', 'orderbook',
+    (('3tif', 'visit_str_rmp'), 'tif-rmp', 'orderbook',
      'l1/book Tif RMP visit_str',
      [0x25cee60, 0x4447430, 0x5171260], 'src/node115-tif-name-codec/README.md'),
-    (('tif', 'visit_str_json'), 'tif-json', 'orderbook',
+    (('3tif', 'visit_str_json'), 'tif-json', 'orderbook',
      'l1/book Tif JSON visit_str',
      [0x25ced60, 0x4447330], 'src/node115-tif-name-codec/README.md'),
     (('outcome_kind', 'visit_str_rmp'), 'outcome-kind-rmp', 'risk',
@@ -194,8 +200,49 @@ def compile_crate_obj(root: Path) -> tuple[bytes, str]:
         return out_obj.read_bytes(), ver
 
 
+def load_all_specs():
+    all_specs = [
+        (tokens, id_prefix, component, label, expected_vas, anchor, None)
+        for tokens, id_prefix, component, label, expected_vas, anchor in SPECS
+    ]
+    w3_path = HERE / 'wave3_specs.json'
+    if w3_path.exists():
+        for entry in json.loads(w3_path.read_text()):
+            all_specs.append((
+                tuple(entry['tokens']),
+                entry['id_prefix'],
+                entry['component'],
+                entry['label'],
+                entry['expected_vas'],
+                entry['anchor'],
+                entry.get('expecting_string'),
+            ))
+    return all_specs
+
+
+def verify_expecting_rodata_target(data: bytes, all_secs, va: int, body: bytes, expected_str: str):
+    """For 25-byte Visitor::expecting FDEs, verify RIP-relative .rodata pointer matches exact string."""
+    import struct
+    pos_lea = body.find(b'\x48\x8d\x35')
+    if pos_lea == -1 or pos_lea + 12 > len(body) or body[pos_lea + 7] != 0xba:
+        raise ValueError(f'expecting FDE at {va:#x} missing lea rsi / mov edx pattern')
+    pos_mov = pos_lea + 7
+    disp = struct.unpack('<i', body[pos_lea + 3:pos_lea + 7])[0]
+    str_va = va + pos_lea + 7 + disp
+    slen = struct.unpack('<I', body[pos_mov + 1:pos_mov + 5])[0]
+    for s in all_secs:
+        if s['address'] <= str_va and str_va + slen <= s['address'] + s['size']:
+            off = s['offset'] + str_va - s['address']
+            actual = data[off:off + slen].decode('utf-8')
+            if actual != expected_str:
+                raise ValueError(f'expecting FDE at {va:#x} resolved {actual!r} != {expected_str!r}')
+            return
+    raise ValueError(f'expecting FDE at {va:#x} .rodata pointer {str_va:#x} out of section bounds')
+
+
 def build_census(root: Path):
     data, target_sha, text, fde_map = load_authenticated_target(root)
+    all_secs = sections(data)
     obj, rustc_ver = compile_crate_obj(root)
     funcs = list(object_functions(obj))
 
@@ -209,7 +256,7 @@ def build_census(root: Path):
     blob = bytearray()
     seen_vas = set()
 
-    for tokens, id_prefix, component, label, expected_vas, anchor in SPECS:
+    for tokens, id_prefix, component, label, expected_vas, anchor, exp_str in load_all_specs():
         matched_funcs = [
             (syms, body, rel) for syms, body, rel in funcs
             if all(tok in syms[0] for tok in tokens)
@@ -236,6 +283,8 @@ def build_census(root: Path):
                 raise ValueError(f'{id_prefix} at {va:#x} overlaps existing window in byte-windows.json')
             off = text['offset'] + va - text['address']
             target_bytes = data[off:off + n]
+            if exp_str is not None:
+                verify_expecting_rodata_target(data, all_secs, va, target_bytes, exp_str)
             cmp = compare(body, target_bytes, rel_rows)
             if not cmp['relocation_qualified']:
                 raise ValueError(
@@ -244,7 +293,7 @@ def build_census(root: Path):
                 )
             source_offset = len(blob)
             blob += body
-            records.append({
+            rec = {
                 'id': f'node115-fp-{id_prefix}-{va:x}',
                 'label': f'{label} ({va:#x})',
                 'component': component,
@@ -260,7 +309,10 @@ def build_census(root: Path):
                 'raw_equal_bytes': cmp['raw_equal_bytes'],
                 'relocation_bytes': cmp['relocation_bytes'],
                 'relocations': rel_rows,
-            })
+            }
+            if exp_str is not None:
+                rec['expecting_string'] = exp_str
+            records.append(rec)
 
     by_comp = {}
     for r in records:
@@ -281,6 +333,7 @@ def build_census(root: Path):
         'source_crate': {
             'path': CRATE_SRC_REL,
             'sha256': sha((root / CRATE_SRC_REL).read_bytes()),
+            'submodules': {p: sha((root / p).read_bytes()) for p in CRATE_SUBMODULES_REL},
         },
         'toolchain': {
             'rustc': rustc_ver,
@@ -380,8 +433,12 @@ def verify_committed(root: Path, rebuild: bool = False):
         raise ValueError('Committed bodies.bin digest/length mismatch')
     if sha((root / CRATE_SRC_REL).read_bytes()) != census['source_crate']['sha256']:
         raise ValueError('Committed source crate digest mismatch')
+    for sub_rel, sub_sha in census['source_crate'].get('submodules', {}).items():
+        if sha((root / sub_rel).read_bytes()) != sub_sha:
+            raise ValueError(f'Committed source submodule digest mismatch: {sub_rel}')
 
     data, target_sha, text, fde_map = load_authenticated_target(root)
+    all_secs = sections(data)
     if target_sha != census['target']['sha256']:
         raise ValueError('Target binary digest mismatch')
 
@@ -398,6 +455,8 @@ def verify_committed(root: Path, rebuild: bool = False):
         target_bytes = data[off:off + end - start]
         if sha(target_bytes) != r['target_body_sha256']:
             raise ValueError(f'Target body digest mismatch for {r["id"]}')
+        if 'expecting_string' in r:
+            verify_expecting_rodata_target(data, all_secs, start, target_bytes, r['expecting_string'])
         src_bytes = bodies[r['source_offset']:r['source_offset'] + end - start]
         if sha(src_bytes) != r['source_body_sha256']:
             raise ValueError(f'Source body digest mismatch for {r["id"]}')
@@ -428,7 +487,7 @@ def main():
         (HERE / 'census.json').write_text(json.dumps(census, indent=1) + '\n', encoding='utf-8')
         (HERE / 'README.md').write_text(render_readme(census), encoding='utf-8')
         manifest_lines = []
-        for name in ('README.md', 'bodies.bin', 'census.json', 'census.py'):
+        for name in ('README.md', 'bodies.bin', 'census.json', 'census.py', 'wave3_specs.json'):
             manifest_lines.append(f'{sha((HERE / name).read_bytes())}  {name}')
         (HERE / 'MANIFEST.sha256').write_text('\n'.join(manifest_lines) + '\n', encoding='utf-8')
         print(json.dumps(census['totals'], indent=2))
