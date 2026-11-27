@@ -11,6 +11,7 @@ pub mod ip_semaphore;
 pub mod lz4;
 pub mod primitives;
 pub mod rate_limiter;
+pub mod stream_protocols;
 pub mod tcp;
 
 /// Re-exports of verified node #115 low-level transport & HTTP/2 framing micro-crates.
@@ -37,6 +38,9 @@ pub use primitives::{
     BoundedChannel, ChannelError, ProfiledRwLock, RetryExhausted, RetryPolicy, sleep_retry,
 };
 pub use rate_limiter::{AlertConfig, RateLimitDecision, RateLimiter};
+pub use stream_protocols::{
+    AbciStreamGreeting, EvmKvsMsg, GreetingFixedPart, GreetingHash, WireSignature,
+};
 pub use tcp::{
     DEFAULT_MAX_FRAME_BYTES, DEFAULT_WRITE_TIMEOUT_SECS, Direction, FramedTcpStream,
     LZ4_STATS_WINDOW_SECS, Lz4Stats, TRAFFIC_RECORDER_WINDOW_SECS, TcpClient, TcpError,
