@@ -40,6 +40,12 @@ pub const WRITE_BUFFER_BYTES: u64 = 0x0800_0000;
 pub const TCP_ROCKSDB_MAX_BYTES: u64 = 100_000_000_000;
 /// `DbHub` sub-directory prefix literal observed at `0x3d4c9e2` (`.rodata 0x431b96`).
 pub const DHS_SUBDIR_PREFIX: &str = "dhs/";
+/// Per-shard checkpoint completion marker prefix proven at `0x1696b90..0x1696d23`
+/// (`.rodata 0x442eae` `"/CHECKPOINT_COMPLETE_"`).
+pub const CHECKPOINT_COMPLETE_SHARD_PREFIX: &str = "CHECKPOINT_COMPLETE_";
+/// Forbidden substring rejected by `OwnedDbDir` at `0x16961b0..0x1696729`
+/// (`.rodata 0x447e28` `"OwnedDbDir invalid dir "`).
+pub const OWNED_DB_DIR_FORBIDDEN_SUBSTR: &str = "checkpoint";
 /// Column family names opened for the `EvmState` shard (`0x3d5ed10`, `.rodata 0x456bf0`, `0x7bd710`, `0x7bd721`).
 pub const EVM_STATE_COLUMN_FAMILIES: [&str; 4] = [
     "default",
@@ -63,6 +69,15 @@ impl RocksDbShard {
             Self::Rpc => "Rpc",
             Self::EvmState => "EvmState",
         }
+    }
+
+    /// Lowercase shard marker filename matching `0x1696b90..0x1696d23`:
+    /// `format!("{dir}/CHECKPOINT_COMPLETE_{}", shard.to_string().to_lowercase())`.
+    pub fn checkpoint_complete_marker_path(self, checkpoint_root: &Path) -> PathBuf {
+        checkpoint_root.join(format!(
+            "{CHECKPOINT_COMPLETE_SHARD_PREFIX}{}",
+            self.dir_name().to_ascii_lowercase()
+        ))
     }
 
     pub const fn column_families(self) -> &'static [&'static str] {
@@ -118,6 +133,33 @@ pub const fn validate_tcp_rocksdb_size(size_bytes: u64) -> Result<(), RocksDbToo
         Err(RocksDbTooLargeError {
             size_bytes,
             limit_bytes: TCP_ROCKSDB_MAX_BYTES,
+        })
+    } else {
+        Ok(())
+    }
+}
+
+/// Error returned when an `OwnedDbDir` path contains the forbidden `"checkpoint"` substring
+/// (`0x16961b0..0x1696729`, `.rodata 0x447e29` `"OwnedDbDir invalid dir "`).
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct OwnedDbDirInvalidError {
+    pub dir: String,
+}
+
+impl std::fmt::Display for OwnedDbDirInvalidError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "OwnedDbDir invalid dir {}", self.dir)
+    }
+}
+
+impl std::error::Error for OwnedDbDirInvalidError {}
+
+/// Rejects any `OwnedDbDir` string containing `"checkpoint"` (`0x16961b0..0x1696729`,
+/// SIMD substring search closure at `0x1696870..0x1696961`).
+pub fn validate_owned_db_dir(dir: &str) -> Result<(), OwnedDbDirInvalidError> {
+    if dir.contains(OWNED_DB_DIR_FORBIDDEN_SUBSTR) {
+        Err(OwnedDbDirInvalidError {
+            dir: dir.to_string(),
         })
     } else {
         Ok(())
@@ -232,7 +274,8 @@ impl PersistentShardKvStore {
     }
 
     /// Create an atomic on-disk checkpoint under `<checkpoint_root>/<shard.dir_name()>`
-    /// and write `CHECKPOINT_COMPLETE` in `<checkpoint_root>` once all CF files are durable.
+    /// and write both `CHECKPOINT_COMPLETE` and the per-shard `CHECKPOINT_COMPLETE_<shard_lower>`
+    /// marker (`0x1696b90..0x1696d23`) in `<checkpoint_root>` once all CF files are durable.
     pub fn create_checkpoint(&self, checkpoint_root: &Path) -> io::Result<PathBuf> {
         let shard_ckpt = checkpoint_root.join(self.shard.dir_name());
         fs::create_dir_all(&shard_ckpt)?;
@@ -240,6 +283,7 @@ impl PersistentShardKvStore {
             write_kv_file_atomic(&shard_ckpt.join(format!("{cf}.kv")), entries)?;
         }
         write_bytes_atomic(&checkpoint_root.join("CHECKPOINT_COMPLETE"), b"")?;
+        write_bytes_atomic(&self.shard.checkpoint_complete_marker_path(checkpoint_root), b"")?;
         Ok(shard_ckpt)
     }
 
