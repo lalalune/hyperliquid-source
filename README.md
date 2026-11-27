@@ -30,13 +30,13 @@ These inventory counts describe available work, not completed components.
 | Components fully built | 4/23 | 17.39% |
 | Components with full behavioral validation | 4/23 | 17.39% |
 | Components with full code/data identity | 0/23 | 0.00% |
-| Target .text bytes compared | 6,176,541/83,719,936 | 7.37762% |
-| Target .text bytes raw-equal | 5,770,888/83,719,936 | 6.89309% |
-| Target .text bytes relocation-qualified | 6,176,541/83,719,936 | 7.37762% |
-| Whole-ELF bytes compared | 6,176,541/105,896,032 | 5.83265% |
-| Whole-ELF bytes raw-equal | 5,770,888/105,896,032 | 5.44958% |
-| First-party .text bytes compared | 138,449/83,719,936 | 0.16537% |
-| Compared windows vs. `.eh_frame_hdr` unwind starts | 9,859/135,313 | 7.28607% |
+| Target .text bytes compared | 6,342,839/83,719,936 | 7.57626% |
+| Target .text bytes raw-equal | 5,932,897/83,719,936 | 7.08660% |
+| Target .text bytes relocation-qualified | 6,342,839/83,719,936 | 7.57626% |
+| Whole-ELF bytes compared | 6,342,839/105,896,032 | 5.98969% |
+| Whole-ELF bytes raw-equal | 5,932,897/105,896,032 | 5.60257% |
+| First-party .text bytes compared | 304,747/83,719,936 | 0.36401% |
+| Compared windows vs. `.eh_frame_hdr` unwind starts | 10,021/135,313 | 7.40579% |
 | Component work areas with registered Rust paths | 23/23 | 100.00% |
 | Active `src/` Rust areas registered in `components.json` | 297/297 | 100.00% |
 | Research work items with top-level `MANIFEST.sha256` | 4,812/4,934 | 97.53% |
@@ -63,20 +63,20 @@ Each fragment keeps its own #115 contract; an integrated node executable remains
 | [Storage and snapshots](docs/COMPONENTS.md#storage) | Node #115 | 3/4 | 75% | 886 | 14 |
 | [Network transport](docs/COMPONENTS.md#transport) | Node #115 | 0/4 | 0% | 425 | 17 |
 | [Consensus](docs/COMPONENTS.md#consensus) | Node #115 | 0/4 | 0% | 1,403 | 8 |
-| [Node runtime and gossip](docs/COMPONENTS.md#node-runtime) | Node #115 | 0/4 | 0% | 527 | 11 |
-| [Block execution and state](docs/COMPONENTS.md#abci) | Node #115 | 3/4 | 75% | 1,017 | 36 |
-| [Action wire and signing](docs/COMPONENTS.md#action-wire) | Node #115 | 0/4 | 0% | 17,291 | 115 |
+| [Node runtime and gossip](docs/COMPONENTS.md#node-runtime) | Node #115 | 0/4 | 0% | 1,059 | 13 |
+| [Block execution and state](docs/COMPONENTS.md#abci) | Node #115 | 3/4 | 75% | 1,578 | 39 |
+| [Action wire and signing](docs/COMPONENTS.md#action-wire) | Node #115 | 0/4 | 0% | 92,852 | 151 |
 | [Action dispatch and handlers](docs/COMPONENTS.md#action-dispatch) | Node #115 | 0/4 | 0% | 35,135 | 15 |
-| [Exchange orchestration](docs/COMPONENTS.md#exchange) | Node #115 | 0/4 | 0% | 3,270 | 34 |
-| [Order books and matching](docs/COMPONENTS.md#orderbook) | Node #115 | 0/4 | 0% | 6,200 | 125 |
-| [Clearinghouses and risk](docs/COMPONENTS.md#risk) | Node #115 | 0/4 | 0% | 6,531 | 84 |
-| [Assets and fixed-point quantities](docs/COMPONENTS.md#assets) | Node #115 | 0/4 | 0% | 5,385 | 83 |
-| [Fees and volume](docs/COMPONENTS.md#fees) | Node #115 | 0/4 | 0% | 3,904 | 70 |
-| [Vaults and subaccounts](docs/COMPONENTS.md#vaults) | Node #115 | 0/4 | 0% | 3,596 | 55 |
-| [Bridge and withdrawals](docs/COMPONENTS.md#bridge) | Node #115 | 0/4 | 0% | 4,706 | 45 |
+| [Exchange orchestration](docs/COMPONENTS.md#exchange) | Node #115 | 0/4 | 0% | 6,150 | 40 |
+| [Order books and matching](docs/COMPONENTS.md#orderbook) | Node #115 | 0/4 | 0% | 9,938 | 134 |
+| [Clearinghouses and risk](docs/COMPONENTS.md#risk) | Node #115 | 0/4 | 0% | 13,191 | 102 |
+| [Assets and fixed-point quantities](docs/COMPONENTS.md#assets) | Node #115 | 0/4 | 0% | 11,069 | 85 |
+| [Fees and volume](docs/COMPONENTS.md#fees) | Node #115 | 0/4 | 0% | 8,413 | 76 |
+| [Vaults and subaccounts](docs/COMPONENTS.md#vaults) | Node #115 | 0/4 | 0% | 7,730 | 64 |
+| [Bridge and withdrawals](docs/COMPONENTS.md#bridge) | Node #115 | 0/4 | 0% | 7,658 | 51 |
 | [HyperEVM execution](docs/COMPONENTS.md#evm) | Node #115 | 0/4 | 0% | 2,485 | 61 |
-| [Staking and validator lifecycle](docs/COMPONENTS.md#staking) | Node #115 | 0/4 | 0% | 13,518 | 63 |
-| [DEX registry](docs/COMPONENTS.md#dex-registry) | Node #115 | 0/4 | 0% | 17,839 | 84 |
+| [Staking and validator lifecycle](docs/COMPONENTS.md#staking) | Node #115 | 0/4 | 0% | 40,531 | 106 |
+| [DEX registry](docs/COMPONENTS.md#dex-registry) | Node #115 | 0/4 | 0% | 49,913 | 106 |
 | [Remaining L1 state helpers](docs/COMPONENTS.md#l1-shared) | Node #115 | 0/4 | 0% | 311 | 10 |
 | [Info API](docs/COMPONENTS.md#info-api) | Node #115 | 0/4 | 0% | 3,579 | 42 |
 | [EVM JSON-RPC](docs/COMPONENTS.md#evm-rpc) | Node #115 | 0/4 | 0% | 175 | 7 |
@@ -95,7 +95,7 @@ Their equality does not establish first-party or whole-node completion.
 
 | Comparison | % of #115 `.text` | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows |
 | --- | ---: | ---: | ---: | ---: |
-| **Node #115 total** | 7.37762% | 5,770,888/6,176,541 (93.43%) | 532/9,859 (5.40%) | 9,859/9,859 (100.00%) |
+| **Node #115 total** | 7.57626% | 5,932,897/6,342,839 (93.54%) | 532/10,021 (5.31%) | 10,021/10,021 (100.00%) |
 | compiler-builtins | 0.00343% | 2,769/2,874 (96.35%) | 5/13 (38.46%) | 13/13 (100.00%) |
 | native-libraries | 6.04179% | 4,721,227/5,058,182 (93.34%) | 445/7,266 (6.12%) | 7,266/7,266 (100.00%) |
 | rust-alloc | 0.00721% | 5,668/6,039 (93.86%) | 0/16 (0.00%) | 16/16 (100.00%) |
@@ -104,7 +104,7 @@ Their equality does not establish first-party or whole-node completion.
 | vendored-crates | 0.78539% | 616,386/657,530 (93.74%) | 44/988 (4.45%) | 988/988 (100.00%) |
 | zstandard | 0.00289% | 2,418/2,418 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
 
-Compared code: **6,176,541/83,719,936 .text bytes (7.37762%)**.
+Compared code: **6,342,839/83,719,936 .text bytes (7.57626%)**.
 
 All active findings bind to node #115. See [detailed progress](docs/PROGRESS.md)
 and [source-built node acceptance](docs/SCOPE.md#source-built-network-node).
