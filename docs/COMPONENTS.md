@@ -10,7 +10,7 @@ The authenticated inventory contains 180 allowlisted source-path observations. D
 Time, logging, wallets, collections and shared runtime utilities.
 
 - Target: node115.
-- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-nonce-text`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`, `src/node115-host-ip-gates`, `src/node115-packed-millis`, `src/node115-utf8-admission`, `src/node115-reverse-path-components`, `src/node115-rng-buffer-selection`, `src/node115-time-producer`, `src/node115-date-time-display`, `src/node115-owned-cstring`, `src/node115-iso-week-date`, `src/node115-timespec-difference`, `src/node115-command-construction`, `src/node115-elf-build-id`, `src/node115-u64-key-hash`, `src/node115-limb-add-family`, `src/node115-wrapped-u64-search`, `src/node115-sponge-permutation`, `src/node115-stable-record-insertion`, `src/node115-bounded-offset`, `src/node115-two-span-projection`, `src/node115-file-write-lifecycle`, `src/node115-recursive-directory-create`.
+- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-nonce-text`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`, `src/node115-host-ip-gates`, `src/node115-packed-millis`, `src/node115-utf8-admission`, `src/node115-reverse-path-components`, `src/node115-rng-buffer-selection`, `src/node115-time-producer`, `src/node115-date-time-display`, `src/node115-owned-cstring`, `src/node115-iso-week-date`, `src/node115-timespec-difference`, `src/node115-command-construction`, `src/node115-elf-build-id`, `src/node115-u64-key-hash`, `src/node115-limb-add-family`, `src/node115-wrapped-u64-search`, `src/node115-sponge-permutation`, `src/node115-stable-record-insertion`, `src/node115-bounded-offset`, `src/node115-two-span-projection`, `src/node115-file-write-lifecycle`, `src/node115-recursive-directory-create`, `src/node115-billion-remainder`, `src/node115-buffer-hash32`, `src/node115-byte-prefix-step-projection`, `src/node115-cpu-quota`, `src/node115-daycount-date`, `src/node115-f64-powi-leaf`, `src/node115-gated-byte-consume`, `src/node115-json-error-position`, `src/node115-json-string-scanner`, `src/node115-latency-ema-projection`, `src/node115-newline-requests`, `src/node115-numeric-selector`, `src/node115-ready-identity`, `src/node115-reverse-word256`, `src/node115-rng-refill`, `src/node115-scalar-reduction`, `src/node115-shortstring-intern`, `src/node115-three-digit-decimal`, `src/node115-wide-byte-select`.
 - Observed diagnostic paths: 33.
 - First task: Map time/quantity conversion helpers; distinguish standard-library code from private helpers.
 
@@ -20,7 +20,7 @@ Time, logging, wallets, collections and shared runtime utilities.
 Private bincode wire codecs and integer encodings.
 
 - Target: node115.
-- Implementation paths: `src/node115-gossip-response-v2-envelope`, `src/node115-client-blocks-error`, `src/node115-gossip-address-vector`, `src/node115-bulk-record-decoder`, `src/node115-varint-buffer-writer`, `src/node115-octet-record-encoder`, `src/node115-fixed20-record-encoder`, `src/node115-four-word-prefix`.
+- Implementation paths: `src/node115-gossip-response-v2-envelope`, `src/node115-client-blocks-error`, `src/node115-gossip-address-vector`, `src/node115-bulk-record-decoder`, `src/node115-varint-buffer-writer`, `src/node115-octet-record-encoder`, `src/node115-fixed20-record-encoder`, `src/node115-four-word-prefix`, `src/node115-attachment-reader`, `src/node115-checked-read32-projection`, `src/node115-client-block-success`, `src/node115-fee-rate-map-codec`, `src/node115-field1-5-varint-reader`, `src/node115-gossip-response-composed`, `src/node115-gossip-response-record`, `src/node115-gossip-rpc-request`, `src/node115-greeting-encoder`, `src/node115-rmp-ring-slices`, `src/node115-signed-scalar`, `src/node115-u32-varint`, `src/node115-u64-reader-state`, `src/node115-varint-size-state`.
 - Observed diagnostic paths: 0.
 - First task: Recover varint boundaries and encoding mode; compare malformed, truncated and boundary inputs.
 
@@ -30,7 +30,7 @@ Private bincode wire codecs and integer encodings.
 RocksDB wrappers, block readers and database lifecycle.
 
 - Target: node115.
-- Implementation paths: `src/node115-snapshot-selectors`, `src/node115-db-hub-byte-key`, `src/node115-owned-db-open`, `src/node115-block-handle-codec`, `src/node115-indexed-artifact-variant`.
+- Implementation paths: `src/node115-snapshot-selectors`, `src/node115-db-hub-byte-key`, `src/node115-owned-db-open`, `src/node115-block-handle-codec`, `src/node115-indexed-artifact-variant`, `src/node115-checkpoint-discovery`, `src/node115-replica-end-height`.
 - Observed diagnostic paths: 5.
 - First task: Recover key/value schemas and snapshot versioning before replay.
 
@@ -40,7 +40,7 @@ RocksDB wrappers, block readers and database lifecycle.
 TCP framing, LZ4, channels, rate limits and reconnects.
 
 - Target: node115.
-- Implementation paths: `src/node115-lz4-decode`, `src/node115-ipv6-groups`, `src/node115-lz4-literal-encoder`, `src/node115-lz4-dictionary-kernel`, `src/node115-tcp-compression-plan`, `src/node115-lz4-match-extension`, `src/node115-lz4-match-sequence`, `src/node115-tcp-stream-frame-lz4`.
+- Implementation paths: `src/node115-lz4-decode`, `src/node115-ipv6-groups`, `src/node115-lz4-literal-encoder`, `src/node115-lz4-dictionary-kernel`, `src/node115-tcp-compression-plan`, `src/node115-lz4-match-extension`, `src/node115-lz4-match-sequence`, `src/node115-tcp-stream-frame-lz4`, `src/node115-frame-stream`, `src/node115-h2-framing`, `src/node115-http-header-writer`, `src/node115-listener-prefix`, `src/node115-owned-frame-send`, `src/node115-owned-tcp-receive`, `src/node115-packed-word-step`, `src/node115-tcp-bincode-error`, `src/node115-tcp-frame-plan`, `src/node115-write-progress`.
 - Observed diagnostic paths: 12.
 - First task: Map frame lengths, compression boundaries and error handling without network traffic.
 
@@ -50,7 +50,7 @@ TCP framing, LZ4, channels, rate limits and reconnects.
 Votes, rounds, quorum certificates, validator sets and timers.
 
 - Target: node115.
-- Implementation paths: `src/node115-weighted-fastfold`, `src/node115-tree-next`, `src/node115-rpc-flat-materializer`, `src/node115-stake-predicate`, `src/node115-adjacent-last`, `src/node115-indirect-triplet-insert`, `src/node115-execution-history-selection`.
+- Implementation paths: `src/node115-weighted-fastfold`, `src/node115-tree-next`, `src/node115-rpc-flat-materializer`, `src/node115-stake-predicate`, `src/node115-adjacent-last`, `src/node115-indirect-triplet-insert`, `src/node115-execution-history-selection`, `src/node115-certificate-caller`, `src/node115-certificate-long-sort`, `src/node115-consensus-batch-floor`, `src/node115-consensus-timer-conversion`, `src/node115-execution-order`, `src/node115-execution-projection`, `src/node115-execution-publication`, `src/node115-nested-certificate-decision`, `src/node115-peer-address-admission`, `src/node115-validator-snapshot-publication`, `src/node115-vote-eligibility`.
 - Observed diagnostic paths: 17.
 - First task: Map signed wire types and quorum arithmetic; validate invalid signatures and timeout transitions.
 
@@ -60,7 +60,7 @@ Votes, rounds, quorum certificates, validator sets and timers.
 CLI, startup, gossip, stream services and process orchestration.
 
 - Target: node115.
-- Implementation paths: `src/node115-gossip-reload`, `src/node115-startup-output`.
+- Implementation paths: `src/node115-gossip-reload`, `src/node115-startup-output`, `src/node115-bootstrap-range`, `src/node115-bulk-path-tree`, `src/node115-cli-validators`, `src/node115-peer-queue`, `src/node115-peers-response-set`, `src/node115-replica-response-json`, `src/node115-restart-delay`, `src/node115-restart-threshold`, `src/node115-startup-admission`, `src/node115-startup-path-join`, `src/node115-startup-sorted-admission`.
 - Observed diagnostic paths: 21.
 - First task: Trace CLI dispatch to service entrypoints and enumerate read/write side effects.
 
@@ -70,7 +70,7 @@ CLI, startup, gossip, stream services and process orchestration.
 Block application, state roots and checkpoint handoff.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-digest-reference-handoff`, `src/node115-digest-support-gate`, `src/node115-digest-vote-admission`, `src/node115-raw-history-retention`.
 - Observed diagnostic paths: 4.
 - First task: Bind begin/action/end-block call paths and state-root inputs for #115.
 
@@ -80,7 +80,7 @@ Block application, state roots and checkpoint handoff.
 Action envelopes, signing payloads and delayed actions.
 
 - Target: node115.
-- Implementation paths: `src/node115-signed-action-four-field`, `src/node115-usd-class-transfer`.
+- Implementation paths: `src/node115-signed-action-four-field`, `src/node115-usd-class-transfer`, `src/node115-action-admission-binding`, `src/node115-action-any-reader`, `src/node115-action-enum-variant-matchers`, `src/node115-governance-codec`, `src/node115-msgpack-number-identifier`, `src/node115-noop-preimage`, `src/node115-twap-action-wire`, `src/node115-twap-cancel-signing-input`, `src/node115-vote-choice-weight`.
 - Observed diagnostic paths: 5.
 - First task: Recover tags, signing domains, replay checks and error precedence.
 
@@ -90,7 +90,7 @@ Action envelopes, signing payloads and delayed actions.
 Agent-created handler splits and central dispatch.
 
 - Target: node115.
-- Implementation paths: `src/node115-display-name-decision`, `src/node115-action-msgpack-identifier`.
+- Implementation paths: `src/node115-display-name-decision`, `src/node115-action-msgpack-identifier`, `src/node115-builder-approval`, `src/node115-claim-rewards`, `src/node115-display-name-state`, `src/node115-governance-vote-state`, `src/node115-oracle-named-admission`, `src/node115-referral-code`, `src/node115-schedule-cancel`, `src/node115-set-referrer`.
 - Observed diagnostic paths: 0.
 - First task: Validate each handler seed against #115; do not infer original function boundaries from these splits.
 
@@ -100,7 +100,7 @@ Agent-created handler splits and central dispatch.
 Trading orchestration, block hooks, deployment and ledger updates.
 
 - Target: node115.
-- Implementation paths: `src/node115-bole-entry-prefix`, `src/node115-user-admission-prefix`, `src/node115-funding-read-reset`, `src/node115-modify-window-admission`.
+- Implementation paths: `src/node115-bole-entry-prefix`, `src/node115-user-admission-prefix`, `src/node115-funding-read-reset`, `src/node115-modify-window-admission`, `src/node115-abstraction-kind-decoder`, `src/node115-bole-record-bound`, `src/node115-exchange-freeze-prelude`, `src/node115-funding-premium`, `src/node115-funding-rate`, `src/node115-funding-settlement-user`, `src/node115-outcome-account-projection`, `src/node115-outcome-fraction-scale`, `src/node115-stake-cursor`, `src/node115-symbol-prefix`.
 - Observed diagnostic paths: 15.
 - First task: Trace order placement through risk checks, matching, fees and ledger writes.
 
@@ -110,7 +110,7 @@ Trading orchestration, block hooks, deployment and ledger updates.
 Book storage, price/time priority and order lifecycle.
 
 - Target: node115.
-- Implementation paths: `src/node115-tif-name-codec`, `src/node115-post-broadcast-targets`, `src/node115-twap-tag4-cleanup`, `src/node115-level-change-record`, `src/node115-order-group-admission`.
+- Implementation paths: `src/node115-tif-name-codec`, `src/node115-post-broadcast-targets`, `src/node115-twap-tag4-cleanup`, `src/node115-level-change-record`, `src/node115-order-group-admission`, `src/node115-book-order-unlink`, `src/node115-mid-market-order-builder`, `src/node115-mid-market-plan`, `src/node115-order-ring-growth`, `src/node115-order-unlink-level`, `src/node115-priority-three`, `src/node115-twap-advance`, `src/node115-twap-finish`, `src/node115-twap-limit-price`, `src/node115-twap-quantity`.
 - Observed diagnostic paths: 6.
 - First task: Recover matching and cancel/modify transitions with exact rounding and overflow behavior.
 
@@ -120,7 +120,7 @@ Book storage, price/time priority and order lifecycle.
 Positions, margin, oracles, liquidations and spot balances.
 
 - Target: node115.
-- Implementation paths: `src/node115-margin-range`, `src/node115-clearinghouse-ntl-ratio`, `src/node115-margin-row`, `src/node115-outcome-record-msgpack`, `src/node115-oracle-outcome-kind`, `src/node115-borrow-lend-codec`, `src/node115-margin-mode-codec`, `src/node115-outcome-payload`, `src/node115-margin-tree-range`, `src/node115-borrow-lend-content-assembly`.
+- Implementation paths: `src/node115-margin-range`, `src/node115-clearinghouse-ntl-ratio`, `src/node115-margin-row`, `src/node115-outcome-record-msgpack`, `src/node115-oracle-outcome-kind`, `src/node115-borrow-lend-codec`, `src/node115-margin-mode-codec`, `src/node115-outcome-payload`, `src/node115-margin-tree-range`, `src/node115-borrow-lend-content-assembly`, `src/node115-finite-ratio-clamp`, `src/node115-leverage-aggregate`, `src/node115-margin-flat-compose`, `src/node115-margin-mode-identifier`, `src/node115-notional-collector`, `src/node115-open-interest-cap`, `src/node115-oracle-entry-lifecycle`, `src/node115-oracle-nested-keys`, `src/node115-portfolio-split-entries`, `src/node115-position-transition`, `src/node115-price-list-retain`, `src/node115-quantity-notification`, `src/node115-scale-zero-caller`.
 - Observed diagnostic paths: 14.
 - First task: Map margin/liquidation formulas and state mutations; prove sign and unit conventions.
 
@@ -130,7 +130,7 @@ Positions, margin, oracles, liquidations and spot balances.
 Price, size, notional and wei arithmetic plus asset metadata.
 
 - Target: node115.
-- Implementation paths: `src/node115-quantity-preparation`, `src/node115-price-core`, `src/node115-signed-bound-kernel`, `src/node115-spot-decimal`, `src/node115-perp-tier-selector`, `src/node115-mixed-tuple-threshold`.
+- Implementation paths: `src/node115-quantity-preparation`, `src/node115-price-core`, `src/node115-signed-bound-kernel`, `src/node115-spot-decimal`, `src/node115-perp-tier-selector`, `src/node115-mixed-tuple-threshold`, `src/node115-decimal96-conversion`, `src/node115-decimal96-normalize`, `src/node115-f64-decimal`, `src/node115-five-significant-digits`, `src/node115-order-band-gates`, `src/node115-quantity-change`, `src/node115-ring-span`, `src/node115-spot-price-band`, `src/node115-spot-scalar-conversions`, `src/node115-sub256-borrow`, `src/node115-u256-decimal-scale`.
 - Observed diagnostic paths: 8.
 - First task: Start with bounded arithmetic helpers: recover width, rounding, scale and overflow branches.
 
@@ -140,7 +140,7 @@ Price, size, notional and wei arithmetic plus asset metadata.
 Fee tiers, volume accounting and rebates.
 
 - Target: node115.
-- Implementation paths: `src/node115-fee-point-classifier`, `src/node115-raw-threshold`, `src/node115-fee-window-scan`, `src/node115-fee-active-scaling`, `src/node115-fee-failure-selection`.
+- Implementation paths: `src/node115-fee-point-classifier`, `src/node115-raw-threshold`, `src/node115-fee-window-scan`, `src/node115-fee-active-scaling`, `src/node115-fee-failure-selection`, `src/node115-fee-map-iteration`, `src/node115-fee-schedule-compose`, `src/node115-fee-trial`.
 - Observed diagnostic paths: 4.
 - First task: Recover maker/taker fee formulas and time-window rollover.
 
@@ -150,7 +150,7 @@ Fee tiers, volume accounting and rebates.
 Vault and subaccount accounting and permissions.
 
 - Target: node115.
-- Implementation paths: `src/node115-vault-identity-guards`, `src/node115-vault-create-context`.
+- Implementation paths: `src/node115-vault-identity-guards`, `src/node115-vault-create-context`, `src/node115-quantity-source`, `src/node115-vault-address`, `src/node115-vault-redistribution`, `src/node115-vault-weight-update`.
 - Observed diagnostic paths: 2.
 - First task: Recover share accounting, transfer restrictions and liquidation interaction.
 
@@ -160,7 +160,7 @@ Vault and subaccount accounting and permissions.
 Deposit/withdrawal requests and cross-chain signing.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-bridge-event-name-decoder`, `src/node115-bridge-preimage`, `src/node115-bridge-request-abi`, `src/node115-bridge-request-mutation`, `src/node115-bridge-word-flatten`.
 - Observed diagnostic paths: 2.
 - First task: Map message hashes, nonce lifecycle and validator signing threshold.
 
@@ -170,7 +170,7 @@ Deposit/withdrawal requests and cross-chain signing.
 EVM state, database adapters, transaction execution and hashing.
 
 - Target: node115.
-- Implementation paths: `src/node115-evm-precompile-outcome-names`, `src/node115-child-reserve-fold`.
+- Implementation paths: `src/node115-evm-precompile-outcome-names`, `src/node115-child-reserve-fold`, `src/node115-bole-reserve-reply`, `src/node115-bole-user-reply`, `src/node115-evm-tx-type-names`, `src/node115-read-precompile-result`, `src/node115-sstore-warm`, `src/node115-storage-value-decode`, `src/node115-transient-rollback-branches`.
 - Observed diagnostic paths: 4.
 - First task: Identify reth/revm private fork boundaries and state transition inputs.
 
@@ -180,7 +180,7 @@ EVM state, database adapters, transaction execution and hashing.
 Stake, validator membership and jailing.
 
 - Target: node115.
-- Implementation paths: `src/node115-staking-error-text`, `src/node115-validator-epoch-ring`.
+- Implementation paths: `src/node115-staking-error-text`, `src/node115-validator-epoch-ring`, `src/node115-link-staking-state`, `src/node115-staking-projection`, `src/node115-staking-weight-comparison`, `src/node115-validator-unregister`.
 - Observed diagnostic paths: 2.
 - First task: Recover stake accounting and epoch transitions separately for #115.
 
@@ -190,7 +190,7 @@ Stake, validator membership and jailing.
 DEX metadata and clearinghouse registry.
 
 - Target: node115.
-- Implementation paths: `src/node115-hip3-disabled-state-codec`.
+- Implementation paths: `src/node115-hip3-disabled-state-codec`, `src/node115-hip3-disabled-record`.
 - Observed diagnostic paths: 3.
 - First task: Recover identifiers, lookup rules and deployment ownership checks.
 
@@ -200,7 +200,7 @@ DEX metadata and clearinghouse registry.
 Agent, system-user, nonce, timing and other cross-cutting state.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-agent-erase-state`, `src/node115-event-context-id`, `src/node115-nonce-key-decode`, `src/node115-slice20-equal`, `src/node115-token-id`.
 - Observed diagnostic paths: 8.
 - First task: Classify each remaining path by actual call graph; avoid dropping uncategorized helpers.
 
@@ -220,7 +220,7 @@ Read-only info requests and position responses.
 JSON-RPC routing, EVM reads and transaction forwarding.
 
 - Target: node115.
-- Implementation paths: `src/node115-storage-key-builder`, `src/node115-block-number-text`.
+- Implementation paths: `src/node115-storage-key-builder`, `src/node115-block-number-text`, `src/node115-fee-history-reward`, `src/node115-raw-hex-decoder`, `src/node115-raw-response-translation`, `src/node115-rpc-store-fifo`.
 - Observed diagnostic paths: 6.
 - First task: Map method dispatch and wire errors against the captured release.
 
@@ -230,6 +230,6 @@ JSON-RPC routing, EVM reads and transaction forwarding.
 Static network/build configuration and naming.
 
 - Target: node115.
-- Implementation paths: `src/node115-chain-name-codec`, `src/node115-spot-mark-codec`.
+- Implementation paths: `src/node115-chain-name-codec`, `src/node115-spot-mark-codec`, `src/node115-scheduled-factor`.
 - Observed diagnostic paths: 2.
 - First task: Separate constants observed in binary data from illustrative source defaults.
