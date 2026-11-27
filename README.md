@@ -16,7 +16,7 @@ an integrated, runnable node remains in progress.
 
 ![Node #115 progress](docs/assets/research-progress.svg)
 
-**297 active Rust implementation areas · 261 top-level Cargo manifests · 4896 #115 research work items.**
+**297 active Rust implementation areas · 261 top-level Cargo manifests · 4897 #115 research work items.**
 
 These inventory counts describe available work, not completed components.
 
@@ -30,16 +30,16 @@ These inventory counts describe available work, not completed components.
 | Components fully built | 0/23 | 0.00% |
 | Components with full behavioral validation | 0/23 | 0.00% |
 | Components with full code/data identity | 0/23 | 0.00% |
-| Target .text bytes compared | 5,375,746/83,719,936 | 6.42111% |
-| Target .text bytes raw-equal | 5,022,897/83,719,936 | 5.99964% |
-| Target .text bytes relocation-qualified | 5,375,746/83,719,936 | 6.42111% |
-| Whole-ELF bytes compared | 5,375,746/105,896,032 | 5.07644% |
-| Whole-ELF bytes raw-equal | 5,022,897/105,896,032 | 4.74323% |
+| Target .text bytes compared | 5,559,648/83,719,936 | 6.64077% |
+| Target .text bytes raw-equal | 5,196,963/83,719,936 | 6.20756% |
+| Target .text bytes relocation-qualified | 5,559,648/83,719,936 | 6.64077% |
+| Whole-ELF bytes compared | 5,559,648/105,896,032 | 5.25010% |
+| Whole-ELF bytes raw-equal | 5,196,963/105,896,032 | 4.90761% |
 | First-party .text bytes compared | 57,572/83,719,936 | 0.06877% |
-| Compared windows vs. `.eh_frame_hdr` unwind starts | 7,977/135,313 | 5.89522% |
+| Compared windows vs. `.eh_frame_hdr` unwind starts | 8,214/135,313 | 6.07037% |
 | Component work areas with registered Rust paths | 23/23 | 100.00% |
 | Active `src/` Rust areas registered in `components.json` | 297/297 | 100.00% |
-| Research work items with top-level `MANIFEST.sha256` | 4,774/4,896 | 97.51% |
+| Research work items with top-level `MANIFEST.sha256` | 4,775/4,897 | 97.51% |
 | Tracked research questions with reviewed evidence | 5/5 | 100.00% |
 
 Gate percentages require acceptance of the full component scope.
@@ -95,16 +95,16 @@ Their equality does not establish first-party or whole-node completion.
 
 | Comparison | % of #115 `.text` | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows |
 | --- | ---: | ---: | ---: | ---: |
-| **Node #115 total** | 6.42111% | 5,022,897/5,375,746 (93.44%) | 513/7,977 (6.43%) | 7,977/7,977 (100.00%) |
+| **Node #115 total** | 6.64077% | 5,196,963/5,559,648 (93.48%) | 521/8,214 (6.34%) | 8,214/8,214 (100.00%) |
 | compiler-builtins | 0.00343% | 2,769/2,874 (96.35%) | 5/13 (38.46%) | 13/13 (100.00%) |
 | native-libraries | 6.04179% | 4,721,227/5,058,182 (93.34%) | 445/7,266 (6.12%) | 7,266/7,266 (100.00%) |
 | rust-alloc | 0.00100% | 759/838 (90.57%) | 0/9 (0.00%) | 9/9 (100.00%) |
 | rust-core | 0.04763% | 37,344/39,873 (93.66%) | 5/112 (4.46%) | 112/112 (100.00%) |
 | rust-std | 0.07233% | 57,583/60,556 (95.09%) | 16/174 (9.20%) | 174/174 (100.00%) |
-| vendored-crates | 0.18327% | 146,270/153,433 (95.33%) | 34/309 (11.00%) | 309/309 (100.00%) |
+| vendored-crates | 0.40293% | 320,336/337,335 (94.96%) | 42/546 (7.69%) | 546/546 (100.00%) |
 | zstandard | 0.00289% | 2,418/2,418 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
 
-Compared code: **5,375,746/83,719,936 .text bytes (6.42111%)**.
+Compared code: **5,559,648/83,719,936 .text bytes (6.64077%)**.
 
 All active findings bind to node #115. See [detailed progress](docs/PROGRESS.md)
 and [source-built node acceptance](docs/SCOPE.md#source-built-network-node).

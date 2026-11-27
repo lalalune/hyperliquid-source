@@ -35,7 +35,7 @@ class FirstPartyByteCensus115Tests(unittest.TestCase):
         self.assertEqual(len(fp_rows), 92)
         self.assertTrue(all(r['id'].startswith('node115-fp-') for r in fp_rows))
         self.assertTrue(all(r['relocation_qualified'] for r in fp_rows))
-        self.assertEqual(len(dep_rows), 7885)
+        self.assertEqual(len(dep_rows), 8122)
         self.assertEqual(sum(c['windows'] for c in coverage['components'].values()), 92)
         self.assertEqual(
             sum(c['bytes'] for c in coverage['components'].values()),
