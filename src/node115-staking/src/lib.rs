@@ -21,7 +21,11 @@
 //!   (`0x3c3d480`), and zero-delegation unregister guard (`0x144`);
 //! - [`withdrawal_queue`]: CStaking unstaking queue (`0x3c3bbd0` / `0x36cb770` /
 //!   `0x3c3b790`), 5-concurrent cap (`0x143`), long-term lockup (`0x141`), and
-//!   7-day/300-second delay table (`0x450d00`).
+//!   7-day/300-second delay table (`0x450d00`);
+//! - [`rewards`]: staking emission rate curve (`0x3c38360`: inverse-sqrt
+//!   quadratic APR), periodic bucket dispatcher (`0x3c3f780`), reserve-capped
+//!   reward staging (`0x422c320` / `0x3d66500`), commission & pro-rata delegator
+//!   distribution (`0x422abf0`), and asymmetric `0.99` staking decay (`0x422a630`).
 //!
 //! All semantics are bound to Linux x86-64 node #115
 //! (`a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`).
@@ -31,6 +35,7 @@ pub mod admission;
 pub mod delegation;
 pub mod governance;
 pub mod jailing;
+pub mod rewards;
 pub mod snapshot;
 pub mod validator_lifecycle;
 pub mod withdrawal_queue;
@@ -73,6 +78,13 @@ pub use jailing::{
     Address, JailingAction, JailingError, JailingState, JailingTime, MANUAL_UNJAIL_INTERVAL_SECS,
     STATUS_DISABLED, STATUS_JAILED_UNTIL, STATUS_MANUAL_UNJAIL_COOLDOWN,
     weighted_median_jail_until,
+};
+pub use rewards::{
+    COMMISSION_BPS_SCALE, DecayedStakeEntry, EMISSION_BASE_FACTOR, EMISSION_QUADRATIC_COEFF,
+    MS_PER_SECOND, PeriodicTriggerMask, REWARD_FRACTION_CEILING, SECONDS_PER_YEAR,
+    STAKING_DECAY_FACTOR, StakingPeriodicBuckets, ValidatorDistributionOutcome,
+    apply_decay_staking_step, clamp_f64_to_u64, distribute_validator_staged_reward,
+    reward_rate_per_step, stage_validator_rewards,
 };
 pub use snapshot::{
     EpochSnapshot, STATUS_MISSING_EPOCH, STATUS_NOT_VALIDATOR, SnapshotError, SnapshotStore,

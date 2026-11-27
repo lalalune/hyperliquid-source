@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "work_item": "RE-008-node115-staking-rewards-and-decay",
+  "target_binary": {
+    "path": "artifacts/node/115/hl-node",
+    "size": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "summary": {
+    "functions": 6,
+    "total_function_bytes": 14054,
+    "rodata_f64_anchors": 8,
+    "rodata_str_anchors": 3,
+    "instruction_windows": 9,
+    "total_window_bytes": 277
+  },
+  "functions": [
+    {
+      "name": "reward_rate_per_step",
+      "start_va": "0x3c38360",
+      "end_va": "0x3c3854e",
+      "size": 494,
+      "sha256": "c6528660d0bbe207bba1e78f766864450d57c7d1da2ca38c92baf1512a18a6d8"
+    },
+    {
+      "name": "maybe_stage_distribute_and_decay",
+      "start_va": "0x3c3f780",
+      "end_va": "0x3c403f7",
+      "size": 3191,
+      "sha256": "97f32926768c448528df87ebf20f75a1d45bd4bc6176679969266f8119175638"
+    },
+    {
+      "name": "stage_reward",
+      "start_va": "0x422c320",
+      "end_va": "0x422c95f",
+      "size": 1599,
+      "sha256": "23be467b9067cf87666c01541d90f105d832ef7b735947a8a078936612010232"
+    },
+    {
+      "name": "stage_validator_reward_closure",
+      "start_va": "0x3d66500",
+      "end_va": "0x3d66a5d",
+      "size": 1373,
+      "sha256": "85a668860f0d46dd109cb42121333739031b75195a52ac758aed341ed961cb42"
+    },
+    {
+      "name": "distribute_staged_rewards",
+      "start_va": "0x422abf0",
+      "end_va": "0x422c320",
+      "size": 5936,
+      "sha256": "8940e25cb46588e1a92303205480cfcbd6302a566cf6cf3036f46af58e5fe9c5"
+    },
+    {
+      "name": "decay_staking",
+      "start_va": "0x422a630",
+      "end_va": "0x422abe5",
+      "size": 1461,
+      "sha256": "9130bf8a1f403ea1d6c9e29a0b6a057485e94a983cf69e80cc018a4d206b08ee"
+    }
+  ],
+  "rodata_f64_anchors": [
+    {
+      "name": "seconds_per_year_365_25d",
+      "va": "0x459058",
+      "bits": "0x417e187e00000000",
+      "value": 31557600.0
+    },
+    {
+      "name": "ms_per_second",
+      "va": "0x459a60",
+      "bits": "0x408f400000000000",
+      "value": 1000.0
+    },
+    {
+      "name": "emission_base_factor",
+      "va": "0x4596b0",
+      "bits": "0x3f8eb851eb851eb8",
+      "value": 0.015
+    },
+    {
+      "name": "emission_quadratic_coeff",
+      "va": "0x459420",
+      "bits": "0xbfe0000000000000",
+      "value": -0.5
+    },
+    {
+      "name": "commission_bps_scale",
+      "va": "0x459b50",
+      "bits": "0x3f1a36e2eb1c432d",
+      "value": 0.0001
+    },
+    {
+      "name": "reward_fraction_ceiling",
+      "va": "0x4590b8",
+      "bits": "0x3ff028f5c28f5c29",
+      "value": 1.01
+    },
+    {
+      "name": "staking_decay_factor",
+      "va": "0x459208",
+      "bits": "0x3fefae147ae147ae",
+      "value": 0.99
+    },
+    {
+      "name": "positive_infinity",
+      "va": "0x459010",
+      "bits": "0x7ff0000000000000",
+      "value": "inf"
+    }
+  ],
+  "rodata_str_anchors": [
+    {
+      "name": "c_staking_stage_reward",
+      "va": "0x7bbe59",
+      "length": 22,
+      "text": "c_staking_stage_reward"
+    },
+    {
+      "name": "c_staking_distribute_staged_rewards",
+      "va": "0x7bbe6f",
+      "length": 35,
+      "text": "c_staking_distribute_staged_rewards"
+    },
+    {
+      "name": "decay_staking",
+      "va": "0x7bbee3",
+      "length": 13,
+      "text": "decay_staking"
+    }
+  ],
+  "windows": [
+    {
+      "name": "reward_rate_sqrt_max_quadratic",
+      "function": "reward_rate_per_step",
+      "start_va": "0x3c3850d",
+      "end_va": "0x3c38539",
+      "size": 44,
+      "hex": "f20f51c0f20f1015971182fcf20f5fc2f20f5ed0660f28c2f20f59c2f20f5905ef0e82fcf20f58c2f20f5ec1",
+      "sha256": "ce7ee489a57913beece6063563fa91cd76de059b335b379ec90499a9b712734c"
+    },
+    {
+      "name": "periodic_stage_bucket_guard",
+      "function": "maybe_stage_distribute_and_decay",
+      "start_va": "0x3c3f8a5",
+      "end_va": "0x3c3f8bb",
+      "size": 22,
+      "hex": "498b8ec00200004839c87607498986c00200004839c8",
+      "sha256": "5c2bcafa6ba6587508fa2348ec16b52fa73a922a220f2cac633f9238ba2e2b9f"
+    },
+    {
+      "name": "periodic_distribute_bucket_guard",
+      "function": "maybe_stage_distribute_and_decay",
+      "start_va": "0x3c3fa5b",
+      "end_va": "0x3c3fa71",
+      "size": 22,
+      "hex": "498b8ed00200004839c87607498986d00200004839c8",
+      "sha256": "a3e0bda2449e15f5bebb6a7fcf57b02eacd0ea9824ba990a63d6aadcdeb10534"
+    },
+    {
+      "name": "periodic_decay_bucket_guard",
+      "function": "maybe_stage_distribute_and_decay",
+      "start_va": "0x3c402a7",
+      "end_va": "0x3c402bd",
+      "size": 22,
+      "hex": "498b8eb00200004839c87607498986b00200004839c8",
+      "sha256": "622621f0c2c32434250db2d7b2319195f60e87b286c41c9032a2acc45ac02f66"
+    },
+    {
+      "name": "stage_reward_calls_rate",
+      "function": "stage_reward",
+      "start_va": "0x422c371",
+      "end_va": "0x422c376",
+      "size": 5,
+      "hex": "e8eabfa0ff",
+      "sha256": "93cc036fdda4d4537e2a9177466877f3d8c52570a709ecf76b3b1ddfb716c80f"
+    },
+    {
+      "name": "stage_closure_reserve_cap",
+      "function": "stage_validator_reward_closure",
+      "start_va": "0x3d669e6",
+      "end_va": "0x3d66a16",
+      "size": 48,
+      "hex": "4c8b63084d89e54d29fd7312488d357f0a72024531ed31ffff15a4e477024c896b084d29ec498b1e4889d84c01e07228",
+      "sha256": "9bebb7d04d039547ac1cdb27d05ffcfbf5314b5dbbc9df1fb2ec75540ccb614e"
+    },
+    {
+      "name": "distribute_commission_bps_guard",
+      "function": "distribute_staged_rewards",
+      "start_va": "0x422b0d0",
+      "end_va": "0x422b0e6",
+      "size": 22,
+      "hex": "f20f590578ea22fcf20f100dd8df22fc660f2ec8731a",
+      "sha256": "00313b8551e2c79cda69b02cbe86c49551f5bb08c68b737551f60f263f3e5553"
+    },
+    {
+      "name": "distribute_delegator_share_guard",
+      "function": "distribute_staged_rewards",
+      "start_va": "0x422b747",
+      "end_va": "0x422b76b",
+      "size": 36,
+      "hex": "f20f5e842430020000660f57c9660f2ec17246f20f100d56d922fc660f2ec8b900000000",
+      "sha256": "dc24cae853f6b99ba1ba594131d5302b76305f80df13bd24c216f047d03ac247"
+    },
+    {
+      "name": "decay_asymmetric_drop_and_099",
+      "function": "decay_staking",
+      "start_va": "0x422a7a0",
+      "end_va": "0x422a7d8",
+      "size": 56,
+      "hex": "488b02488b4a084889ce4829c672e166480f6ece660f620d546a22fc660f5c0dac5922fc660f28c1660f15c1f20f58c1f20f590530ea22fc",
+      "sha256": "0beb333df59d4b941b04f03a6550195d8c6e2985c5aa23424126ea873f84e073"
+    }
+  ]
+}
