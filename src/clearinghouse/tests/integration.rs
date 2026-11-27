@@ -364,3 +364,66 @@ fn spot_existing_token_balances_0x3d5e540_enforces_ratio_filter_and_overflow() {
         other => panic!("expected TotalWeiOverflow, got {other:?}"),
     }
 }
+
+#[test]
+fn reference_oracle_0x366f900_and_oracle_kind_0x3db4e40_match_rules() {
+    use clearinghouse::reference_oracle::{
+        evaluate_reference_oracle, reference_price_deviation, OracleKind, ReferenceOracleEval,
+        ReferenceOraclePolicy, ReferenceOracleTracker,
+    };
+
+    assert_eq!(OracleKind::ALL.len(), 3);
+    assert!((reference_price_deviation(100, 105).unwrap() - 0.05).abs() < 1e-12);
+    assert_eq!(reference_price_deviation(0, 100), None);
+
+    let mut tracker = ReferenceOracleTracker::new(60.0);
+    let policy = ReferenceOraclePolicy::Active {
+        max_diff: 0.02,
+        alert_enabled: true,
+    };
+
+    // Deviation 5% > 2% at t=100s -> flagged, within 60s grace window (no alert yet).
+    assert_eq!(
+        evaluate_reference_oracle(policy, Some(100), Some(105), 100_000_000_000, &mut tracker),
+        ReferenceOracleEval {
+            flagged: true,
+            alert_fired: false,
+            tracker_cleared: false,
+        }
+    );
+    // Still violating at t=161s (elapsed 61s > 60s) -> alert fires!
+    assert_eq!(
+        evaluate_reference_oracle(policy, Some(100), Some(105), 161_000_000_000, &mut tracker),
+        ReferenceOracleEval {
+            flagged: true,
+            alert_fired: true,
+            tracker_cleared: false,
+        }
+    );
+    // Back within tolerance (1% < 2%) -> tracker cleared.
+    assert_eq!(
+        evaluate_reference_oracle(policy, Some(100), Some(101), 162_000_000_000, &mut tracker),
+        ReferenceOracleEval {
+            flagged: false,
+            alert_fired: false,
+            tracker_cleared: true,
+        }
+    );
+    assert_eq!(tracker.first_violation_ns, None);
+
+    // Disabled policy exits immediately without touching tracker.
+    assert_eq!(
+        evaluate_reference_oracle(
+            ReferenceOraclePolicy::Disabled,
+            None,
+            None,
+            200_000_000_000,
+            &mut tracker
+        ),
+        ReferenceOracleEval {
+            flagged: false,
+            alert_fired: false,
+            tracker_cleared: false,
+        }
+    );
+}
