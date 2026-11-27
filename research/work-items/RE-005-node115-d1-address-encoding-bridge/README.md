@@ -35,8 +35,12 @@ Still unresolved: the callback/vtable target, the producer of the object at `+0x
 
 ## Checks
 
-- `python3 tools/action_wire_d1_address_encoding_115.py ...`: target hash, three FDE ranges, instruction witnesses, literals, and schema crosswalk verified.
-- `python3 -m unittest tests.test_action_wire_d1_address_encoding_115 -v`: five tests, including target identity and three byte-corruption controls.
-- Repository-wide checks and hosted review results are recorded in the PR body; no captured executable run is part of this evidence.
+- `python3 tools/action_wire_d1_address_encoding_115.py --out research/work-items/RE-005-node115-d1-address-encoding-bridge`: passed; target hash, three FDE ranges, instruction witnesses, literals, and schema crosswalk verified.
+- `python3 -m unittest tests.test_action_wire_d1_address_encoding_115 -v`: passed, five tests including target identity and three byte-corruption controls.
+- `make doctor`: `analysis_ready=true`; `exact_rebuild_ready=false`. The report identifies missing recovered Cargo manifests/lockfiles, exact build flags and fork provenance, and an accepted implementation/harness; Ghidra and Java are also unavailable in this environment.
+- `make verify`: passed, including binary signatures, import checks, and evidence packet manifests.
+- `make catalogue-check`: passed.
+- `make test`: attempted all 1,670 test files; 34 child test files failed and the command exited 2. The run preceded materializing ignored local index `work/index/node-115-fde.tsv`. After generating it with `make fde-index` and setting `PYTHONDONTWRITEBYTECODE=1`, four selected tests passed: `test_node115_hotstuff_vote_and_qc.py` and the three FDE-index-dependent tests `test_bole_reserve_interest_engine_115.py`, `test_fee_trial_referral_rewards_115.py`, and `test_spot_clearinghouse_accounting_115.py`. The full suite has not been rerun, and those selected passes do not explain the other failures. A separate rerun of `test_foundation_byte_matches_115.py` failed because the installed `rustc` rejected the test's `rustc +1.95.0` invocation with “multiple input filenames”; the underlying cause has not been established. Do not treat the repository-wide suite as green.
+- No captured executable run is part of this evidence.
 
 Next question: locate the producer of the callback object at `payload+0x60` and verify whether it hashes the selected `addressEncoding` string.
