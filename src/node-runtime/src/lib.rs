@@ -10,6 +10,7 @@
 #![forbid(unsafe_code)]
 
 pub mod artifact;
+pub mod aux;
 pub mod cli;
 pub mod connections;
 pub mod error;
@@ -24,6 +25,10 @@ pub mod stream_msg;
 pub use artifact::{
     ARTIFACT_POLL_INTERVAL_SECS, ArtifactUpdater, INDEX_DID_NOT_INCREASE_MSG, IndexedArtifact,
     IndexedArtifactContent, NODE_ARTIFACT_DIR, NODE_METADATA_FILENAME, VISOR_METADATA_FILENAME,
+};
+pub use aux::{
+    AUX_BATCH_VS_STREAM_CONFLICT_MSG, AUX_OUTPUT_STREAMS, AuxStreamConfig, GroupAndSeqSampler,
+    GroupSeqStats, NESTED_RUNTIME_ERROR_MSG, PriorityChannel, block_on_sync,
 };
 pub use bincode_fork;
 pub use cli::{
