@@ -8,29 +8,29 @@ Full-scope acceptance reviewed on **2026-11-27**.
 
 | Required node component | Accepted gates | Milestones | Compared implementation bytes | Registered implementation windows |
 | --- | ---: | ---: | ---: | ---: |
-| [Foundation utilities](COMPONENTS.md#foundation) | 0/4 | 0% | 197 | 2 |
-| [Serialization fork](COMPONENTS.md#serialization) | 3/4 | 75% | 250 | 10 |
-| [Storage and snapshots](COMPONENTS.md#storage) | 3/4 | 75% | 886 | 14 |
-| [Network transport](COMPONENTS.md#transport) | 3/4 | 75% | 425 | 17 |
-| [Consensus](COMPONENTS.md#consensus) | 0/4 | 0% | 1,403 | 8 |
-| [Node runtime and gossip](COMPONENTS.md#node-runtime) | 3/4 | 75% | 1,059 | 13 |
-| [Block execution and state](COMPONENTS.md#abci) | 3/4 | 75% | 1,578 | 39 |
-| [Action wire and signing](COMPONENTS.md#action-wire) | 0/4 | 0% | 92,852 | 151 |
+| [Foundation utilities](COMPONENTS.md#foundation) | 0/4 | 0% | 9,647 | 71 |
+| [Serialization fork](COMPONENTS.md#serialization) | 3/4 | 75% | 8,764 | 33 |
+| [Storage and snapshots](COMPONENTS.md#storage) | 3/4 | 75% | 1,864 | 17 |
+| [Network transport](COMPONENTS.md#transport) | 3/4 | 75% | 500 | 20 |
+| [Consensus](COMPONENTS.md#consensus) | 0/4 | 0% | 10,562 | 67 |
+| [Node runtime and gossip](COMPONENTS.md#node-runtime) | 3/4 | 75% | 1,700 | 27 |
+| [Block execution and state](COMPONENTS.md#abci) | 3/4 | 75% | 7,385 | 58 |
+| [Action wire and signing](COMPONENTS.md#action-wire) | 0/4 | 0% | 94,026 | 153 |
 | [Action dispatch and handlers](COMPONENTS.md#action-dispatch) | 0/4 | 0% | 35,135 | 15 |
-| [Exchange orchestration](COMPONENTS.md#exchange) | 0/4 | 0% | 6,150 | 40 |
-| [Order books and matching](COMPONENTS.md#orderbook) | 0/4 | 0% | 9,938 | 134 |
-| [Clearinghouses and risk](COMPONENTS.md#risk) | 0/4 | 0% | 13,191 | 102 |
-| [Assets and fixed-point quantities](COMPONENTS.md#assets) | 0/4 | 0% | 11,069 | 85 |
-| [Fees and volume](COMPONENTS.md#fees) | 3/4 | 75% | 8,413 | 76 |
+| [Exchange orchestration](COMPONENTS.md#exchange) | 0/4 | 0% | 8,695 | 48 |
+| [Order books and matching](COMPONENTS.md#orderbook) | 0/4 | 0% | 37,363 | 200 |
+| [Clearinghouses and risk](COMPONENTS.md#risk) | 0/4 | 0% | 13,543 | 105 |
+| [Assets and fixed-point quantities](COMPONENTS.md#assets) | 0/4 | 0% | 13,534 | 95 |
+| [Fees and volume](COMPONENTS.md#fees) | 3/4 | 75% | 8,887 | 78 |
 | [Vaults and subaccounts](COMPONENTS.md#vaults) | 0/4 | 0% | 7,730 | 64 |
-| [Bridge and withdrawals](COMPONENTS.md#bridge) | 0/4 | 0% | 7,658 | 51 |
-| [HyperEVM execution](COMPONENTS.md#evm) | 0/4 | 0% | 2,485 | 61 |
-| [Staking and validator lifecycle](COMPONENTS.md#staking) | 0/4 | 0% | 40,531 | 106 |
+| [Bridge and withdrawals](COMPONENTS.md#bridge) | 0/4 | 0% | 19,184 | 64 |
+| [HyperEVM execution](COMPONENTS.md#evm) | 0/4 | 0% | 11,174 | 69 |
+| [Staking and validator lifecycle](COMPONENTS.md#staking) | 0/4 | 0% | 46,638 | 275 |
 | [DEX registry](COMPONENTS.md#dex-registry) | 0/4 | 0% | 49,913 | 106 |
-| [Remaining L1 state helpers](COMPONENTS.md#l1-shared) | 0/4 | 0% | 311 | 10 |
+| [Remaining L1 state helpers](COMPONENTS.md#l1-shared) | 0/4 | 0% | 885 | 13 |
 | [Info API](COMPONENTS.md#info-api) | 0/4 | 0% | 3,579 | 42 |
-| [EVM JSON-RPC](COMPONENTS.md#evm-rpc) | 0/4 | 0% | 175 | 7 |
-| [Global configuration](COMPONENTS.md#constants) | 3/4 | 75% | 9,819 | 17 |
+| [EVM JSON-RPC](COMPONENTS.md#evm-rpc) | 0/4 | 0% | 793 | 9 |
+| [Global configuration](COMPONENTS.md#constants) | 3/4 | 75% | 29,310 | 52 |
 
 Accepted full-scope gates: **21/92**.
 
@@ -61,7 +61,7 @@ Both complete source and target extents are authenticated. These candidates have
 
 ## Full target coverage
 
-Compared .text: 6,342,839/83,719,936 bytes (7.57626%). Raw-equal positions: 5,932,897/83,719,936 (7.08660%). Whole ELF reproduced: no.
+Compared .text: 6,458,903/83,719,936 bytes (7.71489%). Raw-equal positions: 6,037,100/83,719,936 (7.21107%). Whole ELF reproduced: no.
 
 | Whole ELF bytes | .text bytes | Other executable bytes | Allocated data/metadata bytes | Zero-fill bytes |
 | ---: | ---: | ---: | ---: | ---: |
@@ -10092,5 +10092,516 @@ Compared .text: 6,342,839/83,719,936 bytes (7.57626%). Raw-equal positions: 5,93
 | [staking struct visit_bytes [signatureChainId, hyperliquidChain, tradingUser, ... (4 total)] (0x58dc470)](../research/work-items/RE-001-node115-first-party-serde-thinlto-census/census.json) | `0x58dc470..0x58dc6ef` | first-party clean-room rebuild | 620/639 (97.03%) |
 | [exchange enum visit_bytes [enabled, disabled, blocked] (0x59fdb30)](../research/work-items/RE-001-node115-first-party-serde-thinlto-census/census.json) | `0x59fdb30..0x59fdc99` | first-party clean-room rebuild | 342/361 (94.74%) |
 | [orderbook enum visit_bytes [tp, sl] (0x59fe0b0)](../research/work-items/RE-001-node115-first-party-serde-thinlto-census/census.json) | `0x59fe0b0..0x59fe177` | first-party clean-room rebuild | 180/199 (90.45%) |
+| [base <&CodeLocation as Debug>::fmt (0x1500880)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1500880..0x150095d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base BugAlertAck expecting (0x1500a00)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1500a00..0x1500a19` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base Ignore expecting (0x1500a20)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1500a20..0x1500a39` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base <ZipInnerArgs as Debug>::fmt (0x150cfe0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x150cfe0..0x150d0bd` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base Signature expecting (0x1533d40)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1533d40..0x1533d59` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base <&&Signature as Debug>::fmt (0x1534160)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1534160..0x1534267` | first-party clean-room rebuild | 227/263 (86.31%) |
+| [base <&Crate as Debug>::fmt (13 workspace crates, 0x1534270)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1534270..0x153429f` | first-party clean-room rebuild | 39/47 (82.98%) |
+| [l1-shared NodeRole 4-variant JSON visit_str (0x1543ce0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1543ce0..0x1543dca` | first-party clean-room rebuild | 215/234 (91.88%) |
+| [base <&&LockId as Debug>::fmt (0x1544000)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1544000..0x15440e0` | first-party clean-room rebuild | 192/224 (85.71%) |
+| [base <&LockLocation as Debug>::fmt (0x15440e0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x15440e0..0x15441bd` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <&LockOrderingViolation as Debug>::fmt (0x15441c0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x15441c0..0x1544265` | first-party clean-room rebuild | 125/165 (75.76%) |
+| [base <&LogSettings as Debug>::fmt (7 fields, 0x1544270)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1544270..0x154446c` | first-party clean-room rebuild | 441/508 (86.81%) |
+| [base <&PhraseCheckError as Debug>::fmt (0x1544470)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1544470..0x15444a3` | first-party clean-room rebuild | 43/51 (84.31%) |
+| [base/src/short_string.rs:52 short_string_pack_rec (0x15472b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x15472b0..0x1547309` | first-party clean-room rebuild | 69/89 (77.53%) |
+| [base <LockLocation as Debug>::fmt (0x1552350)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1552350..0x155242d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <CodeLocation as Debug>::fmt (0x1552430)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1552430..0x155250d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <LockOrderWitness as Debug>::fmt (0x15527d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x15527d0..0x15528ad` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <LogSettings as Debug>::fmt (7 fields, 0x15528b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x15528b0..0x1552aa9` | first-party clean-room rebuild | 438/505 (86.73%) |
+| [l1-shared NodeRole::fmt Display (0x1553730)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1553730..0x155379a` | first-party clean-room rebuild | 70/106 (66.04%) |
+| [base Time expecting (0x1560990)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1560990..0x15609a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base ApiSecrets expecting (0x15609b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x15609b0..0x15609c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base SignedIndexedUpload expecting (0x1585010)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1585010..0x1585029` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base VisorMetadata expecting (0x15b8ab0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x15b8ab0..0x15b8ac9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base HotfixArgs expecting (0x15b8ad0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x15b8ad0..0x15b8ae9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base HotfixMetadata expecting (0x15b8af0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x15b8af0..0x15b8b09` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base PublisherBinaryMetadata expecting (0x15b8b10)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x15b8b10..0x15b8b29` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [bincode_fork CGU core::fmt::num::<impl Debug for usize/u64>::fmt (vtable 0x6403300)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1607c70..0x1607e03` | first-party clean-room rebuild | 379/403 (94.04%) |
+| [bincode_fork CGU core::fmt::num::<impl Debug for usize>::fmt (vtable 0x6403160/0x64032c0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1607e10..0x1607fb5` | first-party clean-room rebuild | 397/421 (94.30%) |
+| [bincode_fork CGU <&u64 as Debug>::fmt (vtable 0x64031e0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1607fc0..0x1608165` | first-party clean-room rebuild | 397/421 (94.30%) |
+| [bincode_fork CGU <&u32 as Debug>::fmt (vtable 0x64031c0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1608170..0x1608313` | first-party clean-room rebuild | 395/419 (94.27%) |
+| [<&&str as Debug>::fmt (bincode-fork CGU)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1608320..0x1608333` | first-party clean-room rebuild | 15/19 (78.95%) |
+| [bincode_fork CGU <&[u8; 4] as Debug>::fmt (DecodeError::InvalidCharEncoding)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1608340..0x1608666` | first-party clean-room rebuild | 737/806 (91.44%) |
+| [bincode_fork CGU <&u8 as Debug>::fmt (DecodeError::InvalidBooleanValue / [u8; 4] element)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1608670..0x16087a0` | first-party clean-room rebuild | 277/304 (91.12%) |
+| [bincode_fork CGU <&DecodeError as Debug>::fmt (all 18 variants incl. fork InvalidBytesLength)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x16087a0..0x16090ed` | first-party clean-room rebuild | 2,037/2,381 (85.55%) |
+| [<&std::io::Error as Debug>::fmt (bincode-fork CGU)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x16090f0..0x16090f9` | first-party clean-room rebuild | 5/9 (55.56%) |
+| [bincode_fork CGU <&AllowedEnumVariants as Debug>::fmt (vtable 0x6403260)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1609100..0x1609301` | first-party clean-room rebuild | 453/513 (88.30%) |
+| [<&str as Debug>::fmt (bincode-fork CGU)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1609310..0x1609323` | first-party clean-room rebuild | 15/19 (78.95%) |
+| [bincode_fork CGU <&Option<u8> as Debug>::fmt (Utf8Error::error_len, vtable 0x6403180)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1609330..0x160948a` | first-party clean-room rebuild | 310/346 (89.60%) |
+| [bincode_fork CGU <&i64 as Debug>::fmt (DecodeError::InvalidDuration::secs)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1609490..0x1609635` | first-party clean-room rebuild | 397/421 (94.30%) |
+| [bincode_fork CGU <&[u32] as Debug>::fmt (AllowedEnumVariants::Allowed)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1609640..0x1609842` | first-party clean-room rebuild | 466/514 (90.66%) |
+| [bincode_fork CGU <&core::str::Utf8Error as Debug>::fmt (vtable 0x6403280)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1609850..0x160992d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [&bincode_fork::error::IntegerType Debug::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1609930..0x160995f` | first-party clean-room rebuild | 39/47 (82.98%) |
+| [serialization bincode_fork CGU drop_in_place::<std::io::Error> (jemalloc sdallocx, 0x1609960)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1609960..0x1609a31` | first-party clean-room rebuild | 189/209 (90.43%) |
+| [bincode_fork::error::IntegerType Debug::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1609a40..0x1609a6c` | first-party clean-room rebuild | 36/44 (81.82%) |
+| [<bincode_fork::error::DecodeError as Display>::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1609a70..0x1609aaa` | first-party clean-room rebuild | 46/58 (79.31%) |
+| [constants <String as Display>::fmt thunk #1 (0x1772f80)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1772f80..0x1772f94` | first-party clean-room rebuild | 16/20 (80.00%) |
+| [constants global_constants::aws_name::aws_name_path (0x1772fa0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1772fa0..0x1773069` | first-party clean-room rebuild | 161/201 (80.10%) |
+| [constants AwsName::deserialize #[derive(Deserialize)] (0x1773070)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1773070..0x1773fc4` | first-party clean-room rebuild | 3,872/3,924 (98.67%) |
+| [constants global_constants::aws_name::read_aws_name_fallback (0x1773fd0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1773fd0..0x17740fe` | first-party clean-room rebuild | 234/302 (77.48%) |
+| [constants LazyLock<StaticConfig> Once::call_once_force (0x1774bf0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1774bf0..0x1774c56` | first-party clean-room rebuild | 90/102 (88.24%) |
+| [constants Visitor::expecting variant identifier (0x1774c60)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1774c60..0x1774c79` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [constants LazyLock<StaticConfig> FnOnce::call_once shim (0x1774c80)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1774c80..0x1774ce6` | first-party clean-room rebuild | 90/102 (88.24%) |
+| [constants CGU drop_in_place::<std::io::Error> by-ref (0x1774cf0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1774cf0..0x1774dc1` | first-party clean-room rebuild | 189/209 (90.43%) |
+| [constants CGU drop_in_place::<serde_json::Error> (0x1774dd0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1774dd0..0x1774e37` | first-party clean-room rebuild | 83/103 (80.58%) |
+| [constants Visitor::expecting VariantNotFound (0x1774e40)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1774e40..0x1774e59` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [constants AwsName::fmt Display (0x1774e60)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1774e60..0x17754f1` | first-party clean-room rebuild | 1,045/1,681 (62.17%) |
+| [constants AwsName::from_str (0x1775500)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1775500..0x1775dc6` | first-party clean-room rebuild | 2,242/2,246 (99.82%) |
+| [constants CGU serde_json::de::from_trait::<StaticConfig> (0x1775dd0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1775dd0..0x1775ede` | first-party clean-room rebuild | 255/270 (94.44%) |
+| [constants CGU serde_json::Deserializer::parse_number (0x1775f50)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1775f50..0x1776292` | first-party clean-room rebuild | 776/834 (93.05%) |
+| [constants CGU serde_json::Deserializer::parse_integer (0x17762a0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x17762a0..0x1776427` | first-party clean-room rebuild | 365/391 (93.35%) |
+| [constants CGU serde_json::Deserializer::ignore_integer (0x1776430)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1776430..0x177667a` | first-party clean-room rebuild | 580/586 (98.98%) |
+| [constants CGU serde_json::Deserializer::parse_exponent (0x1776680)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1776680..0x1776908` | first-party clean-room rebuild | 596/648 (91.98%) |
+| [constants CGU serde_json::Deserializer::peek_invalid_type (0x1776910)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1776910..0x1776c17` | first-party clean-room rebuild | 744/775 (96.00%) |
+| [constants CGU drop_in_place::<Result<StaticConfig, serde_json::Error>> (0x1776c70)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1776c70..0x1776cbe` | first-party clean-room rebuild | 65/78 (83.33%) |
+| [constants CGU drop_in_place::<serde_json::error::ErrorCode> (0x1776cc0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1776cc0..0x1776db2` | first-party clean-room rebuild | 222/242 (91.74%) |
+| [constants CGU serde_json::de::VariantAccess::variant_seed (0x1776dc0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1776dc0..0x1776f41` | first-party clean-room rebuild | 363/385 (94.29%) |
+| [constants CGU serde_json::de::VariantAccess::unit_variant (0x1776f50)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1776f50..0x177707a` | first-party clean-room rebuild | 272/298 (91.28%) |
+| [constants CGU serde_json::de::UnitVariantAccess::variant_seed (0x1777080)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1777080..0x17771a3` | first-party clean-room rebuild | 261/291 (89.69%) |
+| [constants CGU serde_json::Deserializer::deserialize_ignored_any (0x17771b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x17771b0..0x1777faf` | first-party clean-room rebuild | 3,348/3,583 (93.44%) |
+| [constants <String as Display>::fmt thunk #2 (0x1777fb0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1777fb0..0x1777fc4` | first-party clean-room rebuild | 16/20 (80.00%) |
+| [constants CGU serde_core::de::Error::unknown_variant (0x1777fd0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1777fd0..0x177805b` | first-party clean-room rebuild | 119/139 (85.61%) |
+| [constants CGU serde_json::Error::fix_position (0x1778060)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1778060..0x17780b5` | first-party clean-room rebuild | 69/85 (81.18%) |
+| [constants global_constants::static_config::cham_dir (0x17780c0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x17780c0..0x1778265` | first-party clean-room rebuild | 370/421 (87.89%) |
+| [constants cham_dir create_dir_all panic (0x1778270)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1778270..0x17782d7` | first-party clean-room rebuild | 73/103 (70.87%) |
+| [constants <&str as Display>::fmt thunk (0x1778590)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1778590..0x17785a3` | first-party clean-room rebuild | 15/19 (78.95%) |
+| [constants Visitor::expecting unit (0x17785b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x17785b0..0x17785c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [constants global_constants::static_config::StaticConfig::new (0x17785f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x17785f0..0x177876f` | first-party clean-room rebuild | 322/383 (84.07%) |
+| [constants CGU drop_in_place::<std::io::Error> by-value (0x1778770)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1778770..0x177883e` | first-party clean-room rebuild | 186/206 (90.29%) |
+| [constants str::trim Unicode whitespace (0x1778840)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1778840..0x1778ad7` | first-party clean-room rebuild | 655/663 (98.79%) |
+| [constants Chain::fmt Display (0x1778c60)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x1778c60..0x1778cca` | first-party clean-room rebuild | 70/106 (66.04%) |
+| [Half::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2323be0..0x2323c91` | first-party clean-room rebuild | 153/177 (86.44%) |
+| [Half::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2323ca0..0x2323d51` | first-party clean-room rebuild | 153/177 (86.44%) |
+| [Relationships::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2323d60..0x2323e5d` | first-party clean-room rebuild | 213/253 (84.19%) |
+| [OrderDescription::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2329c50..0x2329e96` | first-party clean-room rebuild | 508/582 (87.29%) |
+| [BookOrder::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2329ea0..0x232a155` | first-party clean-room rebuild | 601/693 (86.72%) |
+| [BookOrder::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x232a160..0x232a415` | first-party clean-room rebuild | 601/693 (86.72%) |
+| [OrderCore::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x232a420..0x232a69c` | first-party clean-room rebuild | 544/636 (85.53%) |
+| [OrderCore::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x232a6a0..0x232a91c` | first-party clean-room rebuild | 544/636 (85.53%) |
+| [exchange UserAbstraction 11-alias JSON visit_str (0x23c5330)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x23c5330..0x23c544d` | first-party clean-room rebuild | 270/285 (94.74%) |
+| [&Perp::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241e280..0x241e3a8` | first-party clean-room rebuild | 266/296 (89.86%) |
+| [&Trigger::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241e3b0..0x241e4ad` | first-party clean-room rebuild | 215/253 (84.98%) |
+| [&&Oid::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241e670..0x241e79b` | first-party clean-room rebuild | 273/299 (91.30%) |
+| [&PriorityDequeEntry::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241e8d0..0x241e9ad` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [&LevelSummary::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241e9b0..0x241ea8d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [&Oid::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241ed40..0x241ee68` | first-party clean-room rebuild | 266/296 (89.86%) |
+| [&Trigger::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241ee70..0x241ef6d` | first-party clean-room rebuild | 213/253 (84.19%) |
+| [&TriggerOrder::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241ef70..0x241f050` | first-party clean-room rebuild | 192/224 (85.71%) |
+| [&Level::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241f210..0x241f3d4` | first-party clean-room rebuild | 392/452 (86.73%) |
+| [&LevelSummary::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241f410..0x241f4ed` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [&UserState::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241f4f0..0x241f5ed` | first-party clean-room rebuild | 213/253 (84.19%) |
+| [&UserState::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241f5f0..0x241f6ed` | first-party clean-room rebuild | 213/253 (84.19%) |
+| [&TriggerOrder::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241f6f0..0x241f7d0` | first-party clean-room rebuild | 192/224 (85.71%) |
+| [&Level::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241fb10..0x241fcd4` | first-party clean-room rebuild | 392/452 (86.73%) |
+| [&PriorityKey::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x241ff40..0x242001d` | first-party clean-room rebuild | 191/221 (86.43%) |
+| [staking ForceIncreaseEpochAction expecting (0x2420060)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2420060..0x2420079` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteWeight expecting (0x2420080)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2420080..0x2420099` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteChoice expecting (0x2420160)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2420160..0x2420179` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidator expecting (0x24204b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x24204b0..0x24204c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking TokenDelegateAction expecting (0x2420510)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2420510..0x2420529` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Proposal expecting (0x2420550)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2420550..0x2420569` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ProposalCategory expecting (0x24205b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x24205b0..0x24205c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking GovProposeAction expecting (0x2420650)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2420650..0x2420669` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CDepositAction expecting (0x2420740)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2420740..0x2420759` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus ColdHardVoter expecting (0x24207a0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x24207a0..0x24207b9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking GovVoteAction expecting (0x24207e0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x24207e0..0x24207f9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CSigner expecting (0x2420820)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2420820..0x2420839` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Vote expecting (0x2420920)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2420920..0x2420939` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CWithdrawAction expecting (0x2420940)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2420940..0x2420959` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base Signature expecting (0x2420b40)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2420b40..0x2420b59` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [Relationships::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2454280..0x245437d` | first-party clean-room rebuild | 214/253 (84.58%) |
+| [OrderDescription::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2454380..0x24545c6` | first-party clean-room rebuild | 508/582 (87.29%) |
+| [OrderCore::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x24546f0..0x245496c` | first-party clean-room rebuild | 546/636 (85.85%) |
+| [OrderCore::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2454970..0x2454bec` | first-party clean-room rebuild | 546/636 (85.85%) |
+| [NodeIp::fmt@0x24b8a80](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x24b8a80..0x24b8ba5` | first-party clean-room rebuild | 263/293 (89.76%) |
+| [action-wire OrderKind 22-alias JSON visit_str (0x25d03a0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25d03a0..0x25d05eb` | first-party clean-room rebuild | 536/587 (91.31%) |
+| [db_write_error_ref_fmt_25eaba0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25eaba0..0x25eace6` | first-party clean-room rebuild | 291/326 (89.26%) |
+| [&&BookOrder::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25eae10..0x25eb0cb` | first-party clean-room rebuild | 613/699 (87.70%) |
+| [&&BookOrder::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25eb0d0..0x25eb38b` | first-party clean-room rebuild | 613/699 (87.70%) |
+| [staking StakingLink::StakingUser expecting (0x25eb5d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25eb5d0..0x25eb5e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLink::Requested expecting (0x25eb6c0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25eb6c0..0x25eb6d9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLink::TradingUser expecting (0x25eb860)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25eb860..0x25eb879` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLinkTracker expecting (0x25eb980)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25eb980..0x25eb999` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLink expecting (0x25ebd20)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25ebd20..0x25ebd39` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [Relationships::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25ff050..0x25ff14d` | first-party clean-room rebuild | 213/253 (84.19%) |
+| [OrderDescription::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25ff150..0x25ff396` | first-party clean-room rebuild | 508/582 (87.29%) |
+| [OrderCore::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25ff3a0..0x25ff61c` | first-party clean-room rebuild | 545/636 (85.69%) |
+| [OrderCore::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x25ff620..0x25ff89c` | first-party clean-room rebuild | 544/636 (85.53%) |
+| [SpotMeta::sz_to_f64_zero_fast](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x269d6a0..0x269d725` | first-party clean-room rebuild | 105/133 (78.95%) |
+| [&&Cloid::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x26a0640..0x26a076b` | first-party clean-room rebuild | 269/299 (89.97%) |
+| [&Cloid::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x26a0770..0x26a0898` | first-party clean-room rebuild | 266/296 (89.86%) |
+| [<&NodeIp as Debug>::fmt@0x26a0fe0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x26a0fe0..0x26a1108` | first-party clean-room rebuild | 264/296 (89.19%) |
+| [staking VoteTracker expecting (0x26a1550)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x26a1550..0x26a1569` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ClaimRewardsAction expecting (0x26a18d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x26a18d0..0x26a18e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [AccountOverride::FieldVisitor::visit_str (JSON)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2745310..0x2745472` | first-party clean-room rebuild | 332/354 (93.79%) |
+| [hardfork_ref_fmt_2772400](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2772400..0x27724dd` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <&CodeLocation as Debug>::fmt (0x27724e0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x27724e0..0x27725bd` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [&&UserCloidTracker::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x27725c0..0x27726a0` | first-party clean-room rebuild | 192/224 (85.71%) |
+| [context_ref_fmt_27726a0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x27726a0..0x27729ca` | first-party clean-room rebuild | 706/810 (87.16%) |
+| [&CloidTracker::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2772bc0..0x2772c74` | first-party clean-room rebuild | 156/180 (86.67%) |
+| [result_abci_digest_ref_fmt_2772da0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2772da0..0x2772fa5` | first-party clean-room rebuild | 463/517 (89.56%) |
+| [staking CValidatorProfile expecting (0x27732b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x27732b0..0x27732c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking EpochValues expecting (0x2773390)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2773390..0x27733a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ValidatorState expecting (0x2773590)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2773590..0x27735a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorStake expecting (0x2773610)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2773610..0x2773629` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ValidatorL1VoteTracker expecting (0x27737b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x27737b0..0x27737c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus MakeQuorumState expecting (0x2773810)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2773810..0x2773829` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus Mempool expecting (0x2773b30)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2773b30..0x2773b49` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CWithdrawal expecting (0x2773bb0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2773bb0..0x2773bc9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus NoVoter expecting (0x2773c50)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2773c50..0x2773c69` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking EpochTracker expecting (0x2773e50)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2773e50..0x2773e69` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking EpochState expecting (0x2773ef0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2773ef0..0x2773f09` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [Hardfork Visitor::expecting (copy 1)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2773f70..0x2773f89` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorStakes expecting (0x2773fb0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2773fb0..0x2773fc9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Staking expecting (0x2774050)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2774050..0x2774069` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus ValidatorHardPolicy expecting (0x27740d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x27740d0..0x27740e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [system_nonce_fmt_2787580](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2787580..0x27876a5` | first-party clean-room rebuild | 263/293 (89.76%) |
+| [Round::fmt@0x27876b0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x27876b0..0x27877d5` | first-party clean-room rebuild | 261/293 (89.08%) |
+| [hardfork_fmt_2787940](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2787940..0x2787a1d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [abci_digest_fmt_2787d20](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2787d20..0x2787e45` | first-party clean-room rebuild | 263/293 (89.76%) |
+| [Bridge2::FieldVisitor::visit_bytes (RMP #1)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x28618e0..0x28621e3` | first-party clean-room rebuild | 2,299/2,307 (99.65%) |
+| [Bridge2::FieldVisitor::visit_str (tag0 #1)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x28621f0..0x286248e` | first-party clean-room rebuild | 602/670 (89.85%) |
+| [Bridge2::FieldVisitor::visit_str (RMP #1)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2862490..0x286272e` | first-party clean-room rebuild | 602/670 (89.85%) |
+| [EthEventId::FieldVisitor::visit_str (tag0 #1)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x28657c0..0x28658bb` | first-party clean-room rebuild | 243/251 (96.81%) |
+| [EthEventId::FieldVisitor::visit_str (RMP #1)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x28658c0..0x28659bb` | first-party clean-room rebuild | 243/251 (96.81%) |
+| [exchange 18-variant compact state/ADL/PM JSON visit_str (0x286d0c0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x286d0c0..0x286d2a0` | first-party clean-room rebuild | 469/480 (97.71%) |
+| [risk Clearinghouse/Bole 9-tag compact JSON visit_str (0x2886380)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2886380..0x2886409` | first-party clean-room rebuild | 126/137 (91.97%) |
+| [exchange BoleReserve 9-field compact JSON visit_str (0x288f7f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x288f7f0..0x288f8b5` | first-party clean-room rebuild | 186/197 (94.42%) |
+| [staking VoteGlobalAction::DisableCValidator expecting (0x292cb10)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x292cb10..0x292cb29` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::DisableNodeIp expecting (0x292cc50)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x292cc50..0x292cc69` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::ModifyCStakingPeriods expecting (0x292cdf0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x292cdf0..0x292ce09` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction expecting (0x292ce30)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x292ce30..0x292ce49` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base BucketGuard tuple expecting (0x292ce90)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x292ce90..0x292cea9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::CValidator expecting (0x292d790)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x292d790..0x292d7a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ValidatorL1VoteAction expecting (0x292d970)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x292d970..0x292d989` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::ModifyCStakingChangeSignerDelays expecting (0x292db10)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x292db10..0x292db29` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorAction::Register expecting (0x292db30)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x292db30..0x292db49` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorAction::ChangeProfile expecting (0x292db50)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x292db50..0x292db69` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::UnjailSigner expecting (0x292dc70)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x292dc70..0x292dc89` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorAction expecting (0x292de70)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x292de70..0x292de89` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [HyperEvm::FieldVisitor::visit_bytes (RMP #1)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x299c930..0x299d068` | first-party clean-room rebuild | 1,844/1,848 (99.78%) |
+| [HyperEvm::FieldVisitor::visit_str (tag0 #1)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x299d070..0x299d2e5` | first-party clean-room rebuild | 577/629 (91.73%) |
+| [HyperEvm::FieldVisitor::visit_str (RMP #1)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x299d2f0..0x299d565` | first-party clean-room rebuild | 577/629 (91.73%) |
+| [EthCallOverrides::FieldVisitor::visit_str (tag0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x29aee50..0x29aef58` | first-party clean-room rebuild | 260/264 (98.48%) |
+| [base <&LockLocation as Debug>::fmt (0x29af520)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x29af520..0x29af5fd` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <&LockOrderingViolation as Debug>::fmt (0x29af630)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x29af630..0x29af6d5` | first-party clean-room rebuild | 125/165 (75.76%) |
+| [base <&&LockId as Debug>::fmt (0x29af7e0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x29af7e0..0x29af8c0` | first-party clean-room rebuild | 192/224 (85.71%) |
+| [node::firewall_ips::FirewallEntry Visitor::expecting (copy 1)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x29b0290..0x29b02a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus BuildBlockContext expecting (0x29b0530)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x29b0530..0x29b0549` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CDepositAction2 expecting (0x29b06d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x29b06d0..0x29b06e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base <LockLocation as Debug>::fmt (0x2a010a0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2a010a0..0x2a0117d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <CodeLocation as Debug>::fmt (0x2a01560)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2a01560..0x2a0163d` | first-party clean-room rebuild | 190/221 (85.97%) |
+| [base <LockOrderWitness as Debug>::fmt (0x2a01640)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2a01640..0x2a0171d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [NodeIp::fmt@0x2afce10](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2afce10..0x2afcf35` | first-party clean-room rebuild | 261/293 (89.08%) |
+| [&node::gossip_rpc::GossipStatus Debug::fmt (copy 1)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2c7c740..0x2c7c7dc` | first-party clean-room rebuild | 120/156 (76.92%) |
+| [staking ValidatorState expecting (0x2c7cfb0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2c7cfb0..0x2c7cfc9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base BucketGuard struct expecting (0x2c7d070)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2c7d070..0x2c7d089` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorState expecting (0x2c7d1d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2c7d1d0..0x2c7d1e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Delegation expecting (0x2c7d2f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2c7d2f0..0x2c7d309` | first-party clean-room rebuild | 22/25 (88.00%) |
+| [staking Delegations expecting (0x2c7d3f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2c7d3f0..0x2c7d409` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus ValidatorConfig expecting (0x2c7d450)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2c7d450..0x2c7d469` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus ValidatorL1StatusAction expecting (0x2c7d470)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2c7d470..0x2c7d489` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking RetiredSigner expecting (0x2c7d510)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2c7d510..0x2c7d529` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CStaking expecting (0x2c7d5b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2c7d5b0..0x2c7d5c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking EpochDelegation expecting (0x2c7d5d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2c7d5d0..0x2c7d5e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [NodeIp::fmt@0x2cc9a70](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2cc9a70..0x2cc9b95` | first-party clean-room rebuild | 261/293 (89.08%) |
+| [Spot::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2cc9bc0..0x2cc9ce5` | first-party clean-room rebuild | 261/293 (89.08%) |
+| [hardfork_fmt_2cd5190](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2cd5190..0x2cd526d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [&OrderBuilderInfo::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d48450..0x2d4854d` | first-party clean-room rebuild | 213/253 (84.19%) |
+| [base <&Signature as Debug>::fmt (0x2d48580)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d48580..0x2d48684` | first-party clean-room rebuild | 224/260 (86.15%) |
+| [<&BlockHash as Debug>::fmt@0x2d48690](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d48690..0x2d487b8` | first-party clean-room rebuild | 264/296 (89.19%) |
+| [<&Round as Debug>::fmt@0x2d487c0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d487c0..0x2d488e8` | first-party clean-room rebuild | 264/296 (89.19%) |
+| [&SubBuilder::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d48b00..0x2d48bdd` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [&Spot::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d48bf0..0x2d48d18` | first-party clean-room rebuild | 264/296 (89.19%) |
+| [&TwapId::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d49350..0x2d49478` | first-party clean-room rebuild | 264/296 (89.19%) |
+| [<&ConsensusTxHash as Debug>::fmt@0x2d498f0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d498f0..0x2d49a18` | first-party clean-room rebuild | 264/296 (89.19%) |
+| [consensus Round expecting (0x2d4a040)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d4a040..0x2d4a059` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [ErrDurGuard Visitor::expecting (copy 1)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d4a160..0x2d4a179` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLinkDisableTradingUserAction expecting (0x2d4a180)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d4a180..0x2d4a199` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking L1VoteStakes expecting (0x2d4a1e0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d4a1e0..0x2d4a1f9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base Signature expecting (0x2d4a340)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d4a340..0x2d4a359` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking RegisterValidatorAction expecting (0x2d4a730)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d4a730..0x2d4a749` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus NRounds expecting (0x2d4a750)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d4a750..0x2d4a769` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking L1ValidatorStakes expecting (0x2d4a770)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d4a770..0x2d4a789` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking LinkStakingUserAction expecting (0x2d4a870)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2d4a870..0x2d4a889` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [NodeIp::fmt@0x2e220e0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2e220e0..0x2e22205` | first-party clean-room rebuild | 261/293 (89.08%) |
+| [Round::fmt@0x2e2ff10](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2e2ff10..0x2e30035` | first-party clean-room rebuild | 261/293 (89.08%) |
+| [Relationships::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2e32d60..0x2e32e5d` | first-party clean-room rebuild | 213/253 (84.19%) |
+| [OrderDescription::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2e33480..0x2e336c6` | first-party clean-room rebuild | 506/582 (86.94%) |
+| [BlockHash::fmt@0x2e336d0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2e336d0..0x2e337f5` | first-party clean-room rebuild | 261/293 (89.08%) |
+| [hardfork_fmt_2e33800](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2e33800..0x2e338dd` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [OrderCore::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2e338e0..0x2e33b5c` | first-party clean-room rebuild | 544/636 (85.53%) |
+| [OrderCore::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2e33b60..0x2e33ddc` | first-party clean-room rebuild | 544/636 (85.53%) |
+| [abci_digest_fmt_2e36f90](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2e36f90..0x2e370b5` | first-party clean-room rebuild | 261/293 (89.08%) |
+| [ConsensusTxHash::fmt@0x2e39420](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x2e39420..0x2e39545` | first-party clean-room rebuild | 261/293 (89.08%) |
+| [exchange BoleReserve::utilization_bps fixed-point u128 (0x36a08b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x36a08b0..0x36a09e8` | first-party clean-room rebuild | 300/312 (96.15%) |
+| [exchange BoleReserve::utilization_f64 fixed-point u128 (0x36a09f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x36a09f0..0x36a0b25` | first-party clean-room rebuild | 293/309 (94.82%) |
+| [staking ValidatorL1VoteTracker expecting (0x36cd170)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x36cd170..0x36cd189` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ValidatorState expecting (0x36cd250)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x36cd250..0x36cd269` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Staking expecting (0x36cd330)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x36cd330..0x36cd349` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking EpochState expecting (0x36cd410)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x36cd410..0x36cd429` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base Signature expecting (0x36cd470)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x36cd470..0x36cd489` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CWithdrawal expecting (0x36cd4f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x36cd4f0..0x36cd509` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [&Perp::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x38db4d0..0x38db5f8` | first-party clean-room rebuild | 266/296 (89.86%) |
+| [ErrDurGuard Visitor::expecting (copy 2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x38dbb20..0x38dbb39` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [exchange UserAbstraction 11-alias JSON visit_str (0x3bdd050)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3bdd050..0x3bdd16d` | first-party clean-room rebuild | 270/285 (94.74%) |
+| [consensus ValidatorL1StatusAction expecting (0x3bdd8d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3bdd8d0..0x3bdd8e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorState expecting (0x3c4d0b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3c4d0b0..0x3c4d0c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Vote expecting (0x3c4d150)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3c4d150..0x3c4d169` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteChoice expecting (0x3c4d1f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3c4d1f0..0x3c4d209` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking RetiredSigner expecting (0x3c4d310)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3c4d310..0x3c4d329` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking EpochValues expecting (0x3c4d430)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3c4d430..0x3c4d449` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteWeight expecting (0x3c4d4f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3c4d4f0..0x3c4d509` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Proposal expecting (0x3c4d530)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3c4d530..0x3c4d549` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ProposalCategory expecting (0x3c4d830)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3c4d830..0x3c4d849` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CStaking expecting (0x3c4d8d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3c4d8d0..0x3c4d8e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [db_write_error_ref_fmt_3d525a0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3d525a0..0x3d526e6` | first-party clean-room rebuild | 292/326 (89.57%) |
+| [base Time expecting (0x3d52940)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3d52940..0x3d52959` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [risk OracleKind::fmt Display (0x3d66320)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3d66320..0x3d6636e` | first-party clean-room rebuild | 54/78 (69.23%) |
+| [staking VoteTracker expecting (0x3f146b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3f146b0..0x3f146c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ClaimRewardsAction expecting (0x3f146d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x3f146d0..0x3f146e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ForceIncreaseEpochAction expecting (0x41feb90)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x41feb90..0x41feba9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [&Token::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4228ac0..0x4228be8` | first-party clean-room rebuild | 266/296 (89.86%) |
+| [staking L1ValidatorStakes expecting (0x4228f50)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4228f50..0x4228f69` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base BucketGuard struct expecting (0x4228fb0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4228fb0..0x4228fc9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking L1VoteStakes expecting (0x42290e0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x42290e0..0x42290f9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus ValidatorHardPolicy expecting (0x4229240)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229240..0x4229259` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking EpochTracker expecting (0x4229350)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229350..0x4229369` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking EpochDelegation expecting (0x4229400)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229400..0x4229419` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorStake expecting (0x42294a0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x42294a0..0x42294b9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus Mempool expecting (0x4229500)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229500..0x4229519` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Delegations expecting (0x4229610)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229610..0x4229629` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus MakeQuorumState expecting (0x4229630)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229630..0x4229649` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CSigner expecting (0x4229650)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229650..0x4229669` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus NoVoter expecting (0x42296d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x42296d0..0x42296e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ValidatorState expecting (0x4229710)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229710..0x4229729` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorStakes expecting (0x4229730)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229730..0x4229749` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [Hardfork Visitor::expecting (copy 2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x42297f0..0x4229809` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Delegation expecting (0x4229810)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229810..0x4229829` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidator expecting (0x4229870)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229870..0x4229889` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorProfile expecting (0x4229890)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229890..0x42298a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus ColdHardVoter expecting (0x4229950)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4229950..0x4229969` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [HyperEvm::FieldVisitor::visit_bytes (RMP #2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4339e20..0x433a558` | first-party clean-room rebuild | 1,845/1,848 (99.84%) |
+| [HyperEvm::FieldVisitor::visit_str (tag0 #2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x433a560..0x433a7d5` | first-party clean-room rebuild | 577/629 (91.73%) |
+| [HyperEvm::FieldVisitor::visit_str (RMP #2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x433a7e0..0x433aa55` | first-party clean-room rebuild | 577/629 (91.73%) |
+| [consensus BuildBlockContext expecting (0x43512c0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x43512c0..0x43512d9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [Bridge2::FieldVisitor::visit_bytes (RMP #2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4442e00..0x4443703` | first-party clean-room rebuild | 2,299/2,307 (99.65%) |
+| [Bridge2::FieldVisitor::visit_str (RMP #2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4443710..0x44439ae` | first-party clean-room rebuild | 611/670 (91.19%) |
+| [Bridge2::FieldVisitor::visit_str (tag0 #2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x44439b0..0x4443c4e` | first-party clean-room rebuild | 611/670 (91.19%) |
+| [EthEventId::FieldVisitor::visit_str (RMP #2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4446940..0x4446a3b` | first-party clean-room rebuild | 243/251 (96.81%) |
+| [EthEventId::FieldVisitor::visit_str (tag0 #2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4446a40..0x4446b3b` | first-party clean-room rebuild | 243/251 (96.81%) |
+| [action-wire OrderKind 22-alias JSON visit_str (0x4450a20)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4450a20..0x4450c6b` | first-party clean-room rebuild | 543/587 (92.50%) |
+| [staking GovVoteAction expecting (0x4450d40)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4450d40..0x4450d59` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CDepositAction expecting (0x4451af0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4451af0..0x4451b09` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CWithdrawAction expecting (0x4452930)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4452930..0x4452949` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking GovProposeAction expecting (0x4453d30)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4453d30..0x4453d49` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking TokenDelegateAction expecting (0x4456350)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4456350..0x4456369` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking LinkStakingUserAction expecting (0x445a010)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x445a010..0x445a029` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking RegisterValidatorAction expecting (0x445e4a0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x445e4a0..0x445e4b9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLinkDisableTradingUserAction expecting (0x4466890)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4466890..0x44668a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorAction expecting (0x44dc3b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x44dc3b0..0x44dc3c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorAction::ChangeProfile expecting (0x44dc8f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x44dc8f0..0x44dc909` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorAction::Register expecting (0x44dcbd0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x44dcbd0..0x44dcbe9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus Round expecting (0x452a0a0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x452a0a0..0x452a0b9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus NRounds expecting (0x452a1c0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x452a1c0..0x452a1d9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [l1_hash_fmt_4545400](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4545400..0x4545525` | first-party clean-room rebuild | 261/293 (89.08%) |
+| [Perp::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4545530..0x4545655` | first-party clean-room rebuild | 263/293 (89.76%) |
+| [exchange 18-variant compact state/ADL/PM JSON visit_str (0x4682fd0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4682fd0..0x46831b0` | first-party clean-room rebuild | 468/480 (97.50%) |
+| [staking CDepositAction2 expecting (0x4683b90)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4683b90..0x4683ba9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [risk Clearinghouse/Bole 9-tag compact JSON visit_str (0x4693600)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4693600..0x4693689` | first-party clean-room rebuild | 125/137 (91.24%) |
+| [exchange BoleReserve 9-field compact JSON visit_str (0x4699090)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4699090..0x4699155` | first-party clean-room rebuild | 185/197 (93.91%) |
+| [staking VoteGlobalAction::CValidator expecting (0x46dd990)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46dd990..0x46dd9a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::ModifyCStakingChangeSignerDelays expecting (0x46ddb10)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46ddb10..0x46ddb29` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction expecting (0x46ddb30)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46ddb30..0x46ddb49` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLink::Requested expecting (0x46ddc10)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46ddc10..0x46ddc29` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::DisableCValidator expecting (0x46ddc30)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46ddc30..0x46ddc49` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::DisableNodeIp expecting (0x46ddd30)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46ddd30..0x46ddd49` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLinkTracker expecting (0x46ddd50)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46ddd50..0x46ddd69` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ValidatorL1VoteAction expecting (0x46ddd70)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46ddd70..0x46ddd89` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::UnjailSigner expecting (0x46dddf0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46dddf0..0x46dde09` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLink expecting (0x46de070)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46de070..0x46de089` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLink::TradingUser expecting (0x46de0f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46de0f0..0x46de109` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base Signature expecting (0x46de2d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46de2d0..0x46de2e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base BucketGuard tuple expecting (0x46de2f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46de2f0..0x46de309` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLink::StakingUser expecting (0x46de3d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46de3d0..0x46de3e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::ModifyCStakingPeriods expecting (0x46de410)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x46de410..0x46de429` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base <&&LockId as Debug>::fmt (0x4772eb0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4772eb0..0x4772f90` | first-party clean-room rebuild | 192/224 (85.71%) |
+| [base <&LockLocation as Debug>::fmt (0x4773140)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4773140..0x477321d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <&LockOrderingViolation as Debug>::fmt (0x4773220)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4773220..0x47732c5` | first-party clean-room rebuild | 126/165 (76.36%) |
+| [base <&CodeLocation as Debug>::fmt (0x47732d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x47732d0..0x47733ad` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <LockLocation as Debug>::fmt (0x47755f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x47755f0..0x47756cd` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <CodeLocation as Debug>::fmt (0x47756d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x47756d0..0x47757ad` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <LockOrderWitness as Debug>::fmt (0x47757b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x47757b0..0x477588d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [net_utils::rate_limiter::AlertConfig field Visitor::expecting](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4783180..0x4783199` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [net_utils::rate_limiter::AlertConfig Visitor::expecting](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x47831a0..0x47831b9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [<&ConsensusTxHash as Debug>::fmt@0x4d99280](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d99280..0x4d993a8` | first-party clean-room rebuild | 266/296 (89.86%) |
+| [&&UserCloidTracker::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d99fa0..0x4d9a080` | first-party clean-room rebuild | 192/224 (85.71%) |
+| [hardfork_ref_fmt_4d9ab80](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d9ab80..0x4d9ac5d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [&CloidTracker::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d9afe0..0x4d9b094` | first-party clean-room rebuild | 156/180 (86.67%) |
+| [staking VoteChoice expecting (0x4d9c410)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d9c410..0x4d9c429` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Vote expecting (0x4d9c4b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d9c4b0..0x4d9c4c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [ErrDurGuard Visitor::expecting (copy 3)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d9c550..0x4d9c569` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking EpochTracker expecting (0x4d9c5b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d9c5b0..0x4d9c5c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [node::firewall_ips::FirewallEntry Visitor::expecting (copy 2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d9c5d0..0x4d9c5e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Proposal expecting (0x4d9c820)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d9c820..0x4d9c839` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ProposalCategory expecting (0x4d9c840)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d9c840..0x4d9c859` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [Hardfork Visitor::expecting (copy 3)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d9c900..0x4d9c919` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteWeight expecting (0x4d9c940)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4d9c940..0x4d9c959` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [ConsensusTxHash::fmt@0x4e05de0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4e05de0..0x4e05f05` | first-party clean-room rebuild | 263/293 (89.76%) |
+| [base Time expecting (0x4e39670)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4e39670..0x4e39689` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ClaimRewardsAction expecting (0x4e39720)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4e39720..0x4e39739` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base Time expecting (0x4e397b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4e397b0..0x4e397c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base <&&LockId as Debug>::fmt (0x4f0da40)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4f0da40..0x4f0db20` | first-party clean-room rebuild | 192/224 (85.71%) |
+| [base <&LockOrderingViolation as Debug>::fmt (0x4f0dc00)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4f0dc00..0x4f0dca5` | first-party clean-room rebuild | 125/165 (75.76%) |
+| [<&CommitProof as Debug>::fmt@0x4f0dcb0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4f0dcb0..0x4f0dd90` | first-party clean-room rebuild | 192/224 (85.71%) |
+| [<&ClientBlock as Debug>::fmt@0x4f0dd90](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4f0dd90..0x4f0de6d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <&LockLocation as Debug>::fmt (0x4f0de70)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4f0de70..0x4f0df4d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <Signature as Debug>::fmt (0x4fb3660)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4fb3660..0x4fb3764` | first-party clean-room rebuild | 225/260 (86.54%) |
+| [base <LockLocation as Debug>::fmt (0x4fb3800)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4fb3800..0x4fb38dd` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <CodeLocation as Debug>::fmt (0x4fb38e0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4fb38e0..0x4fb39bd` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [base <LockOrderWitness as Debug>::fmt (0x4fb4750)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4fb4750..0x4fb482d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [Signed::fmt@0x4fb5970](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x4fb5970..0x4fb5a4d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [SpotMeta::sz_to_f64_zero_fast](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x50bebc0..0x50bec45` | first-party clean-room rebuild | 105/133 (78.95%) |
+| [staking ValidatorL1VoteAction expecting (0x50d8f70)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x50d8f70..0x50d8f89` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base SignedIndexedUpload expecting (0x50d9080)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x50d9080..0x50d9099` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [Half::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5100860..0x5100911` | first-party clean-room rebuild | 153/177 (86.44%) |
+| [Half::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5100920..0x51009d1` | first-party clean-room rebuild | 153/177 (86.44%) |
+| [Relationships::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51009e0..0x5100add` | first-party clean-room rebuild | 213/253 (84.19%) |
+| [OrderDescription::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51010b0..0x51012f6` | first-party clean-room rebuild | 508/582 (87.29%) |
+| [BookOrder::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5101b80..0x5101e35` | first-party clean-room rebuild | 602/693 (86.87%) |
+| [BookOrder::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5101e40..0x51020f5` | first-party clean-room rebuild | 601/693 (86.72%) |
+| [OrderCore::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5102100..0x510237c` | first-party clean-room rebuild | 544/636 (85.53%) |
+| [OrderCore::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5102380..0x51025fc` | first-party clean-room rebuild | 544/636 (85.53%) |
+| [&LevelSummary::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51ac4f0..0x51ac5cd` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [&LevelSummary::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51ac5d0..0x51ac6ad` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [&Level::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51ac6b0..0x51ac874` | first-party clean-room rebuild | 392/452 (86.73%) |
+| [&&BookOrder::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51ac880..0x51acb3b` | first-party clean-room rebuild | 607/699 (86.84%) |
+| [&Level::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51acb40..0x51acd04` | first-party clean-room rebuild | 392/452 (86.73%) |
+| [&PriorityDequeEntry::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51acd10..0x51acded` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [&&BookOrder::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51acdf0..0x51ad0ab` | first-party clean-room rebuild | 607/699 (86.84%) |
+| [&PriorityKey::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51ad0b0..0x51ad18d` | first-party clean-room rebuild | 189/221 (85.52%) |
+| [staking ValidatorState expecting (0x51ad3b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51ad3b0..0x51ad3c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [node::visor_time_lock::VisorTimeLock Visitor::expecting](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51ad490..0x51ad4a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Staking expecting (0x51ad600)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51ad600..0x51ad619` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorProfile expecting (0x51ad800)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51ad800..0x51ad819` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus Mempool expecting (0x51ad920)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51ad920..0x51ad939` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking EpochState expecting (0x51adb10)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51adb10..0x51adb29` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ValidatorL1VoteTracker expecting (0x51add90)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51add90..0x51adda9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [Relationships::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51f7a30..0x51f7b2d` | first-party clean-room rebuild | 213/253 (84.19%) |
+| [OrderDescription::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51f7f40..0x51f8186` | first-party clean-room rebuild | 508/582 (87.29%) |
+| [OrderCore::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51f8b60..0x51f8ddc` | first-party clean-room rebuild | 544/636 (85.53%) |
+| [OrderCore::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x51f8de0..0x51f905c` | first-party clean-room rebuild | 544/636 (85.53%) |
+| [&Cloid::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d4bb0..0x53d4cd8` | first-party clean-room rebuild | 266/296 (89.86%) |
+| [base <&Signature as Debug>::fmt (0x53d4eb0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d4eb0..0x53d4fb4` | first-party clean-room rebuild | 224/260 (86.15%) |
+| [<&Round as Debug>::fmt@0x53d4fc0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d4fc0..0x53d50e8` | first-party clean-room rebuild | 266/296 (89.86%) |
+| [&&Cloid::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d5360..0x53d548b` | first-party clean-room rebuild | 269/299 (89.97%) |
+| [&Perp::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d5490..0x53d55b8` | first-party clean-room rebuild | 266/296 (89.86%) |
+| [abci_digest_ref_fmt_53d55c0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d55c0..0x53d56e8` | first-party clean-room rebuild | 266/296 (89.86%) |
+| [staking StakingLinkTracker expecting (0x53d5870)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d5870..0x53d5889` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::DisableNodeIp expecting (0x53d58d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d58d0..0x53d58e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorAction expecting (0x53d5a10)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d5a10..0x53d5a29` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::ModifyCStakingChangeSignerDelays expecting (0x53d5bf0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d5bf0..0x53d5c09` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::DisableCValidator expecting (0x53d5dd0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d5dd0..0x53d5de9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::UnjailSigner expecting (0x53d5e50)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d5e50..0x53d5e69` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CSigner expecting (0x53d5ff0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d5ff0..0x53d6009` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CWithdrawAction expecting (0x53d6090)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d6090..0x53d60a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CDepositAction2 expecting (0x53d60d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d60d0..0x53d60e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::ModifyCStakingPeriods expecting (0x53d60f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d60f0..0x53d6109` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base Signature expecting (0x53d6110)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d6110..0x53d6129` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus ColdHardVoter expecting (0x53d6130)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d6130..0x53d6149` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorAction::ChangeProfile expecting (0x53d6170)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d6170..0x53d6189` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus Round expecting (0x53d61b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d61b0..0x53d61c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLink::StakingUser expecting (0x53d6290)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d6290..0x53d62a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction expecting (0x53d6370)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d6370..0x53d6389` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base Signature expecting (0x53d64b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d64b0..0x53d64c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus NRounds expecting (0x53d64d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d64d0..0x53d64e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLink expecting (0x53d6590)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d6590..0x53d65a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLink::TradingUser expecting (0x53d65f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d65f0..0x53d6609` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ForceIncreaseEpochAction expecting (0x53d6650)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d6650..0x53d6669` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidator expecting (0x53d6830)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d6830..0x53d6849` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking TokenDelegateAction expecting (0x53d6850)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d6850..0x53d6869` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteGlobalAction::CValidator expecting (0x53d6870)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d6870..0x53d6889` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLink::Requested expecting (0x53d69d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d69d0..0x53d69e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorAction::Register expecting (0x53d69f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x53d69f0..0x53d6a09` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [HyperEvm::FieldVisitor::visit_bytes (RMP #3)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5472610..0x5472d48` | first-party clean-room rebuild | 1,844/1,848 (99.78%) |
+| [HyperEvm::FieldVisitor::visit_str (RMP #3)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5472d50..0x5472fc5` | first-party clean-room rebuild | 577/629 (91.73%) |
+| [base <&CodeLocation as Debug>::fmt (0x5615cd0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5615cd0..0x5615dad` | first-party clean-room rebuild | 192/221 (86.88%) |
+| [consensus BuildBlockContext expecting (0x5616930)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5616930..0x5616949` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking RetiredSigner expecting (0x5616970)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5616970..0x5616989` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base BucketGuard struct expecting (0x5616b70)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5616b70..0x5616b89` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [node::gossip_config::GossipConfigInner Visitor::expecting](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5616bf0..0x5616c09` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorState expecting (0x5616cd0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5616cd0..0x5616ce9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CStaking expecting (0x5616df0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5616df0..0x5616e09` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [l1_hash_fmt_564b200](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x564b200..0x564b325` | first-party clean-room rebuild | 264/293 (90.10%) |
+| [Round::fmt@0x564d0d0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x564d0d0..0x564d1f5` | first-party clean-room rebuild | 262/293 (89.42%) |
+| [node::hl_node::NodeIpParseError Display/Debug::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x564d6e0..0x564d6f9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [abci_digest_fmt_56599b0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x56599b0..0x5659ad5` | first-party clean-room rebuild | 264/293 (90.10%) |
+| [l1-shared NodeRole 4-variant JSON visit_str (0x57c3c90)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x57c3c90..0x57c3d7a` | first-party clean-room rebuild | 215/234 (91.88%) |
+| [SpotMeta::sz_to_f64_zero_fast](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x57cdae0..0x57cdb65` | first-party clean-room rebuild | 109/133 (81.95%) |
+| [db_write_error_ref_fmt_57d0ec0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x57d0ec0..0x57d1006` | first-party clean-room rebuild | 291/326 (89.26%) |
+| [consensus Validator expecting (0x57d18d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x57d18d0..0x57d18e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking VoteTracker expecting (0x57d19d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x57d19d0..0x57d19e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [bincode_fork::varint::varint_decode_u32_slow](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5822490..0x58225b5` | first-party clean-room rebuild | 280/293 (95.56%) |
+| [bincode_fork::varint::varint_decode_u64_slow](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x58225c0..0x58226fc` | first-party clean-room rebuild | 306/316 (96.84%) |
+| [bincode_fork::varint::cold_invalid_int](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5822700..0x582270e` | first-party clean-room rebuild | 14/14 (100.00%) |
+| [bincode_fork::varint::varint_decode_usize_slow](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5822710..0x582284c` | first-party clean-room rebuild | 306/316 (96.84%) |
+| [<&Qc as Debug>::fmt@0x59406d0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x59406d0..0x594089b` | first-party clean-room rebuild | 402/459 (87.58%) |
+| [<&BlockHash as Debug>::fmt@0x59408a0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x59408a0..0x59409c8` | first-party clean-room rebuild | 265/296 (89.53%) |
+| [<&CommittedRound as Debug>::fmt@0x5941440](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5941440..0x5941568` | first-party clean-room rebuild | 265/296 (89.53%) |
+| [<&Cert as Debug>::fmt@0x5941570](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5941570..0x594176f` | first-party clean-room rebuild | 451/511 (88.26%) |
+| [staking L1ValidatorStakes expecting (0x5941cb0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5941cb0..0x5941cc9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking StakingLinkDisableTradingUserAction expecting (0x5941cd0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5941cd0..0x5941ce9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus ValidatorHardPolicy expecting (0x5941cf0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5941cf0..0x5941d09` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus NoVoter expecting (0x5942150)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5942150..0x5942169` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking RegisterValidatorAction expecting (0x5942270)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5942270..0x5942289` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking L1VoteStakes expecting (0x59422b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x59422b0..0x59422c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CWithdrawal expecting (0x59422f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x59422f0..0x5942309` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus ValidatorL1StatusAction expecting (0x5942370)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5942370..0x5942389` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking GovProposeAction expecting (0x59423d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x59423d0..0x59423e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CDepositAction expecting (0x59423f0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x59423f0..0x5942409` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorStakes expecting (0x5942490)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5942490..0x59424a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking LinkStakingUserAction expecting (0x5942530)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5942530..0x5942549` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking CValidatorStake expecting (0x5942550)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5942550..0x5942569` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [net_utils::rate_limiter::AlertConfig Visitor::expecting (copy 2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5942610..0x5942629` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus ValidatorConfig expecting (0x59427b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x59427b0..0x59427c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking GovVoteAction expecting (0x5942850)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5942850..0x5942869` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [Qc::fmt@0x59660c0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x59660c0..0x5966288` | first-party clean-room rebuild | 399/456 (87.50%) |
+| [Tc::fmt@0x5966290](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5966290..0x5966390` | first-party clean-room rebuild | 220/256 (85.94%) |
+| [Round::fmt@0x5966390](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5966390..0x59664b5` | first-party clean-room rebuild | 262/293 (89.42%) |
+| [BlockHash::fmt@0x59674b0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x59674b0..0x59675d5` | first-party clean-room rebuild | 262/293 (89.42%) |
+| [hardfork_fmt_59675e0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x59675e0..0x59676bd` | first-party clean-room rebuild | 192/221 (86.88%) |
+| [CommittedRound::fmt@0x5967b80](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5967b80..0x5967ca5` | first-party clean-room rebuild | 262/293 (89.42%) |
+| [<&NodeIp as Debug>::fmt@0x5a2d200](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5a2d200..0x5a2d328` | first-party clean-room rebuild | 265/296 (89.53%) |
+| [&node::visor_time_lock::VisorKind Debug::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5a2e340..0x5a2e376` | first-party clean-room rebuild | 46/54 (85.19%) |
+| [&node::gossip_rpc::GossipStatus Debug::fmt (copy 2)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5a2e380..0x5a2e41c` | first-party clean-room rebuild | 125/156 (80.13%) |
+| [base BucketGuard tuple expecting (0x5a2eeb0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5a2eeb0..0x5a2eec9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus HeartbeatJailingConfig expecting (0x5a2f1b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5a2f1b0..0x5a2f1c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base HotfixMetadata expecting (0x5a2f290)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5a2f290..0x5a2f2a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base VisorMetadata expecting (0x5a2f390)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5a2f390..0x5a2f3a9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base PublisherBinaryMetadata expecting (0x5a2f430)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5a2f430..0x5a2f449` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [base HotfixArgs expecting (0x5a2f4d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5a2f4d0..0x5a2f4e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [l1_hash_fmt_5a8aed0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5a8aed0..0x5a8aff5` | first-party clean-room rebuild | 262/293 (89.42%) |
+| [NodeIp::fmt@0x5a8b000](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5a8b000..0x5a8b125` | first-party clean-room rebuild | 262/293 (89.42%) |
+| [base <Signature as Debug>::fmt (0x5aa77b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5aa77b0..0x5aa78b4` | first-party clean-room rebuild | 227/260 (87.31%) |
+| [Round::fmt@0x5aa78c0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5aa78c0..0x5aa79e5` | first-party clean-room rebuild | 262/293 (89.42%) |
+| [<Arc<Proof> as Debug>::fmt@0x5aa79f0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5aa79f0..0x5aa7ad3` | first-party clean-room rebuild | 198/227 (87.22%) |
+| [OrderDescription::fmt](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5aa9090..0x5aa92d6` | first-party clean-room rebuild | 507/582 (87.11%) |
+| [BlockHash::fmt@0x5aa9320](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5aa9320..0x5aa9445` | first-party clean-room rebuild | 262/293 (89.42%) |
+| [hardfork_fmt_5aa9630](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5aa9630..0x5aa970d` | first-party clean-room rebuild | 192/221 (86.88%) |
+| [abci_digest_fmt_5aaa250](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5aaa250..0x5aaa375` | first-party clean-room rebuild | 262/293 (89.42%) |
+| [Signed::fmt@0x5aaa380](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5aaa380..0x5aaa45d` | first-party clean-room rebuild | 192/221 (86.88%) |
+| [ConsensusTxHash::fmt@0x5aaaf60](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5aaaf60..0x5aab085` | first-party clean-room rebuild | 262/293 (89.42%) |
+| [Bridge2::FieldVisitor::visit_bytes (RMP #3)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5ae3260..0x5ae3b63` | first-party clean-room rebuild | 2,299/2,307 (99.65%) |
+| [Bridge2::FieldVisitor::visit_str (RMP #3)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5ae3b70..0x5ae3e0e` | first-party clean-room rebuild | 602/670 (89.85%) |
+| [EthEventId::FieldVisitor::visit_str (RMP #3)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5ae4780..0x5ae487b` | first-party clean-room rebuild | 243/251 (96.81%) |
+| [staking Delegation expecting (0x5b09150)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5b09150..0x5b09169` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [consensus MakeQuorumState expecting (0x5b09270)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5b09270..0x5b09289` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking EpochValues expecting (0x5b092b0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5b092b0..0x5b092c9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking EpochDelegation expecting (0x5b09310)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5b09310..0x5b09329` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking Delegations expecting (0x5b093d0)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5b093d0..0x5b093e9` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [staking ValidatorState expecting (0x5b09530)](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5b09530..0x5b09549` | first-party clean-room rebuild | 21/25 (84.00%) |
+| [abci_digest_fmt_5b555e0](../research/work-items/RE-001-node115-first-party-wave4-consolidation/census.json) | `0x5b555e0..0x5b55705` | first-party clean-room rebuild | 262/293 (89.42%) |
 
 The window list is not a function census. Data, calls, ABI, relocations and whole-program behavior remain acceptance requirements.
