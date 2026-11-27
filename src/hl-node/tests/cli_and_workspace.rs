@@ -91,6 +91,36 @@ fn cli_rejects_invalid_node115_validator_inputs() {
         ]),
         Err(CliError::InvalidReplicaStyle("invalid-style".to_string()))
     );
+
+    // AuxStreamConfig mutual-exclusion guard (`node/src/aux.rs` `0x51d0aba`).
+    let conflict = parse_args([
+        "run-non-validator",
+        "--write-fills",
+        "--write-trades",
+        "--write-order-statuses",
+        "--batch-by-block",
+        "--stream-with-block-info",
+    ]);
+    assert!(matches!(conflict, Err(CliError::AuxConfigConflict(_))));
+
+    let ok_aux = parse_args([
+        "run-non-validator",
+        "--write-fills",
+        "--write-trades",
+        "--write-order-statuses",
+        "--batch-by-block",
+    ])
+    .unwrap();
+    let CliAction::Command(cmd) = ok_aux else {
+        panic!("expected command");
+    };
+    let aux = cmd.aux_config.expect("aux config");
+    assert!(aux.batch_by_block);
+    assert!(!aux.stream_with_block_info);
+    assert_eq!(
+        aux.enabled_streams,
+        vec!["node_trades", "node_fills", "node_order_statuses"]
+    );
 }
 
 #[test]

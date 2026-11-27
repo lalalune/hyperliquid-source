@@ -69,11 +69,28 @@ pub fn workspace_health(chain: ChainName) -> WorkspaceHealth {
         Ok(Some(500))
     );
     assert_eq!(evm::LT_HASH_LANES, 1024);
+    assert_eq!(evm::system::HYPER_EVM_SYSTEM_CONTRACTS.len(), 3);
+    assert_eq!(evm::system::SMALL_BLOCK_GAS_LIMIT, 3_000_000);
+    assert_eq!(evm::system::BIG_BLOCK_GAS_LIMIT, 30_000_000);
     assert_eq!(evm_rpc::EVM_RPC_CORE_METHODS.len(), 26);
     assert_eq!(evm_rpc::EVM_RPC_EXTRA_METHODS.len(), 2);
     assert_eq!(info_api::INFO_SERVER_SOURCE_PATHS.len(), 7);
     assert_eq!(info_api::INFO_SERVER_PANIC_LOCATION_COUNT, 43);
     const { assert!(bridge::BRIDGE2_SERIALIZED_FIELD_COUNT > 0) };
+    assert_eq!(
+        bridge::contracts::BRIDGE2_MAINNET_ADDRESS_HEX,
+        Cid::Bridge2Mainnet.address_hex()
+    );
+    assert_eq!(
+        bridge::contracts::USDC2_MAINNET_ADDRESS_HEX,
+        Cid::Usdc2Mainnet.address_hex()
+    );
+    assert_eq!(node115_fees::solvency::PROTOCOL_FEE_SCALES.len(), 6);
+    assert_eq!(
+        node115_staking::withdrawal_queue::MAX_CONCURRENT_WITHDRAWALS_PER_USER,
+        5
+    );
+    assert_eq!(node_runtime::aux::AUX_OUTPUT_STREAMS.len(), 10);
     let _db_block = node115_db::rocks_db::BLOCK_SIZE;
     assert_eq!(
         node115_consensus::timeout_flow::TAG_FIRST_TIMER,

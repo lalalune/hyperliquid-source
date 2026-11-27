@@ -10,15 +10,30 @@ use bincode_fork::{
     ByteVec, Decode, DecodeError, DecoderImpl, Encode, EncodeError, EncoderImpl, Reader, Writer,
     decode_from_slice, encode_to_vec, standard,
 };
+use bridge::contracts::{canonical_bridge2_address, canonical_usdc2_address};
+use evm::system::{
+    CoreWriterFrame, CoreWriterFrameError, EvmBlockKind, parse_core_writer_frame,
+};
 use global_constants::{ChainDisplay, ChainName};
 use node_runtime::error::NodeError;
 use node_runtime::peer_sync::{BlockSink, ConsensusHook};
 use node115_abci::abci_hash::{
     ReductionNode, ReductionRow, blake3_hash, compute_reduction_tree_root,
 };
-use node115_abci::checkpoint_replay_fixture::DEFAULT_ROOT_CADENCE_MODULUS;
+use node115_abci::checkpoint_replay_fixture::{
+    DEFAULT_ROOT_CADENCE_MODULUS, ReplayInitializer, RestoredState,
+};
+use node115_abci::state::{
+    AbciState, ApplyBlockPreconditionError, REQUIRED_FEATURE_VERSION,
+};
 use node115_db::db_home::{DbHome, DbHomeError};
+use node115_fees::tiers::FeeSchedule;
 use node115_orderbook::Books;
+use node115_staking::delegation::StakingChain;
+use node115_staking::jailing::{Address as StakingAddress, JailingTime};
+use node115_staking::withdrawal_queue::{
+    QueuedWithdrawal, WithdrawalQueueError, WithdrawalQueueState,
+};
 
 /// Magic header for `checkpoint.bin` written under `DbHome::checkpoint_dir_for_height`.
 const CHECKPOINT_MAGIC: [u8; 8] = *b"HLN115CP";
@@ -170,6 +185,7 @@ pub enum EngineError {
     Io(std::io::Error),
     Codec(String),
     NonMonotonicHeight { expected: u64, got: u64 },
+    AbciPrecondition(ApplyBlockPreconditionError),
     ChainMismatch { expected: u8, got: u8 },
     StateRootMismatch { expected: String, computed: String },
     LtHashesMismatch { path: PathBuf, reason: String },
@@ -184,6 +200,7 @@ impl fmt::Display for EngineError {
             Self::NonMonotonicHeight { expected, got } => {
                 write!(f, "non-monotonic block height: expected {expected}, got {got}")
             }
+            Self::AbciPrecondition(e) => write!(f, "ABCI apply_block precondition failed: {e:?}"),
             Self::ChainMismatch { expected, got } => {
                 write!(f, "checkpoint chain mismatch: expected {expected}, got {got}")
             }
@@ -259,19 +276,49 @@ fn chain_to_u8(chain: ChainName) -> u8 {
     }
 }
 
+fn chain_to_staking_chain(chain: ChainName) -> StakingChain {
+    match chain {
+        ChainName::Local => StakingChain::Local,
+        ChainName::Sandbox => StakingChain::Sandbox,
+        ChainName::Testnet => StakingChain::Testnet,
+        ChainName::Mainnet => StakingChain::Mainnet,
+    }
+}
+
+fn new_abci_state(checkpoint_path: PathBuf, height: u64, round: u64) -> AbciState {
+    AbciState::new(
+        RestoredState {
+            checkpoint_path,
+            height,
+            round,
+            loader_seq: 0,
+            copied_round: round,
+            replay_initializer: ReplayInitializer {
+                initial_height: height,
+                initial_round: round,
+            },
+        },
+        DEFAULT_ROOT_CADENCE_MODULUS,
+        None,
+    )
+}
+
 /// Deterministic offline node execution engine wiring storage (`node115-db`),
 /// ABCI BLAKE3 state-root hashing (`node115-abci` + `node115-abci-blake3`),
-/// serialization (`bincode-fork` + `net-utils` LZ4), books, staking, bridge,
-/// clearinghouse, exchange, and EVM KVS state.
+/// serialization (`bincode-fork` + `net-utils` LZ4), books, staking withdrawal queue,
+/// bridge contracts, clearinghouse, exchange, fee solvency, and EVM KVS/CoreWriter state.
 pub struct NodeEngine {
     chain: ChainName,
     db_home: DbHome,
-    latest_height: u64,
-    latest_round: u64,
+    abci_state: AbciState,
+    state_time: (u64, u64),
+    feature_version: u8,
+    using_big_blocks: bool,
     blocks_digest: [u8; 32],
     evm_kvs: BTreeMap<Vec<u8>, Vec<u8>>,
     applied_blocks: Vec<NodeBlock>,
     books: Books<u32>,
+    withdrawal_queue: WithdrawalQueueState,
     abci_state_root: [u8; 32],
     restored_from_checkpoint: Option<u64>,
 }
@@ -287,15 +334,19 @@ impl NodeEngine {
         if let Some(height) = find_latest_persisted_checkpoint(&db_home)? {
             Self::restore_checkpoint(chain, db_home, height)
         } else {
+            let cp_root = db_home.checkpoint_subdir();
             let mut engine = Self {
                 chain,
                 db_home,
-                latest_height: 0,
-                latest_round: 0,
+                abci_state: new_abci_state(cp_root, 0, 0),
+                state_time: (0, 0),
+                feature_version: REQUIRED_FEATURE_VERSION,
+                using_big_blocks: false,
                 blocks_digest: blake3_hash(&[chain_to_u8(chain)]),
                 evm_kvs: BTreeMap::new(),
                 applied_blocks: Vec::new(),
                 books: Books::new(),
+                withdrawal_queue: WithdrawalQueueState::default(),
                 abci_state_root: [0u8; 32],
                 restored_from_checkpoint: None,
             };
@@ -336,12 +387,15 @@ impl NodeEngine {
         let mut engine = Self {
             chain,
             db_home,
-            latest_height: rec.height,
-            latest_round: rec.round,
+            abci_state: new_abci_state(cp_dir, rec.height, rec.round),
+            state_time: (rec.height, 0),
+            feature_version: REQUIRED_FEATURE_VERSION,
+            using_big_blocks: false,
             blocks_digest: rec.blocks_digest,
             evm_kvs,
             applied_blocks: rec.applied_blocks,
             books: Books::new(),
+            withdrawal_queue: WithdrawalQueueState::default(),
             abci_state_root: [0u8; 32],
             restored_from_checkpoint: Some(rec.height),
         };
@@ -384,11 +438,75 @@ impl NodeEngine {
     }
 
     pub fn latest_height(&self) -> u64 {
-        self.latest_height
+        self.abci_state.height()
     }
 
     pub fn latest_round(&self) -> u64 {
-        self.latest_round
+        self.abci_state.round()
+    }
+
+    pub fn set_hardfork_height(&mut self, height: Option<u64>) {
+        self.abci_state.hardfork_height = height;
+    }
+
+    pub fn set_feature_version(&mut self, version: u8) {
+        self.feature_version = version;
+    }
+
+    pub fn using_big_blocks(&self) -> bool {
+        self.using_big_blocks
+    }
+
+    pub fn set_using_big_blocks(&mut self, enabled: bool) {
+        self.using_big_blocks = enabled;
+    }
+
+    pub fn evm_block_gas_limit(&self) -> u64 {
+        EvmBlockKind::from_using_big_blocks(self.using_big_blocks).gas_limit()
+    }
+
+    /// Validate a `CoreWriter` (`0x3333...3333`) v1 `RawAction` frame (`evm::system`).
+    pub fn validate_core_writer_frame<'a>(
+        &self,
+        raw: &'a [u8],
+    ) -> Result<CoreWriterFrame<'a>, CoreWriterFrameError> {
+        parse_core_writer_frame(raw, |_, _| false)
+    }
+
+    /// Validate a `FeeSchedule` through node #115's 6-scale `5e-6` net-fee solvency floor.
+    pub fn validate_fee_schedule(
+        &self,
+        schedule: &FeeSchedule,
+        trial_discount: f64,
+    ) -> node115_fees::fee_schedule_compose::Outcome {
+        schedule.validate_with_solvency(trial_discount)
+    }
+
+    /// Return the embedded canonical Arbitrum `(Bridge2, Usdc2)` addresses for this chain (`bridge::contracts`).
+    pub fn canonical_bridge_contracts(&self) -> (Option<[u8; 20]>, Option<[u8; 20]>) {
+        (
+            canonical_bridge2_address(self.chain),
+            canonical_usdc2_address(self.chain),
+        )
+    }
+
+    pub fn credit_staking_balance(&mut self, user: StakingAddress, wei: u64) {
+        let entry = self.withdrawal_queue.user_balances.entry(user).or_insert(0);
+        *entry = entry.saturating_add(wei);
+    }
+
+    pub fn queue_staking_withdrawal(
+        &mut self,
+        now: JailingTime,
+        user: StakingAddress,
+        amount: u64,
+    ) -> Result<JailingTime, WithdrawalQueueError> {
+        self.withdrawal_queue
+            .queue_withdrawal(chain_to_staking_chain(self.chain), now, user, amount)
+    }
+
+    pub fn drain_mature_staking_withdrawals(&mut self, now: JailingTime) -> Vec<QueuedWithdrawal> {
+        self.withdrawal_queue.drain_mature_withdrawals(now)
     }
 
     pub fn abci_state_root(&self) -> [u8; 32] {
@@ -426,10 +544,31 @@ impl NodeEngine {
         self.books.len()
     }
 
-    /// Apply a single strictly monotonic block, updating EVM KVS state and
+    /// Apply a single block enforcing all 6 ordered node #115 `AbciEngine::apply_block`
+    /// pre-execution guards (`0x5a04ec3..0x5a04f59`), updating EVM KVS state, and
     /// recomputing the exact node #115 BLAKE3 reduction-tree ABCI state root.
-    pub fn apply_block(&mut self, block: NodeBlock) -> Result<[u8; 32], EngineError> {
-        let expected = self.latest_height + 1;
+    #[allow(clippy::too_many_arguments)]
+    pub fn apply_block_guarded(
+        &mut self,
+        block: NodeBlock,
+        parent_round: u64,
+        block_parent_time: (u64, u64),
+        header_actions: u64,
+        payload_actions: u64,
+    ) -> Result<[u8; 32], EngineError> {
+        self.abci_state
+            .validate_apply_preconditions(
+                parent_round,
+                block.round,
+                self.state_time,
+                block_parent_time,
+                header_actions,
+                payload_actions,
+                self.feature_version,
+            )
+            .map_err(EngineError::AbciPrecondition)?;
+
+        let expected = self.latest_height() + 1;
         if block.height != expected {
             return Err(EngineError::NonMonotonicHeight {
                 expected,
@@ -454,15 +593,24 @@ impl NodeEngine {
             self.evm_kvs.insert(k.clone(), v.clone());
         }
 
-        self.latest_height = block.height;
-        self.latest_round = block.round;
+        self.abci_state.advance_block(block.round);
+        self.state_time = (self.latest_height(), 0);
         self.applied_blocks.push(block);
 
-        let _cadence_hit = self.latest_height.is_multiple_of(DEFAULT_ROOT_CADENCE_MODULUS);
+        let _cadence_hit = self.latest_height().is_multiple_of(DEFAULT_ROOT_CADENCE_MODULUS);
 
         let root = self.compute_state_root()?;
         self.abci_state_root = root;
         Ok(root)
+    }
+
+    /// Convenience wrapper applying a monotonic block using current `(state_round, state_time)`
+    /// through the full 6-guard `apply_block_guarded` pipeline.
+    pub fn apply_block(&mut self, block: NodeBlock) -> Result<[u8; 32], EngineError> {
+        let parent_round = self.latest_round();
+        let parent_time = self.state_time;
+        let action_count = block.evm_kvs_writes.len() as u64;
+        self.apply_block_guarded(block, parent_round, parent_time, action_count, action_count)
     }
 
     /// Apply a batch of EVM KVS pairs received from an `EvmKvs` stream (port 3998)
@@ -507,7 +655,7 @@ impl NodeEngine {
         let mut st_buf = Vec::new();
         st_buf.extend_from_slice(&(node115_staking::admission::ACTION_CLASS_TABLE.len() as u64).to_le_bytes());
         st_buf.extend_from_slice(&node115_consensus::timeout_flow::TAG_FIRST_TIMER.to_le_bytes());
-        st_buf.extend_from_slice(&self.latest_round.to_le_bytes());
+        st_buf.extend_from_slice(&self.latest_round().to_le_bytes());
         let staking_digest = blake3_hash(&st_buf);
 
         // Slot 4: Bridge + constants invariants
@@ -557,8 +705,8 @@ impl NodeEngine {
             self.compute_slot_digests();
         let rec = CheckpointRecord {
             chain_id: chain_to_u8(self.chain),
-            height: self.latest_height,
-            round: self.latest_round,
+            height: self.latest_height(),
+            round: self.latest_round(),
             blocks_digest: self.blocks_digest,
             evm_kvs_digest,
             orderbook_digest,
@@ -574,17 +722,17 @@ impl NodeEngine {
         let compressed = net_utils::compress_prepend_size(&raw)
             .map_err(|e| EngineError::Codec(format!("checkpoint lz4 failed: {e:?}")))?;
 
-        let cp_dir = self.db_home.checkpoint_dir_for_height(self.latest_height);
+        let cp_dir = self.db_home.checkpoint_dir_for_height(self.latest_height());
         fs::create_dir_all(&cp_dir)?;
         let cp_path = cp_dir.join("checkpoint.bin");
         fs::write(&cp_path, compressed)?;
 
-        let lt_path = self.db_home.lt_hashes_path(self.latest_height);
+        let lt_path = self.db_home.lt_hashes_path(self.latest_height());
         let lt_json = format!(
             "{{\"chain\":\"{}\",\"height\":{},\"round\":{},\"lt_hash_lanes\":{},\"abci_state_root\":\"{}\",\"evm_kvs_digest\":\"{}\"}}\n",
             self.chain_display(),
-            self.latest_height,
-            self.latest_round,
+            self.latest_height(),
+            self.latest_round(),
             evm::LT_HASH_LANES,
             format_hex_32(&self.abci_state_root),
             format_hex_32(&evm_kvs_digest),
@@ -623,7 +771,7 @@ fn find_latest_persisted_checkpoint(db_home: &DbHome) -> Result<Option<u64>, Eng
 /// synchronized over loopback TCP (`sync_client_blocks`) apply straight into ABCI state.
 impl BlockSink for NodeEngine {
     fn latest_height(&self) -> u64 {
-        self.latest_height
+        self.abci_state.height()
     }
 
     fn apply_client_block(&mut self, height: u64, payload: Vec<u8>) -> Result<(), NodeError> {

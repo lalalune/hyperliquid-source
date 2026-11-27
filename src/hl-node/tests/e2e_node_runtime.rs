@@ -4,10 +4,19 @@ use std::path::PathBuf;
 use std::sync::{Arc, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use evm::system::{
+    BIG_BLOCK_GAS_LIMIT, CORE_WRITER_VERSION_V1, CoreWriterFrameError, SMALL_BLOCK_GAS_LIMIT,
+    encode_core_writer_frame,
+};
 use global_constants::ChainName;
 use hl_node::engine::{EngineError, NodeBlock, NodeEngine};
 use hl_node::http_server::{HttpServerConfig, LocalHttpServer, http_get, http_post};
 use hl_node::peer_loopback::run_loopback_peer_sync;
+use node115_abci::state::{ApplyBlockPreconditionError, REQUIRED_FEATURE_VERSION};
+use node115_fees::fee_schedule_compose::Outcome as FeeOutcome;
+use node115_fees::tiers::{BaseFeeRates, FeeSchedule};
+use node115_staking::jailing::JailingTime;
+use node115_staking::withdrawal_queue::WithdrawalQueueError;
 
 fn unique_temp_dir(label: &str) -> PathBuf {
     let nanos = SystemTime::now()
@@ -250,4 +259,137 @@ fn e2e_loopback_tcp_peer_sync_abci_stream_and_evm_kvs_convergence() {
 
     let _ = fs::remove_dir_all(&seed_dir);
     let _ = fs::remove_dir_all(&follower_dir);
+}
+
+#[test]
+fn e2e_abci_6_guards_fees_solvency_evm_corewriter_bridge_and_staking_queue() {
+    let data_dir = unique_temp_dir("subsystems-guards");
+    let mut eng = NodeEngine::open_or_restore(ChainName::Mainnet, &data_dir).expect("open");
+
+    // 1. Canonical Arbitrum Bridge2/Usdc2 contracts (bridge::contracts)
+    let (bridge2, usdc2) = eng.canonical_bridge_contracts();
+    assert_eq!(bridge2, Some(bridge::contracts::BRIDGE2_MAINNET_ADDRESS));
+    assert_eq!(usdc2, Some(bridge::contracts::USDC2_MAINNET_ADDRESS));
+
+    // 2. Dual-block gas limits & CoreWriter v1 17-slot dispatcher (evm::system)
+    assert_eq!(eng.evm_block_gas_limit(), SMALL_BLOCK_GAS_LIMIT);
+    eng.set_using_big_blocks(true);
+    assert_eq!(eng.evm_block_gas_limit(), BIG_BLOCK_GAS_LIMIT);
+    let ok_frame = encode_core_writer_frame(CORE_WRITER_VERSION_V1, 1, b"order-payload").unwrap();
+    let parsed = eng.validate_core_writer_frame(&ok_frame).expect("valid v1 action 1");
+    assert_eq!(parsed.action_id, 1);
+    assert_eq!(parsed.payload, b"order-payload");
+    // Action ID 14 is explicitly rejected in node #115 jump table 0x79e340
+    let bad_14 = encode_core_writer_frame(CORE_WRITER_VERSION_V1, 14, b"x").unwrap();
+    assert_eq!(
+        eng.validate_core_writer_frame(&bad_14),
+        Err(CoreWriterFrameError::UnsupportedActionId(14))
+    );
+
+    // 3. FeeSchedule 6-scale protocol net-fee solvency floor (node115-fees::solvency)
+    let solvent = FeeSchedule {
+        rates: BaseFeeRates {
+            perp_cross: 0.0005,
+            perp_add: 0.0001,
+            spot_cross: 0.0005,
+            spot_add: 0.0001,
+        },
+        vip_tiers: Vec::new(),
+        mm_tiers: Vec::new(),
+        referral_discount: 0.04,
+        referrer_keep: 0.1,
+        destination: [0u8; 20],
+        extra_destination_fractions: Vec::new(),
+        stake_discount_tiers: Vec::new(),
+        weigh_spot_volume_double: true,
+    };
+    assert_eq!(eng.validate_fee_schedule(&solvent, 0.0), FeeOutcome::Passed);
+    let mut insolvent = solvent;
+    insolvent.rates.perp_add = -0.0005;
+    assert_eq!(
+        eng.validate_fee_schedule(&insolvent, 0.0),
+        FeeOutcome::Rejected
+    );
+
+    // 4. CStaking withdrawal queue (node115-staking::withdrawal_queue)
+    let user = [0x11u8; 20];
+    eng.credit_staking_balance(user, 1_000);
+    let t0 = JailingTime {
+        major: 100,
+        seconds: 0,
+        nanos: 0,
+    };
+    let maturity = eng
+        .queue_staking_withdrawal(t0, user, 400)
+        .expect("queue withdrawal");
+    assert_eq!(
+        eng.queue_staking_withdrawal(t0, user, 700),
+        Err(WithdrawalQueueError::InsufficientBalance)
+    );
+    assert!(eng.drain_mature_staking_withdrawals(t0).is_empty());
+    let drained = eng.drain_mature_staking_withdrawals(maturity);
+    assert_eq!(drained.len(), 1);
+    assert_eq!(drained[0].wei, 400);
+
+    // 5. All 6 ordered ABCI apply_block pre-execution guards (node115-abci::state)
+    let blk1 = sample_blocks(1).pop().unwrap();
+    // Action count mismatch (guard #5)
+    assert!(matches!(
+        eng.apply_block_guarded(blk1.clone(), 0, (0, 0), 2, 1),
+        Err(EngineError::AbciPrecondition(
+            ApplyBlockPreconditionError::ActionCountMismatch {
+                header_actions: 2,
+                payload_actions: 1
+            }
+        ))
+    ));
+    // Feature version != 3 (guard #6)
+    eng.set_feature_version(2);
+    assert!(matches!(
+        eng.apply_block_guarded(blk1.clone(), 0, (0, 0), 1, 1),
+        Err(EngineError::AbciPrecondition(
+            ApplyBlockPreconditionError::FeatureVersionMismatch {
+                expected: REQUIRED_FEATURE_VERSION,
+                actual: 2
+            }
+        ))
+    ));
+    eng.set_feature_version(REQUIRED_FEATURE_VERSION);
+    // Hardfork freeze at height 0 (guard #1)
+    eng.set_hardfork_height(Some(0));
+    assert!(matches!(
+        eng.apply_block_guarded(blk1.clone(), 0, (0, 0), 1, 1),
+        Err(EngineError::AbciPrecondition(
+            ApplyBlockPreconditionError::StateFrozen { height: 0 }
+        ))
+    ));
+    eng.set_hardfork_height(None);
+    // Clean application passes all 6 guards
+    eng.apply_block(blk1).expect("valid block 1");
+    assert_eq!(eng.latest_height(), 1);
+
+    // 6. Verify HTTP /health + /evm reflects live big-block state
+    let shared = Arc::new(RwLock::new(eng));
+    let server = LocalHttpServer::start(
+        Arc::clone(&shared),
+        HttpServerConfig {
+            bind_addr: SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)),
+            serve_info: true,
+            serve_evm_rpc: true,
+        },
+    )
+    .expect("start server");
+    let addr = server.local_addr();
+    let health = http_get(addr, "/health").expect("health");
+    assert!(health.body.contains("\"evmBlockGasLimit\":30000000"));
+    let big = http_post(
+        addr,
+        "/evm",
+        r#"{"jsonrpc":"2.0","id":1,"method":"eth_usingBigBlocks","params":[]}"#,
+    )
+    .expect("eth_usingBigBlocks");
+    assert!(big.body.contains("\"result\":true"));
+    server.stop();
+
+    let _ = fs::remove_dir_all(&data_dir);
 }

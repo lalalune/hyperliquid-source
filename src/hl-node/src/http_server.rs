@@ -203,12 +203,13 @@ fn dispatch_request(
     if method == "GET" && path == "/health" {
         let eng = state.engine.read().expect("engine read lock");
         let json = format!(
-            "{{\"status\":\"ok\",\"chain\":\"{}\",\"height\":{},\"round\":{},\"abciStateRoot\":\"{}\",\"evmKvCount\":{},\"serveInfo\":{},\"serveEvmRpc\":{},\"subsystems\":26}}",
+            "{{\"status\":\"ok\",\"chain\":\"{}\",\"height\":{},\"round\":{},\"abciStateRoot\":\"{}\",\"evmKvCount\":{},\"evmBlockGasLimit\":{},\"serveInfo\":{},\"serveEvmRpc\":{},\"subsystems\":26}}",
             eng.chain_display(),
             eng.latest_height(),
             eng.latest_round(),
             eng.abci_state_root_hex(),
             eng.evm_kv_count(),
+            eng.evm_block_gas_limit(),
             state.serve_info,
             state.serve_evm_rpc,
         );
@@ -355,7 +356,13 @@ fn handle_evm_rpc(body: &[u8], state: &ServerState) -> (u16, &'static str, Strin
         "eth_blockNumber" => format!("\"0x{:x}\"", eng.latest_height()),
         "eth_syncing" => "false".to_string(),
         "eth_gasPrice" | "eth_bigBlockGasPrice" => "\"0x3b9aca00\"".to_string(),
-        "eth_usingBigBlocks" => "false".to_string(),
+        "eth_usingBigBlocks" => {
+            if eng.using_big_blocks() {
+                "true".to_string()
+            } else {
+                "false".to_string()
+            }
+        }
         "eth_maxPriorityFeePerGas" => "\"0x0\"".to_string(),
         _ => format!(
             "{{\"method\":\"{canonical_method}\",\"blockNumber\":\"0x{:x}\",\"abciStateRoot\":\"{}\"}}",

@@ -7,6 +7,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use global_constants::ChainName;
+use node_runtime::aux::AuxStreamConfig;
 use node115_cli_validators::{accepts_lowercase_bool, accepts_u64_decimal, validate_node_ip};
 use node115_startup_output::{OutputSettings, ReplicaStyle, StyleError};
 
@@ -107,6 +108,7 @@ pub struct ParsedCommand {
     pub flags: BTreeSet<String>,
     pub values: BTreeMap<String, String>,
     pub output_settings: Option<OutputSettings>,
+    pub aux_config: Option<AuxStreamConfig>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -121,6 +123,7 @@ pub enum CliError {
     InvalidBool { option: &'static str, value: String },
     InvalidNodeIp(String),
     InvalidReplicaStyle(String),
+    AuxConfigConflict(String),
 }
 
 impl std::fmt::Display for CliError {
@@ -144,6 +147,7 @@ impl std::fmt::Display for CliError {
             CliError::InvalidReplicaStyle(s) => {
                 write!(f, "Matching variant not found for --replica-cmds-style: {s:?}")
             }
+            CliError::AuxConfigConflict(msg) => write!(f, "aux stream config conflict: {msg}"),
         }
     }
 }
@@ -387,12 +391,46 @@ where
         None
     };
 
+    let aux_config = if sub.uses_common_run_options() {
+        let mut enabled_streams = Vec::new();
+        for (flag_name, stream_name) in [
+            ("write-trades", "node_trades"),
+            ("write-fills", "node_fills"),
+            ("write-raw-book-diffs", "node_raw_book_diffs"),
+            ("write-order-statuses", "node_order_statuses"),
+            ("write-misc-events", "misc_events"),
+            ("write-hip3-oracle-updates", "hip3_oracle_updates"),
+            (
+                "write-system-and-core-writer-actions",
+                "system_and_core_writer_actions",
+            ),
+        ] {
+            if flags.contains(flag_name) {
+                enabled_streams.push(stream_name);
+            }
+        }
+        if values.contains_key("write-user-clearinghouse-states") {
+            enabled_streams.push("dex_user_clearinghouse_states");
+        }
+        let cfg = AuxStreamConfig {
+            batch_by_block: flags.contains("batch-by-block"),
+            stream_with_block_info: flags.contains("stream-with-block-info"),
+            enabled_streams,
+        };
+        cfg.validate()
+            .map_err(|e| CliError::AuxConfigConflict(e.to_string()))?;
+        Some(cfg)
+    } else {
+        None
+    };
+
     Ok(CliAction::Command(ParsedCommand {
         chain,
         subcommand: sub,
         flags,
         values,
         output_settings,
+        aux_config,
     }))
 }
 
