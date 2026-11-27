@@ -5,9 +5,12 @@
 
 #![forbid(unsafe_code)]
 
+pub mod chain_ext;
 pub mod decimal_scaler;
 pub mod hyperliquidity;
 pub mod nonce_set;
+pub mod state_guards;
+pub mod utils;
 
 pub use node115_agent_erase_state as agent_erase;
 pub use node115_daycount_date as daycount_date;

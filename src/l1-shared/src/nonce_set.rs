@@ -101,6 +101,18 @@ impl NonceReject {
     }
 }
 
+/// Panic message prefix verified at `.rodata 0x7c958c` (`l1/src/nonce_set.rs:141:13`, `0x4227e44`).
+pub const NONCE_INVARIANT_LABEL: &str = "nonce invariant";
+
+/// Error returned when deserialized nonces violate the strictly-ascending invariant
+/// checked in `NonceSetDe` (`0x4227d30`, `l1/src/nonce_set.rs:141:13`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct NonceInvariantError {
+    pub index: usize,
+    pub prev: u64,
+    pub next: u64,
+}
+
 /// Strictly ascending per-account nonce ring (`VecDeque<u64>`).
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct NonceRing {
@@ -112,6 +124,23 @@ impl NonceRing {
         Self {
             ring: VecDeque::new(),
         }
+    }
+
+    /// Reconstructs the `NonceSetDe` strictly-ascending invariant check (`0x4227d30..0x4227e5d`,
+    /// `l1/src/nonce_set.rs:141:13`): every adjacent pair must satisfy `prev < next`.
+    pub fn from_deserialized(nonces: Vec<u64>) -> Result<Self, NonceInvariantError> {
+        for (i, pair) in nonces.windows(2).enumerate() {
+            if pair[0] >= pair[1] {
+                return Err(NonceInvariantError {
+                    index: i + 1,
+                    prev: pair[0],
+                    next: pair[1],
+                });
+            }
+        }
+        Ok(Self {
+            ring: VecDeque::from(nonces),
+        })
     }
 
     pub fn len(&self) -> usize {
