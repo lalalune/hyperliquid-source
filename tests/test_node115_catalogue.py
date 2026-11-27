@@ -69,9 +69,16 @@ class CatalogueTests(unittest.TestCase):
     def test_dependency_bytes_do_not_count_as_first_party(self):
         coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', self.components)
         self.assertEqual(set(coverage['targets']), {'node115'})
-        self.assertEqual(coverage['totals']['node115']['windows'], 7885)
-        self.assertEqual(coverage['totals']['node115']['bytes'], 5318174)
-        self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
+        dep_rows = [r for r in coverage['windows'] if 'dependency' in r]
+        fp_rows = [r for r in coverage['windows'] if 'dependency' not in r]
+        self.assertEqual((len(dep_rows), sum(r['bytes'] for r in dep_rows)), (7885, 5318174))
+        self.assertEqual((len(fp_rows), sum(r['bytes'] for r in fp_rows)), (66, 12234))
+        self.assertEqual(coverage['totals']['node115']['windows'], len(dep_rows) + len(fp_rows))
+        self.assertEqual(coverage['totals']['node115']['bytes'],
+                         sum(r['bytes'] for r in dep_rows) + sum(r['bytes'] for r in fp_rows))
+        self.assertEqual(sum(row['windows'] for row in coverage['components'].values()), len(fp_rows))
+        self.assertEqual(sum(row['bytes'] for row in coverage['components'].values()),
+                         sum(r['bytes'] for r in fp_rows))
 
     def test_wrong_owner_target_and_changed_evidence_rejected(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -122,7 +129,9 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual((len(native), sum(r['bytes'] for r in native)), (7265, 5053810))
         self.assertEqual(len(rust) + len(native), len(rows))
         self.assertTrue(all(r['relocation_qualified'] for r in rows))
-        self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
+        self.assertTrue(all('dependency' in r for r in rows))
+        fp_rows = [r for r in coverage['windows'] if 'dependency' not in r]
+        self.assertEqual(sum(row['windows'] for row in coverage['components'].values()), len(fp_rows))
     def test_relocation_field_rejections_cannot_widen_credit(self):
         field = {'offset': 4, 'width': 4, 'kind': 2, 'addend': -4}
         cases = ([field, {**field, 'offset': 6}],          # overlapping fields

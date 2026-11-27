@@ -8,29 +8,29 @@ Full-scope acceptance reviewed on **2026-11-09**.
 
 | Required node component | Accepted gates | Milestones | Compared implementation bytes | Registered implementation windows |
 | --- | ---: | ---: | ---: | ---: |
-| [Foundation utilities](COMPONENTS.md#foundation) | 0/4 | 0% | 0 | 0 |
+| [Foundation utilities](COMPONENTS.md#foundation) | 0/4 | 0% | 197 | 2 |
 | [Serialization fork](COMPONENTS.md#serialization) | 0/4 | 0% | 0 | 0 |
 | [Storage and snapshots](COMPONENTS.md#storage) | 0/4 | 0% | 0 | 0 |
 | [Network transport](COMPONENTS.md#transport) | 0/4 | 0% | 0 | 0 |
-| [Consensus](COMPONENTS.md#consensus) | 0/4 | 0% | 0 | 0 |
+| [Consensus](COMPONENTS.md#consensus) | 0/4 | 0% | 1,403 | 8 |
 | [Node runtime and gossip](COMPONENTS.md#node-runtime) | 0/4 | 0% | 0 | 0 |
 | [Block execution and state](COMPONENTS.md#abci) | 0/4 | 0% | 0 | 0 |
 | [Action wire and signing](COMPONENTS.md#action-wire) | 0/4 | 0% | 0 | 0 |
 | [Action dispatch and handlers](COMPONENTS.md#action-dispatch) | 0/4 | 0% | 0 | 0 |
-| [Exchange orchestration](COMPONENTS.md#exchange) | 0/4 | 0% | 0 | 0 |
-| [Order books and matching](COMPONENTS.md#orderbook) | 0/4 | 0% | 0 | 0 |
-| [Clearinghouses and risk](COMPONENTS.md#risk) | 0/4 | 0% | 0 | 0 |
-| [Assets and fixed-point quantities](COMPONENTS.md#assets) | 0/4 | 0% | 0 | 0 |
-| [Fees and volume](COMPONENTS.md#fees) | 0/4 | 0% | 0 | 0 |
+| [Exchange orchestration](COMPONENTS.md#exchange) | 0/4 | 0% | 1,520 | 5 |
+| [Order books and matching](COMPONENTS.md#orderbook) | 0/4 | 0% | 1,197 | 5 |
+| [Clearinghouses and risk](COMPONENTS.md#risk) | 0/4 | 0% | 2,153 | 14 |
+| [Assets and fixed-point quantities](COMPONENTS.md#assets) | 0/4 | 0% | 147 | 3 |
+| [Fees and volume](COMPONENTS.md#fees) | 0/4 | 0% | 113 | 1 |
 | [Vaults and subaccounts](COMPONENTS.md#vaults) | 0/4 | 0% | 0 | 0 |
-| [Bridge and withdrawals](COMPONENTS.md#bridge) | 0/4 | 0% | 0 | 0 |
-| [HyperEVM execution](COMPONENTS.md#evm) | 0/4 | 0% | 0 | 0 |
+| [Bridge and withdrawals](COMPONENTS.md#bridge) | 0/4 | 0% | 1,764 | 5 |
+| [HyperEVM execution](COMPONENTS.md#evm) | 0/4 | 0% | 1,110 | 6 |
 | [Staking and validator lifecycle](COMPONENTS.md#staking) | 0/4 | 0% | 0 | 0 |
-| [DEX registry](COMPONENTS.md#dex-registry) | 0/4 | 0% | 0 | 0 |
-| [Remaining L1 state helpers](COMPONENTS.md#l1-shared) | 0/4 | 0% | 0 | 0 |
+| [DEX registry](COMPONENTS.md#dex-registry) | 0/4 | 0% | 926 | 5 |
+| [Remaining L1 state helpers](COMPONENTS.md#l1-shared) | 0/4 | 0% | 86 | 1 |
 | [Info API](COMPONENTS.md#info-api) | 0/4 | 0% | 0 | 0 |
 | [EVM JSON-RPC](COMPONENTS.md#evm-rpc) | 0/4 | 0% | 0 | 0 |
-| [Global configuration](COMPONENTS.md#constants) | 0/4 | 0% | 0 | 0 |
+| [Global configuration](COMPONENTS.md#constants) | 0/4 | 0% | 1,618 | 11 |
 
 Accepted full-scope gates: **0/92**.
 
@@ -61,7 +61,7 @@ Both complete source and target extents are authenticated. These candidates have
 
 ## Full target coverage
 
-Compared .text: 5,318,174/83,719,936 bytes (6.35234%). Raw-equal positions: 4,968,370/83,719,936 (5.93451%). Whole ELF reproduced: no.
+Compared .text: 5,330,408/83,719,936 bytes (6.36695%). Raw-equal positions: 4,979,729/83,719,936 (5.94808%). Whole ELF reproduced: no.
 
 | Whole ELF bytes | .text bytes | Other executable bytes | Allocated data/metadata bytes | Zero-fill bytes |
 | ---: | ---: | ---: | ---: | ---: |
@@ -7956,5 +7956,71 @@ Compared .text: 5,318,174/83,719,936 bytes (6.35234%). Raw-equal positions: 4,96
 | [tikv-jemalloc-sys 0.6.1+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7: one of 2 identical copies of 2 build functions, e.g. _rjem_je_tcache_gc_dalloc_event_handler](../research/work-items/RE-002-node115-vendor-census/census.json) | `0x63ec1e0..0x63ec349` | published-crate rebuild | 346/361 (95.84%) |
 | [tikv-jemalloc-sys 0.6.1+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7: one of 2 identical copies of 2 build functions, e.g. _rjem_je_tcache_gc_dalloc_event_handler](../research/work-items/RE-002-node115-vendor-census/census.json) | `0x63ec350..0x63ec4b9` | published-crate rebuild | 346/361 (95.84%) |
 | [BLST portable SHA-256 assembly, identical source in v0.3.15/v0.3.16/v0.3.17](../research/work-items/RE-002-node115-cfa-frame-policy/blst-portable/evidence.json) | `0x5d20100..0x5d21214` | published native assembly rebuild | 4,363/4,372 (99.79%) |
+| [l1/raw_signature_tracker slice20 equality (0x5436860)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x5436860..0x54368b6` | independent-rust-build | 86/86 (100.00%) |
+| [l1/fees binary64 descending window scan (0x36e1b10)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x36e1b10..0x36e1b81` | independent-rust-build | 105/113 (92.92%) |
+| [l1/qtys 256-bit unsigned subtraction with borrow (0x2ccdd80)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2ccdd80..0x2ccddb1` | independent-rust-build | 49/49 (100.00%) |
+| [l1/qtys 256-bit unsigned subtraction with borrow (0x43be060)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x43be060..0x43be091` | independent-rust-build | 49/49 (100.00%) |
+| [l1/qtys 256-bit unsigned subtraction with borrow (0x564c830)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x564c830..0x564c861` | independent-rust-build | 49/49 (100.00%) |
+| [base VecDeque bounded ring offset search (0x45514d0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x45514d0..0x4551523` | independent-rust-build | 83/83 (100.00%) |
+| [base VecDeque 80-byte two-span iterator (0x152e360)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x152e360..0x152e3d2` | independent-rust-build | 114/114 (100.00%) |
+| [global_constants ChainName RMP visit_str (0x14be010)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x14be010..0x14be0a6` | independent-rust-build | 142/150 (94.67%) |
+| [global_constants ChainName RMP visit_str (0x2690cd0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2690cd0..0x2690d66` | independent-rust-build | 142/150 (94.67%) |
+| [global_constants ChainName RMP visit_str (0x4682610)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4682610..0x46826a6` | independent-rust-build | 142/150 (94.67%) |
+| [global_constants ChainName RMP visit_str (0x57c3520)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x57c3520..0x57c35b6` | independent-rust-build | 144/150 (96.00%) |
+| [global_constants ChainName JSON visit_str (0x14be0b0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x14be0b0..0x14be15c` | independent-rust-build | 165/172 (95.93%) |
+| [global_constants ChainName JSON visit_str (0x2690d70)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2690d70..0x2690e1c` | independent-rust-build | 165/172 (95.93%) |
+| [global_constants ChainName JSON visit_str (0x46826b0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x46826b0..0x468275c` | independent-rust-build | 164/172 (95.35%) |
+| [global_constants ChainName JSON visit_str (0x57c3470)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x57c3470..0x57c351c` | independent-rust-build | 165/172 (95.93%) |
+| [global_constants SpotMarkKind RMP visit_str (0x22e20d0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x22e20d0..0x22e213e` | independent-rust-build | 102/110 (92.73%) |
+| [global_constants SpotMarkKind RMP visit_str (0x3d47cb0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x3d47cb0..0x3d47d1e` | independent-rust-build | 102/110 (92.73%) |
+| [global_constants SpotMarkKind RMP visit_str (0x535bee0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x535bee0..0x535bf4e` | independent-rust-build | 102/110 (92.73%) |
+| [l1/book Tif RMP visit_str (0x25cee60)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x25cee60..0x25cef45` | independent-rust-build | 213/229 (93.01%) |
+| [l1/book Tif RMP visit_str (0x4447430)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4447430..0x4447515` | independent-rust-build | 215/229 (93.89%) |
+| [l1/book Tif RMP visit_str (0x5171260)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x5171260..0x5171345` | independent-rust-build | 213/229 (93.01%) |
+| [l1/book Tif JSON visit_str (0x25ced60)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x25ced60..0x25cee5f` | independent-rust-build | 240/255 (94.12%) |
+| [l1/book Tif JSON visit_str (0x4447330)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4447330..0x444742f` | independent-rust-build | 242/255 (94.90%) |
+| [l1/clearinghouse OutcomeKind RMP visit_str (0x25d3ca0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x25d3ca0..0x25d3d42` | independent-rust-build | 146/162 (90.12%) |
+| [l1/clearinghouse OutcomeKind RMP visit_str (0x44649e0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x44649e0..0x4464a82` | independent-rust-build | 146/162 (90.12%) |
+| [l1/clearinghouse OutcomeKind RMP visit_str (0x5479a10)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x5479a10..0x5479ab2` | independent-rust-build | 146/162 (90.12%) |
+| [l1/clearinghouse MarginMode RMP visit_str (0x2868990)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2868990..0x2868a20` | independent-rust-build | 136/144 (94.44%) |
+| [l1/clearinghouse MarginMode RMP visit_str (0x3bcf9e0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x3bcf9e0..0x3bcfa70` | independent-rust-build | 136/144 (94.44%) |
+| [l1/clearinghouse MarginMode RMP visit_str (0x59fdec0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x59fdec0..0x59fdf50` | independent-rust-build | 137/144 (95.14%) |
+| [l1/bole Operation RMP visit_str (0x2691210)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2691210..0x26912ac` | independent-rust-build | 148/156 (94.87%) |
+| [l1/bole Operation RMP visit_str (0x3d440a0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x3d440a0..0x3d4413c` | independent-rust-build | 148/156 (94.87%) |
+| [l1/bole Operation RMP visit_str (0x57c3760)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x57c3760..0x57c37fc` | independent-rust-build | 150/156 (96.15%) |
+| [l1/bole Operation JSON visit_str (0x2691150)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2691150..0x2691202` | independent-rust-build | 171/178 (96.07%) |
+| [l1/bole Operation JSON visit_str (0x3d44140)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x3d44140..0x3d441f2` | independent-rust-build | 171/178 (96.07%) |
+| [l1/bole BorrowLendField RMP visit_str (0x2869450)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2869450..0x28694d9` | independent-rust-build | 129/137 (94.16%) |
+| [l1/bole BorrowLendField RMP visit_str (0x467fba0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x467fba0..0x467fc29` | independent-rust-build | 129/137 (94.16%) |
+| [l1/bole BorrowLendField RMP visit_str (0x534bf90)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x534bf90..0x534c019` | independent-rust-build | 129/137 (94.16%) |
+| [l1/bridge BridgeEvent RMP visit_str (0x2864d00)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2864d00..0x2864e56` | independent-rust-build | 290/342 (84.80%) |
+| [l1/bridge BridgeEvent RMP visit_str (0x4446560)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4446560..0x44466b6` | independent-rust-build | 300/342 (87.72%) |
+| [l1/bridge BridgeEvent RMP visit_str (0x5ae4620)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x5ae4620..0x5ae4776` | independent-rust-build | 291/342 (85.09%) |
+| [l1/bridge BridgeEvent JSON visit_str (0x2864e60)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2864e60..0x2864fd1` | independent-rust-build | 318/369 (86.18%) |
+| [l1/bridge BridgeEvent JSON visit_str (0x44466c0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x44466c0..0x4446831` | independent-rust-build | 328/369 (88.89%) |
+| [l1/dex_registry DisabledState RMP visit_str (0x2b955c0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2b955c0..0x2b95670` | independent-rust-build | 156/176 (88.64%) |
+| [l1/dex_registry DisabledState RMP visit_str (0x4446d20)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4446d20..0x4446dd0` | independent-rust-build | 158/176 (89.77%) |
+| [l1/dex_registry DisabledState RMP visit_str (0x546a380)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x546a380..0x546a430` | independent-rust-build | 156/176 (88.64%) |
+| [l1/dex_registry DisabledState JSON visit_str (0x2b954f0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2b954f0..0x2b955b7` | independent-rust-build | 180/199 (90.45%) |
+| [l1/dex_registry DisabledState JSON visit_str (0x4446dd0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4446dd0..0x4446e97` | independent-rust-build | 182/199 (91.46%) |
+| [l1/evm EvmTxType RMP visit_str (0x22dc290)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x22dc290..0x22dc345` | independent-rust-build | 173/181 (95.58%) |
+| [l1/evm EvmTxType RMP visit_str (0x44458a0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x44458a0..0x4445955` | independent-rust-build | 173/181 (95.58%) |
+| [l1/evm EvmTxType RMP visit_str (0x5ae3fc0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x5ae3fc0..0x5ae4075` | independent-rust-build | 174/181 (96.13%) |
+| [l1/evm EvmTxType JSON visit_str (0x22dde20)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x22dde20..0x22ddeeb` | independent-rust-build | 196/203 (96.55%) |
+| [l1/evm EvmTxType JSON visit_str (0x4445960)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4445960..0x4445a2b` | independent-rust-build | 196/203 (96.55%) |
+| [l1/evm ReadPrecompileOutcomeName RMP visit_str (0x2692a20)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x2692a20..0x2692ac1` | independent-rust-build | 150/161 (93.17%) |
+| [l1/exchange AbstractionKind RMP visit_str (0x23c65f0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x23c65f0..0x23c6716` | independent-rust-build | 266/294 (90.48%) |
+| [l1/exchange AbstractionKind RMP visit_str (0x3bdd720)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x3bdd720..0x3bdd846` | independent-rust-build | 266/294 (90.48%) |
+| [l1/exchange AbstractionKind RMP visit_str (0x4d6b5d0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4d6b5d0..0x4d6b6f6` | independent-rust-build | 266/294 (90.48%) |
+| [l1/exchange AbstractionKind JSON visit_str (0x23c6720)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x23c6720..0x23c685f` | independent-rust-build | 292/319 (91.54%) |
+| [l1/exchange AbstractionKind JSON visit_str (0x3bdd5e0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x3bdd5e0..0x3bdd71f` | independent-rust-build | 292/319 (91.54%) |
+| [l1/governance VoteChoice RMP visit_str (0x23c18b0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x23c18b0..0x23c1926` | independent-rust-build | 110/118 (93.22%) |
+| [l1/governance VoteChoice RMP visit_str (0x3bd6f00)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x3bd6f00..0x3bd6f76` | independent-rust-build | 110/118 (93.22%) |
+| [l1/governance VoteChoice RMP visit_str (0x4d69bd0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4d69bd0..0x4d69c46` | independent-rust-build | 110/118 (93.22%) |
+| [l1/governance ProposalCategory RMP visit_str (0x23c2fb0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x23c2fb0..0x23c3079` | independent-rust-build | 193/201 (96.02%) |
+| [l1/governance ProposalCategory RMP visit_str (0x3bd7c80)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x3bd7c80..0x3bd7d49` | independent-rust-build | 193/201 (96.02%) |
+| [l1/governance ProposalCategory RMP visit_str (0x4d6a370)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x4d6a370..0x4d6a439` | independent-rust-build | 193/201 (96.02%) |
+| [l1/governance ProposalCategory JSON visit_str (0x23c2ed0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x23c2ed0..0x23c2faf` | independent-rust-build | 216/223 (96.86%) |
+| [l1/governance ProposalCategory JSON visit_str (0x3bd7ba0)](../research/work-items/RE-001-node115-first-party-byte-census/census.json) | `0x3bd7ba0..0x3bd7c7f` | independent-rust-build | 216/223 (96.86%) |
 
 The window list is not a function census. Data, calls, ABI, relocations and whole-program behavior remain acceptance requirements.
