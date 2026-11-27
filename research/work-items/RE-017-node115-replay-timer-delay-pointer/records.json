@@ -1,0 +1,233 @@
+{
+  "captured_target_executed": false,
+  "claim_status": "exact pointer-flow observation; timer-delay meaning and stored value remain inferred/unresolved",
+  "component_gate_changed": false,
+  "pointer_flow": [
+    {
+      "at": 95395946,
+      "observation": "tracker+0x88 address is formed"
+    },
+    {
+      "at": 95395967,
+      "observation": "address is stored in callback-context word +0x18"
+    },
+    {
+      "at": 95395997,
+      "observation": "context base is passed to 0x4de0540 in RSI"
+    },
+    {
+      "at": 81659234,
+      "observation": "selected no-overflow branch reaches flat-map call"
+    },
+    {
+      "at": 81659386,
+      "observation": "context pointer is preserved in RSI at call to 0x57f1690"
+    },
+    {
+      "at": 92214942,
+      "observation": "flat-map walker saves the context pointer"
+    },
+    {
+      "at": 92215031,
+      "observation": "saved context is passed to 0x57d44d0 in RDI"
+    },
+    {
+      "at": 92095755,
+      "observation": "callback loads context word +0x18 as a pointer"
+    },
+    {
+      "at": 92095759,
+      "observation": "callback reads one 8-byte IEEE-754 value through that pointer"
+    }
+  ],
+  "question": "Does the selected replay flat-map timer comparator consume tracker+0x88?",
+  "relocations": {
+    "0x64e0f70": {
+      "addend": 22993248,
+      "info": 8,
+      "slot": 105779056
+    },
+    "0x64e0f78": {
+      "addend": 23243168,
+      "info": 8,
+      "slot": 105779064
+    }
+  },
+  "remaining_unknowns": [
+    "who initializes or updates tracker+0x88 and its exact stored value",
+    "the time unit or configuration meaning of the f64",
+    "runtime branch reachability, concurrent mutation and full timer eligibility",
+    "the separate tree/sentinel timer route and complete component gates"
+  ],
+  "source_commit": "e1528748a34c6ef79736ba16002caadbdff163a4",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target_size": 105896032,
+  "windows": {
+    "entry_timer_compare": {
+      "anchors": [
+        {
+          "bytes": "4c8b2f",
+          "mnemonic": "mov",
+          "operands": "r13, qword ptr [rdi]",
+          "va": 92095747
+        },
+        {
+          "bytes": "48897c2478",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x78], rdi",
+          "va": 92095750
+        },
+        {
+          "bytes": "488b4718",
+          "mnemonic": "mov",
+          "operands": "rax, qword ptr [rdi + 0x18]",
+          "va": 92095755
+        },
+        {
+          "bytes": "f20f1000",
+          "mnemonic": "movsd",
+          "operands": "xmm0, qword ptr [rax]",
+          "va": 92095759
+        }
+      ],
+      "body_sha256": "bcd77c3729ac88e93564c0f6f6381255f52648ee6c92d12b5e1ccaa673523843",
+      "end": 92097258,
+      "fde": {
+        "cie": 17028612,
+        "end": 92097258,
+        "fde": 20411016,
+        "lsda": 3990436,
+        "start": 92095696
+      },
+      "file_offset": 92091600,
+      "native_instruction_count": 326,
+      "start": 92095696
+    },
+    "flat_map_walk": {
+      "anchors": [
+        {
+          "bytes": "4889742410",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x10], rsi",
+          "va": 92214942
+        },
+        {
+          "bytes": "4889ee",
+          "mnemonic": "mov",
+          "operands": "rsi, rbp",
+          "va": 92215020
+        },
+        {
+          "bytes": "488b7c2410",
+          "mnemonic": "mov",
+          "operands": "rdi, qword ptr [rsp + 0x10]",
+          "va": 92215026
+        },
+        {
+          "bytes": "e8d42dfeff",
+          "mnemonic": "call",
+          "operands": "0x57d44d0",
+          "va": 92215031
+        }
+      ],
+      "body_sha256": "39e7db956acd03c521aed3311369a58cbf8878403a3df74a4991ac4f6679b2bf",
+      "end": 92215412,
+      "fde": {
+        "cie": 13266648,
+        "end": 92215412,
+        "fde": 16345132,
+        "lsda": null,
+        "start": 92214928
+      },
+      "file_offset": 92210832,
+      "native_instruction_count": 130,
+      "start": 92214928
+    },
+    "timer_map_apply": {
+      "anchors": [
+        {
+          "bytes": "0f818f000000",
+          "mnemonic": "jno",
+          "operands": "0x4de05f7",
+          "va": 81659234
+        },
+        {
+          "bytes": "4889df",
+          "mnemonic": "mov",
+          "operands": "rdi, rbx",
+          "va": 81659383
+        },
+        {
+          "bytes": "e89110a100",
+          "mnemonic": "call",
+          "operands": "0x57f1690",
+          "va": 81659386
+        }
+      ],
+      "body_sha256": "4246af445a7dd5ba891ad07eed33c6f3db998766bfe3a77ee1ba905f56215e33",
+      "end": 81660167,
+      "fde": {
+        "cie": 17028612,
+        "end": 81660167,
+        "fde": 19901444,
+        "lsda": 3643176,
+        "start": 81659200
+      },
+      "file_offset": 81655104,
+      "native_instruction_count": 204,
+      "start": 81659200
+    },
+    "tracker_drain": {
+      "anchors": [
+        {
+          "bytes": "4989f6",
+          "mnemonic": "mov",
+          "operands": "r14, rsi",
+          "va": 95395902
+        },
+        {
+          "bytes": "488d7e60",
+          "mnemonic": "lea",
+          "operands": "rdi, [rsi + 0x60]",
+          "va": 95395908
+        },
+        {
+          "bytes": "498db688000000",
+          "mnemonic": "lea",
+          "operands": "rsi, [r14 + 0x88]",
+          "va": 95395946
+        },
+        {
+          "bytes": "4889742418",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x18], rsi",
+          "va": 95395967
+        },
+        {
+          "bytes": "4889e6",
+          "mnemonic": "mov",
+          "operands": "rsi, rsp",
+          "va": 95395997
+        },
+        {
+          "bytes": "e89b642eff",
+          "mnemonic": "call",
+          "operands": "0x4de0540",
+          "va": 95396000
+        }
+      ],
+      "body_sha256": "320d4642d9e862f9864e73f0a697647547a7bb3478587363277af03e50ff8327",
+      "end": 95396334,
+      "fde": {
+        "cie": 17028612,
+        "end": 95396334,
+        "fde": 20654152,
+        "lsda": 4133016,
+        "start": 95395888
+      },
+      "file_offset": 95391792,
+      "native_instruction_count": 112,
+      "start": 95395888
+    }
+  }
+}
