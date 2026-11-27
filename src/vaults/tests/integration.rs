@@ -663,3 +663,139 @@ fn vault_distribute_0x44a97b0_enforces_gates_profit_share_and_residual() {
     assert_eq!(followers[1].vault_entry_usd, 50_000_000);
     assert_eq!(followers[1].net_deposit, 60_000_000);
 }
+
+#[test]
+fn sub_account_modify_0x366b0d0_enforces_label_guard_and_membership() {
+    use vaults::sub_account::{
+        modify_sub_account, TAG_ERR_SUB_ACCOUNT_NOT_FOUND, TAG_SUCCESS,
+    };
+
+    let mut list = vec![
+        ExistingSubAccount {
+            address: [1; 20],
+            label: "Alpha".to_string(),
+        },
+        ExistingSubAccount {
+            address: [2; 20],
+            label: "Beta".to_string(),
+        },
+    ];
+
+    // > 100 bytes -> 0x158.
+    let err = modify_sub_account(&mut list, [1; 20], &"x".repeat(101)).unwrap_err();
+    assert_eq!(err.tag(), TAG_ERR_NAME_TOO_LONG);
+
+    // 0 or 17 bytes -> 0xe8.
+    assert_eq!(
+        modify_sub_account(&mut list, [1; 20], "").unwrap_err().tag(),
+        TAG_ERR_INVALID_LABEL_LEN
+    );
+    assert_eq!(
+        modify_sub_account(&mut list, [1; 20], "12345678901234567")
+            .unwrap_err()
+            .tag(),
+        TAG_ERR_INVALID_LABEL_LEN
+    );
+
+    // Case-insensitive duplicate -> 0xe6.
+    assert_eq!(
+        modify_sub_account(&mut list, [1; 20], "bEtA")
+            .unwrap_err()
+            .tag(),
+        TAG_ERR_DUPLICATE_LABEL
+    );
+
+    // Unknown sub-account -> 0xeb.
+    assert_eq!(
+        modify_sub_account(&mut list, [9; 20], "Gamma")
+            .unwrap_err()
+            .tag(),
+        TAG_ERR_SUB_ACCOUNT_NOT_FOUND
+    );
+
+    // Valid rename updates entry in place and returns 0x1a2.
+    assert_eq!(modify_sub_account(&mut list, [1; 20], "Gamma"), Ok(TAG_SUCCESS));
+    assert_eq!(list[0].label, "Gamma");
+    assert_eq!(list[1].label, "Beta");
+}
+
+#[test]
+fn vault_lifecycle_0x44ae320_0x44aad40_0x44abfb0_match_node115_constants() {
+    use vaults::lifecycle::{
+        aggregate_vault_equity, max_withdrawable_for_user, validate_new_vault, NewVaultError,
+        DEFAULT_LEADER_COMMISSION, LOCKUP_SECONDS_MAINNET, LOCKUP_SECONDS_NON_MAINNET,
+        MAX_INITIAL_USD, MIN_INITIAL_USD, TAG_ERR_DESC_TOO_SHORT,
+        TAG_ERR_INITIAL_DEPOSIT_TOO_SMALL, TAG_ERR_INVALID_USD_AMOUNT, TAG_ERR_NAME_TOO_LONG,
+        TAG_ERR_NAME_TOO_SHORT, TAG_ERR_STRING_TOO_LONG,
+    };
+
+    // Vault::new validation order & exact tags.
+    let e_max = validate_new_vault(MAX_INITIAL_USD, "Valid", "Valid description", 3, false)
+        .unwrap_err();
+    assert_eq!(e_max.tag(), TAG_ERR_INVALID_USD_AMOUNT);
+    let e_min = validate_new_vault(MIN_INITIAL_USD - 1, "Valid", "Valid description", 3, false)
+        .unwrap_err();
+    assert_eq!(e_min.tag(), TAG_ERR_INITIAL_DEPOSIT_TOO_SMALL);
+    let e_name_outer =
+        validate_new_vault(MIN_INITIAL_USD, &"n".repeat(101), "Valid description", 3, false)
+            .unwrap_err();
+    assert_eq!(e_name_outer.tag(), TAG_ERR_STRING_TOO_LONG);
+    assert_eq!(
+        validate_new_vault(MIN_INITIAL_USD, "ab", "Valid description", 3, false)
+            .unwrap_err()
+            .tag(),
+        TAG_ERR_NAME_TOO_SHORT
+    );
+    assert_eq!(
+        validate_new_vault(MIN_INITIAL_USD, &"n".repeat(51), "Valid description", 3, false)
+            .unwrap_err()
+            .tag(),
+        TAG_ERR_NAME_TOO_LONG
+    );
+    assert_eq!(
+        validate_new_vault(MIN_INITIAL_USD, "Valid", &"d".repeat(251), 3, false)
+            .unwrap_err()
+            .tag(),
+        TAG_ERR_STRING_TOO_LONG
+    );
+    assert_eq!(
+        validate_new_vault(MIN_INITIAL_USD, "Valid", "123456789", 3, false),
+        Err(NewVaultError::DescriptionTooShort)
+    );
+    assert_eq!(NewVaultError::DescriptionTooShort.tag(), TAG_ERR_DESC_TOO_SHORT);
+
+    // Mainnet (chain_id=3) -> 86400s lockup, default 10% commission; non-mainnet -> 20s.
+    let cfg_main =
+        validate_new_vault(MIN_INITIAL_USD, "Alpha", "Mainnet vault desc", 3, false).unwrap();
+    assert_eq!(cfg_main.lockup_seconds, LOCKUP_SECONDS_MAINNET);
+    assert_eq!(cfg_main.leader_commission, DEFAULT_LEADER_COMMISSION);
+
+    let cfg_test =
+        validate_new_vault(MIN_INITIAL_USD, "Alpha", "Testnet vault desc", 1, true).unwrap();
+    assert_eq!(cfg_test.lockup_seconds, LOCKUP_SECONDS_NON_MAINNET);
+    assert_eq!(cfg_test.leader_commission, 0.0);
+
+    // Vault::vault_equity (0x44aad40): parent tag 2 sums children saturating; tag 0 ignores children.
+    let parent = [0x10; 20];
+    let c1 = [0x11; 20];
+    let c2 = [0x12; 20];
+    let eq_fn = |a: [u8; 20]| match a[0] {
+        0x10 => 500_000_000,
+        0x11 => 200_000_000,
+        0x12 => 300_000_000,
+        _ => 0,
+    };
+    assert_eq!(aggregate_vault_equity(parent, 0, &[c1, c2], eq_fn), (500_000_000, 0));
+    assert_eq!(
+        aggregate_vault_equity(parent, 2, &[c1, c2], eq_fn),
+        (1_000_000_000, 0)
+    );
+
+    // Vault::max_withdrawable (0x44abfb0):
+    // Total $10,000, leader 10% ($1,000), followers 90% ($9,000).
+    // Leader must keep max($100, $9,000 * 0.05/0.95 = $473.684210) -> withdrawable = $526.315790.
+    assert_eq!(max_withdrawable_for_user(10_000_000_000, 0.10, false), 1_000_000_000);
+    assert_eq!(max_withdrawable_for_user(10_000_000_000, 0.10, true), 526_315_790);
+    // Small vault ($150 total, 100% leader): leader must keep $100 floor -> $50 withdrawable.
+    assert_eq!(max_withdrawable_for_user(150_000_000, 1.0, true), 50_000_000);
+}

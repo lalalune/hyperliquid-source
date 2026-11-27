@@ -35,10 +35,11 @@ pub const TAG_ERR_LIMIT_REACHED: u16 = 0xe5;
 pub const TAG_ERR_DUPLICATE_LABEL: u16 = 0xe6;
 pub const TAG_ERR_DUPLICATE_ADDRESS: u16 = 0xe7;
 pub const TAG_ERR_INVALID_LABEL_LEN: u16 = 0xe8;
+pub const TAG_ERR_SUB_ACCOUNT_NOT_FOUND: u16 = 0xeb;
 pub const TAG_ERR_VOLUME_TOO_LOW: u16 = 0xec;
 pub const TAG_ERR_NAME_TOO_LONG: u16 = 0x158;
 
-/// Rejection reason from sub-account admission (`0x366a620` / `0x366b350`).
+/// Rejection reason from sub-account admission (`0x366a620` / `0x366b0d0` / `0x366b350`).
 #[derive(Clone, Debug, PartialEq)]
 pub enum SubAccountReject {
     /// Raw volume below [`MIN_VOLUME_RAW`] (tag `0xec`, payload `volume as f64 / 100.0`).
@@ -47,6 +48,8 @@ pub enum SubAccountReject {
     LimitReached { current: usize, max: u64 },
     /// Derived sub-account address already exists (tag `0xe7`).
     DuplicateAddress,
+    /// Target sub-account address is not registered under this master (`0x366b0d0`, tag `0xeb`).
+    SubAccountNotFound,
     /// Raw name byte length `>= 101` before calling `0x366b350` (tag `0x158`).
     NameTooLong { len: usize },
     /// Raw label byte length outside `1..=16` in `0x366b350` (tag `0xe8`).
@@ -61,6 +64,7 @@ impl SubAccountReject {
             Self::VolumeTooLow { .. } => TAG_ERR_VOLUME_TOO_LOW,
             Self::LimitReached { .. } => TAG_ERR_LIMIT_REACHED,
             Self::DuplicateAddress => TAG_ERR_DUPLICATE_ADDRESS,
+            Self::SubAccountNotFound => TAG_ERR_SUB_ACCOUNT_NOT_FOUND,
             Self::NameTooLong { .. } => TAG_ERR_NAME_TOO_LONG,
             Self::InvalidLabelLength { .. } => TAG_ERR_INVALID_LABEL_LEN,
             Self::DuplicateLabel => TAG_ERR_DUPLICATE_LABEL,
@@ -148,4 +152,30 @@ pub fn admit_sub_account(
         address: derived_address,
         label: label.to_string(),
     })
+}
+
+/// Reconstructs `SubAccountTracker::modify_sub_account` (`0x366b0d0..0x366b350`).
+///
+/// Enforces outer name bound (`<= 100` bytes -> `0x158`), delegates to the
+/// inner label guard `0x366b350` (`1..=16` bytes -> `0xe8`, case-insensitive
+/// uniqueness across the master's sub-accounts -> `0xe6`), then locates
+/// `sub_account` in `sub_accounts` (returning `0xeb` if absent) and renames
+/// it in place, returning `Ok(TAG_SUCCESS)`.
+pub fn modify_sub_account(
+    sub_accounts: &mut [ExistingSubAccount],
+    sub_account: Address,
+    new_label: &str,
+) -> Result<u16, SubAccountReject> {
+    if new_label.len() > OUTER_NAME_LEN_LIMIT {
+        return Err(SubAccountReject::NameTooLong {
+            len: new_label.len(),
+        });
+    }
+    let existing_labels: Vec<&str> = sub_accounts.iter().map(|s| s.label.as_str()).collect();
+    validate_sub_account_label(new_label, &existing_labels)?;
+    let Some(entry) = sub_accounts.iter_mut().find(|s| s.address == sub_account) else {
+        return Err(SubAccountReject::SubAccountNotFound);
+    };
+    entry.label = new_label.to_string();
+    Ok(TAG_SUCCESS)
 }
