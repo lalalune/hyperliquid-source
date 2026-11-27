@@ -10,6 +10,7 @@
 
 pub mod credit;
 pub mod schedule;
+pub mod solvency;
 pub mod tiers;
 pub mod vlm;
 
@@ -36,6 +37,13 @@ pub use credit::{
     scale_fill_fee_component, settle_fill_fee,
 };
 pub use schedule::is_monotonically_non_increasing;
+pub use solvency::{
+    COMBINED_SUBACCOUNT_MIN_RAW_VLM, MAX_FEE_RATE, MIN_NET_PROTOCOL_FEE, MIN_POSITIVE_FEE_RATE,
+    PROTOCOL_FEE_SCALES, SCHEDULE_CANCEL_MAX_DAYS_AHEAD, SCHEDULE_CANCEL_MAX_PER_DAY,
+    SCHEDULE_CANCEL_MIN_RAW_VLM, SolvencyCheckInputs, check_combined_subaccount_volume_gate,
+    check_net_fee_solvency_0x36a58d0, check_schedule_cancel_volume_gate, is_valid_maker_rate,
+    is_valid_taker_rate,
+};
 pub use tiers::{
     BaseFeeRates, BuilderFeeError, BuilderFeeRegistry, FeeSchedule, MAX_PERP_BUILDER_FEE_RATE,
     MAX_SPOT_BUILDER_FEE_RATE, MmFeeTier, StakeDiscountTier, TradeFeeBreakdown, UserFeeRates,

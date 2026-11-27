@@ -432,3 +432,124 @@ fn fee_tiers_staking_referral_spot_and_builder_fees() {
     assert_eq!(maker_fee.maker_rebate, 3_000);
     assert_eq!(maker_fee.referrer_reward, 0);
 }
+
+#[test]
+fn protocol_fee_solvency_floor_rate_bounds_and_volume_gates_match_node115() {
+    use node115_fees::{
+        BaseFeeRates, COMBINED_SUBACCOUNT_MIN_RAW_VLM, FeeSchedule, MAX_FEE_RATE,
+        MIN_NET_PROTOCOL_FEE, MIN_POSITIVE_FEE_RATE, MmFeeTier, PROTOCOL_FEE_SCALES,
+        SCHEDULE_CANCEL_MAX_DAYS_AHEAD, SCHEDULE_CANCEL_MAX_PER_DAY, SCHEDULE_CANCEL_MIN_RAW_VLM,
+        SolvencyCheckInputs, StakeDiscountTier, VipFeeTier, check_combined_subaccount_volume_gate,
+        check_net_fee_solvency_0x36a58d0, check_schedule_cancel_volume_gate, fee_schedule_compose,
+        is_valid_maker_rate, is_valid_taker_rate,
+    };
+
+    assert_eq!(PROTOCOL_FEE_SCALES, [1.0, 0.2, 6.0, 0.1, 2.0, 40.0]);
+    assert_eq!(MIN_NET_PROTOCOL_FEE, 5e-6);
+    assert_eq!(MIN_POSITIVE_FEE_RATE, 0.0001);
+    assert_eq!(MAX_FEE_RATE, 0.001);
+    assert_eq!(SCHEDULE_CANCEL_MIN_RAW_VLM, 100_000_000);
+    assert_eq!(SCHEDULE_CANCEL_MAX_DAYS_AHEAD, 5);
+    assert_eq!(SCHEDULE_CANCEL_MAX_PER_DAY, 10);
+    assert_eq!(COMBINED_SUBACCOUNT_MIN_RAW_VLM, 2_000_000_000);
+
+    // Rate dust/cap bounds (`0x36a2ef3..0x36a3059`)
+    assert!(is_valid_taker_rate(0.0));
+    assert!(is_valid_taker_rate(0.0001));
+    assert!(is_valid_taker_rate(0.001));
+    assert!(!is_valid_taker_rate(0.00005)); // sub-1bps positive dust rejected
+    assert!(!is_valid_taker_rate(-0.0001));
+    assert!(!is_valid_taker_rate(0.0011));
+
+    assert!(is_valid_maker_rate(-0.0003)); // negative MM rebate allowed
+    assert!(is_valid_maker_rate(0.0));
+    assert!(is_valid_maker_rate(0.0001));
+    assert!(!is_valid_maker_rate(0.00005)); // sub-1bps positive dust rejected
+    assert!(!is_valid_maker_rate(-0.0011)); // exceeds |-0.001|
+
+    // Exact `0x36a58d0` 6-scale solvency check:
+    // min_cross = 0.00025, stake = 0.20 -> 0.00020; ref = 0.04, keep = 0.10 -> 0.0001728;
+    // min_add = -0.00003 -> net = 0.0001428; at smallest scale 0.1 -> 1.428e-5 >= 5e-6 -> PASS.
+    assert!(check_net_fee_solvency_0x36a58d0(SolvencyCheckInputs {
+        vip_adds: &[0.0001],
+        mm_adds: &[-0.00003],
+        vip_crosses: &[0.00025],
+        base_add: 0.00015,
+        base_cross: 0.00045,
+        max_staking_discount: 0.20,
+        referral_discount: 0.04,
+        trial_discount: 0.0,
+        referrer_keep: 0.10,
+    }));
+    // Excessive rebate (-0.00015) fails solvency at scale 0.1: (0.0001728 - 0.00015) * 0.1 = 2.28e-6 < 5e-6
+    assert!(!check_net_fee_solvency_0x36a58d0(SolvencyCheckInputs {
+        vip_adds: &[0.0001],
+        mm_adds: &[-0.00015],
+        vip_crosses: &[0.00025],
+        base_add: 0.00015,
+        base_cross: 0.00045,
+        max_staking_discount: 0.20,
+        referral_discount: 0.04,
+        trial_discount: 0.0,
+        referrer_keep: 0.10,
+    }));
+
+    // Integrated FeeSchedule::validate_with_solvency (`0x36a1c20` + `0x36a58d0`)
+    let solvent_sched = FeeSchedule {
+        rates: BaseFeeRates {
+            perp_cross: 0.00045,
+            perp_add: 0.00015,
+            spot_cross: 0.00070,
+            spot_add: 0.00040,
+        },
+        vip_tiers: vec![VipFeeTier {
+            ntl_cutoff: 5_000_000,
+            cross: 0.00040,
+            add: 0.00012,
+            spot_cross: 0.00060,
+            spot_add: 0.00030,
+            tail: 1.0,
+        }],
+        mm_tiers: vec![MmFeeTier {
+            maker_fraction_cutoff: 0.005,
+            add: -0.00003,
+        }],
+        referral_discount: 0.04,
+        referrer_keep: 0.10,
+        destination: addr(1),
+        extra_destination_fractions: vec![],
+        stake_discount_tiers: vec![StakeDiscountTier {
+            bps_of_max_supply_staked: 1.0,
+            discount: 0.20,
+        }],
+        weigh_spot_volume_double: true,
+    };
+    assert_eq!(
+        solvent_sched.validate_with_solvency(0.0),
+        fee_schedule_compose::Outcome::Passed
+    );
+
+    let mut insolvent_sched = solvent_sched.clone();
+    insolvent_sched.mm_tiers[0].add = -0.00035;
+    assert_eq!(
+        insolvent_sched.validate_with_solvency(0.0),
+        fee_schedule_compose::Outcome::Rejected
+    );
+
+    // Volume gates (`0x2c2cb40` & `0x2c59480`)
+    assert_eq!(check_schedule_cancel_volume_gate(RawVlm(99_999_999)), Err(999_999.99));
+    assert_eq!(check_schedule_cancel_volume_gate(RawVlm(100_000_000)), Ok(()));
+
+    let mut sink = RecordingOverflowSink::default();
+    assert!(!check_combined_subaccount_volume_gate(
+        RawVlm(1_500_000_000),
+        &[RawVlm(500_000_000)],
+        &mut sink,
+    ));
+    assert!(check_combined_subaccount_volume_gate(
+        RawVlm(1_500_000_000),
+        &[RawVlm(500_000_001)],
+        &mut sink,
+    ));
+    assert!(sink.events.is_empty());
+}

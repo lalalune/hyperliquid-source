@@ -157,6 +157,80 @@ impl FeeSchedule {
         compose::evaluate(&sched, |_, _, _| true)
     }
 
+    /// Full `#115` `0x36a1c20` + `0x36a58d0` validation combining `node115-fee-schedule-compose`
+    /// with the exact 6-scale `5e-6` net-protocol-fee solvency floor callback for both perp and spot.
+    pub fn validate_with_solvency(&self, trial_discount: f64) -> compose::Outcome {
+        let tiers: Vec<compose::Tier> = self
+            .vip_tiers
+            .iter()
+            .map(|t| compose::Tier {
+                values: [t.cross, t.add, t.spot_cross, t.spot_add],
+                cutoff: t.ntl_cutoff,
+                tail: t.tail,
+            })
+            .collect();
+        let secondary: Vec<compose::Secondary> = self
+            .mm_tiers
+            .iter()
+            .map(|m| compose::Secondary {
+                first: m.maker_fraction_cutoff,
+                second: m.add,
+            })
+            .collect();
+        let stake_pairs: Vec<(f64, f64)> = self
+            .stake_discount_tiers
+            .iter()
+            .map(|s| (s.bps_of_max_supply_staked, s.discount))
+            .collect();
+        let extra_values: Vec<f64> = self
+            .extra_destination_fractions
+            .iter()
+            .map(|&(_, f)| f)
+            .collect();
+        let sched = compose::Schedule {
+            seeds: self.rates.as_array(),
+            tiers: &tiers,
+            secondary: &secondary,
+            stake_pairs: &stake_pairs,
+            extra_values: &extra_values,
+            ranges: [self.referral_discount, self.referrer_keep],
+        };
+        let perp_vip_adds: Vec<f64> = self.vip_tiers.iter().map(|t| t.add).collect();
+        let perp_vip_crosses: Vec<f64> = self.vip_tiers.iter().map(|t| t.cross).collect();
+        let spot_vip_adds: Vec<f64> = self.vip_tiers.iter().map(|t| t.spot_add).collect();
+        let spot_vip_crosses: Vec<f64> = self.vip_tiers.iter().map(|t| t.spot_cross).collect();
+        let mm_adds: Vec<f64> = self.mm_tiers.iter().map(|m| m.add).collect();
+        compose::evaluate(&sched, |side, _, max_stake_discount| {
+            let (vip_adds, vip_crosses, base_add, base_cross) = match side {
+                compose::FloorSide::First => (
+                    perp_vip_adds.as_slice(),
+                    perp_vip_crosses.as_slice(),
+                    self.rates.perp_add,
+                    self.rates.perp_cross,
+                ),
+                compose::FloorSide::Second => (
+                    spot_vip_adds.as_slice(),
+                    spot_vip_crosses.as_slice(),
+                    self.rates.spot_add,
+                    self.rates.spot_cross,
+                ),
+            };
+            crate::solvency::check_net_fee_solvency_0x36a58d0(
+                crate::solvency::SolvencyCheckInputs {
+                    vip_adds,
+                    mm_adds: &mm_adds,
+                    vip_crosses,
+                    base_add,
+                    base_cross,
+                    max_staking_discount: max_stake_discount,
+                    referral_discount: self.referral_discount,
+                    trial_discount,
+                    referrer_keep: self.referrer_keep,
+                },
+            )
+        })
+    }
+
     /// Computes weighted 14-day qualifying volume using `weigh_spot_volume_double`.
     #[inline]
     pub const fn weighted_volume(&self, perp_vlm: u64, spot_vlm: u64) -> u64 {
