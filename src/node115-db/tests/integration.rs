@@ -4,8 +4,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use node115_db::block_reader::{BlockReadError, IndexedArtifactVariant, OfflineBlockReader};
 use node115_db::db_home::{
-    CheckpointMode, DbHome, DbHomeError, checkpoint_plan, directory_end_height,
-    validate_db_home_path,
+    CHECKPOINT_SUBDIR, CheckpointMode, DbHome, DbHomeError, EXCHANGE_ROOT_CAPTURE_OFFSETS,
+    LT_HASHES_FILENAME, checkpoint_plan, directory_end_height, validate_db_home_path,
 };
 use node115_db::db_hub::{
     ByteKeyLookup, ByteKeyNode, InvalidValue, OfflineDbHub, SnapshotOuterPath,
@@ -99,6 +99,27 @@ fn db_home_guard_discovery_plan_restore_copy_and_replica_height() {
     assert_eq!(directory_end_height(&rep_root).unwrap(), 1003);
 
     let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn db_home_checkpoint_subdir_lt_hashes_and_74_slot_capture_offsets() {
+    let home = DbHome::new(Path::new("/var/hl/db_home")).unwrap();
+    assert_eq!(home.checkpoint_subdir(), Path::new("/var/hl/db_home").join(CHECKPOINT_SUBDIR));
+    assert_eq!(
+        home.checkpoint_dir_for_height(42),
+        Path::new("/var/hl/db_home/checkpoint/42")
+    );
+    assert_eq!(
+        home.lt_hashes_path(42),
+        Path::new("/var/hl/db_home/checkpoint/42").join(LT_HASHES_FILENAME)
+    );
+    assert_eq!(EXCHANGE_ROOT_CAPTURE_OFFSETS.len(), 74);
+    assert_eq!(EXCHANGE_ROOT_CAPTURE_OFFSETS[24], 0x3f08);
+    assert_eq!(EXCHANGE_ROOT_CAPTURE_OFFSETS[25], 0x0d88);
+    assert_eq!(EXCHANGE_ROOT_CAPTURE_OFFSETS[28], 0x10e8);
+    assert_eq!(EXCHANGE_ROOT_CAPTURE_OFFSETS[71], 0x3d98);
+    assert_eq!(EXCHANGE_ROOT_CAPTURE_OFFSETS[72], 0x3e50);
+    assert_eq!(EXCHANGE_ROOT_CAPTURE_OFFSETS[73], 0x3908);
 }
 
 #[test]

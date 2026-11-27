@@ -21,6 +21,27 @@ pub use node115_restore_copy::prepare_first_copy;
 /// Subdirectory name checked at `0x4469a72` (`rodata 0x459a58`) and `node115-restore-copy`.
 pub const EVM_STATE_SUBDIR: &str = "EvmState";
 
+/// Checkpoint container subdirectory formatted at `0x44683a8` (`db_home.rs:286..317`, rodata `0x434739`).
+pub const CHECKPOINT_SUBDIR: &str = "checkpoint";
+
+/// LT-hashes companion metadata filename formatted at `0x446857f` / `0x44685d9` (rodata `0x44f3c9`).
+pub const LT_HASHES_FILENAME: &str = "lt_hashes.json";
+
+/// Exact 74 contiguous `Exchange` struct field offsets captured into `[rsp+0x128..=rsp+0x370]`
+/// for ABCI state-root hashing in both live (`0x269a1b0`) and slow (`0x4e34ce0`) node #115 engines.
+pub const EXCHANGE_ROOT_CAPTURE_OFFSETS: [u16; 74] = [
+    0x0000, 0x07c0, 0x0080, 0x07d8, 0x0968, 0x0b9a, 0x0b98, 0x09f8,
+    0x0670, 0x0b78, 0x0a78, 0x09b0, 0x0a18, 0x0b99, 0x0b90, 0x0a38,
+    0x3ac0, 0x3ad8, 0x3af0, 0x4158, 0x4168, 0x3c58, 0x41e8, 0x0ba0,
+    0x3f08, 0x0d88, 0x4200, 0x4220, 0x10e8, 0x4178, 0x4288, 0x4294,
+    0x4228, 0x3ce8, 0x3f88, 0x4188, 0x3fa8, 0x3fc8, 0x42ac, 0x4230,
+    0x4238, 0x10f8, 0x4240, 0x3a00, 0x3a40, 0x3a80, 0x1108, 0x3d40,
+    0x4198, 0x3ff8, 0x4018, 0x4038, 0x37e0, 0x42ad, 0x4058, 0x40a0,
+    0x40c0, 0x41a8, 0x41d8, 0x4250, 0x42a0, 0x42ae, 0x4268, 0x37f0,
+    0x4138, 0x42af, 0x3830, 0x3d78, 0x3858, 0x42b0, 0x4270, 0x3d98,
+    0x3e50, 0x3908,
+];
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum DbHomeError {
     ContainsDbBundle { path: PathBuf },
@@ -57,6 +78,18 @@ impl DbHome {
 
     pub fn evm_state_dir(&self) -> PathBuf {
         self.root.join(EVM_STATE_SUBDIR)
+    }
+
+    pub fn checkpoint_subdir(&self) -> PathBuf {
+        self.root.join(CHECKPOINT_SUBDIR)
+    }
+
+    pub fn checkpoint_dir_for_height(&self, height: u64) -> PathBuf {
+        self.checkpoint_subdir().join(height.to_string())
+    }
+
+    pub fn lt_hashes_path(&self, height: u64) -> PathBuf {
+        self.checkpoint_dir_for_height(height).join(LT_HASHES_FILENAME)
     }
 
     pub fn discover_checkpoints(&self) -> io::Result<Vec<CheckpointCandidate>> {
