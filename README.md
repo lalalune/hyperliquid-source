@@ -16,7 +16,7 @@ an integrated, runnable node remains in progress.
 
 ![Node #115 progress](docs/assets/research-progress.svg)
 
-**294 active Rust implementation areas · 258 top-level Cargo manifests · 4877 #115 research work items.**
+**295 active Rust implementation areas · 259 top-level Cargo manifests · 4878 #115 research work items.**
 
 These inventory counts describe available work, not completed components.
 
@@ -38,8 +38,8 @@ These inventory counts describe available work, not completed components.
 | First-party .text bytes compared | 57,572/83,719,936 | 0.06877% |
 | Compared windows vs. `.eh_frame_hdr` unwind starts | 7,977/135,313 | 5.89522% |
 | Component work areas with registered Rust paths | 23/23 | 100.00% |
-| Active `src/` Rust areas registered in `components.json` | 290/294 | 98.64% |
-| Research work items with top-level `MANIFEST.sha256` | 4,755/4,877 | 97.50% |
+| Active `src/` Rust areas registered in `components.json` | 290/295 | 98.31% |
+| Research work items with top-level `MANIFEST.sha256` | 4,756/4,878 | 97.50% |
 | Tracked research questions with reviewed evidence | 5/5 | 100.00% |
 
 Gate percentages require acceptance of the full component scope.
