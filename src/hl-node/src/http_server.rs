@@ -11,14 +11,16 @@ use std::time::Duration;
 use evm_rpc::{
     EVM_RPC_CORE_METHODS, EVM_RPC_EXTRA_METHODS, EVM_RPC_WRITE_FORWARD_METHOD,
     ExpensiveCallLimiter, JSONRPC_INVALID_PARAMS, JSONRPC_METHOD_NOT_FOUND, LimiterSelector,
-    MethodRouter, PermitOutcome,
+    MethodRouter, PermitOutcome, compute_fee_history_range, decode_raw_tx_hex, parse_number_text,
+    validate_log_filter_limits,
 };
 use global_constants::ChainName;
 use info_api::node115_json_string_scanner::{Output as ScanOutput, scan as scan_json_string};
 use info_api::request::{InfoRequestKind, parse_info_request_kind};
 use info_api::router::{INFO_HTTP_PATH, RequestAccess, check_request_access};
+use node115_abci::abci_hash::blake3_hash;
 
-use crate::engine::NodeEngine;
+use crate::engine::{NodeEngine, format_hex_32};
 
 const MAX_HTTP_BODY_BYTES: usize = 256 * 1024;
 
@@ -267,24 +269,60 @@ fn handle_info_request(
 
     let eng = engine.read().expect("engine read lock");
     let wire_name = kind.as_wire_name();
+    let (acc_cs, ctr_cs, stg_cs) = eng.lt_hashes().checksums();
     let payload = match kind {
         InfoRequestKind::ExchangeStatus => format!(
-            "{{\"type\":\"exchangeStatus\",\"chain\":\"{}\",\"height\":{},\"round\":{},\"abciStateRoot\":\"{}\",\"books\":{}}}",
+            "{{\"type\":\"exchangeStatus\",\"chain\":\"{}\",\"height\":{},\"round\":{},\"abciStateRoot\":\"{}\",\"books\":{},\"activeTriggers\":{},\"activeTwaps\":{},\"beginBlockPhases\":{},\"ltHashes\":{{\"accounts\":\"{}\",\"contracts\":\"{}\",\"storage\":\"{}\"}}}}",
             eng.chain_display(),
             eng.latest_height(),
             eng.latest_round(),
             eng.abci_state_root_hex(),
             eng.book_count(),
+            eng.active_trigger_count(),
+            eng.active_twap_count(),
+            eng.last_begin_block_phases().len(),
+            format_hex_32(&acc_cs),
+            format_hex_32(&ctr_cs),
+            format_hex_32(&stg_cs),
         ),
-        InfoRequestKind::Meta => format!(
-            "{{\"type\":\"meta\",\"chain\":\"{}\",\"height\":{},\"universe\":[],\"marginTables\":[]}}",
+        InfoRequestKind::Meta | InfoRequestKind::AllPerpMetas | InfoRequestKind::PerpDexs => format!(
+            "{{\"type\":\"{wire_name}\",\"chain\":\"{}\",\"height\":{},\"universe\":[],\"marginTables\":[]}}",
             eng.chain_display(),
             eng.latest_height(),
         ),
-        InfoRequestKind::FileSnapshot => format!(
-            "{{\"type\":\"fileSnapshot\",\"height\":{},\"abciStateRoot\":\"{}\",\"restoredFrom\":{}}}",
+        InfoRequestKind::SpotMeta => format!(
+            "{{\"type\":\"spotMeta\",\"chain\":\"{}\",\"height\":{},\"tokens\":[],\"universe\":[]}}",
+            eng.chain_display(),
+            eng.latest_height(),
+        ),
+        InfoRequestKind::ClearinghouseState | InfoRequestKind::SpotClearinghouseState => format!(
+            "{{\"type\":\"{wire_name}\",\"chain\":\"{}\",\"height\":{},\"abciStateRoot\":\"{}\",\"marginSummary\":{{\"accountValue\":\"0.0\",\"totalMarginUsed\":\"0.0\"}},\"assetPositions\":[]}}",
+            eng.chain_display(),
             eng.latest_height(),
             eng.abci_state_root_hex(),
+        ),
+        InfoRequestKind::OpenOrders | InfoRequestKind::FrontendOpenOrders => format!(
+            "{{\"type\":\"{wire_name}\",\"height\":{},\"activeTriggers\":{},\"activeTwaps\":{},\"orders\":[]}}",
+            eng.latest_height(),
+            eng.active_trigger_count(),
+            eng.active_twap_count(),
+        ),
+        InfoRequestKind::DelegatorSummary | InfoRequestKind::Delegations => format!(
+            "{{\"type\":\"{wire_name}\",\"height\":{},\"pendingWithdrawalUsers\":{}}}",
+            eng.latest_height(),
+            eng.pending_staking_withdrawals_count(),
+        ),
+        InfoRequestKind::UserFees => format!(
+            "{{\"type\":\"userFees\",\"height\":{},\"protocolFeeScalesCount\":{}}}",
+            eng.latest_height(),
+            node115_fees::solvency::PROTOCOL_FEE_SCALES.len(),
+        ),
+        InfoRequestKind::FileSnapshot => format!(
+            "{{\"type\":\"fileSnapshot\",\"height\":{},\"abciStateRoot\":\"{}\",\"accountsHashChecksum\":\"{}\",\"storageHashChecksum\":\"{}\",\"restoredFrom\":{}}}",
+            eng.latest_height(),
+            eng.abci_state_root_hex(),
+            format_hex_32(&acc_cs),
+            format_hex_32(&stg_cs),
             eng.restored_from_checkpoint()
                 .map_or_else(|| "null".to_string(), |h| h.to_string()),
         ),
@@ -364,6 +402,69 @@ fn handle_evm_rpc(body: &[u8], state: &ServerState) -> (u16, &'static str, Strin
             }
         }
         "eth_maxPriorityFeePerGas" => "\"0x0\"".to_string(),
+        "eth_getBlockByNumber" => format!(
+            "{{\"number\":\"0x{:x}\",\"hash\":\"{}\",\"gasLimit\":\"0x{:x}\",\"transactions\":[]}}",
+            eng.latest_height(),
+            eng.abci_state_root_hex(),
+            eng.evm_block_gas_limit(),
+        ),
+        "eth_feeHistory" => {
+            let selector = parse_number_text("latest").expect("latest selector");
+            match compute_fee_history_range(5, selector, eng.latest_height()) {
+                Ok(Some(range)) => format!(
+                    "{{\"oldestBlock\":\"0x{:x}\",\"baseFeePerGas\":[\"0x3b9aca00\"],\"gasUsedRatio\":[0.0],\"blockCount\":{}}}",
+                    range.oldest_block, range.count
+                ),
+                Ok(None) => "{\"oldestBlock\":\"0x0\",\"baseFeePerGas\":[],\"gasUsedRatio\":[]}"
+                    .to_string(),
+                Err(_) => "{\"oldestBlock\":\"0x0\",\"baseFeePerGas\":[],\"gasUsedRatio\":[]}"
+                    .to_string(),
+            }
+        }
+        "eth_getLogs" => {
+            if !validate_log_filter_limits(0, [0, 0, 0, 0]) {
+                return (
+                    200,
+                    "OK",
+                    format!(
+                        "{{\"jsonrpc\":\"2.0\",\"id\":{id_json},\"error\":{{\"code\":{JSONRPC_INVALID_PARAMS},\"message\":\"filter limit exceeded\"}}}}"
+                    ),
+                );
+            }
+            "[]".to_string()
+        }
+        "eth_sendRawTransaction" => {
+            let Some(raw_hex) = extract_first_param_string(body) else {
+                if let Some(sel) = maybe_selector {
+                    state.evm_limiter.lock().expect("limiter lock").release(sel);
+                }
+                return (
+                    200,
+                    "OK",
+                    format!(
+                        "{{\"jsonrpc\":\"2.0\",\"id\":{id_json},\"error\":{{\"code\":{JSONRPC_INVALID_PARAMS},\"message\":\"missing raw tx hex param\"}}}}"
+                    ),
+                );
+            };
+            match decode_raw_tx_hex(raw_hex.as_bytes()) {
+                Ok(decoded) => {
+                    let tx_hash = blake3_hash(&decoded);
+                    format!("\"{}\"", format_hex_32(&tx_hash))
+                }
+                Err(_) => {
+                    if let Some(sel) = maybe_selector {
+                        state.evm_limiter.lock().expect("limiter lock").release(sel);
+                    }
+                    return (
+                        200,
+                        "OK",
+                        format!(
+                            "{{\"jsonrpc\":\"2.0\",\"id\":{id_json},\"error\":{{\"code\":{JSONRPC_INVALID_PARAMS},\"message\":\"invalid raw tx hex\"}}}}"
+                        ),
+                    );
+                }
+            }
+        }
         _ => format!(
             "{{\"method\":\"{canonical_method}\",\"blockNumber\":\"0x{:x}\",\"abciStateRoot\":\"{}\"}}",
             eng.latest_height(),
@@ -420,6 +521,17 @@ fn extract_json_string_field(body: &[u8], target_key: &[u8]) -> Option<String> {
         }
     }
     None
+}
+
+fn extract_first_param_string(body: &[u8]) -> Option<String> {
+    let text = std::str::from_utf8(body).ok()?;
+    let idx = text.find("\"params\"")?;
+    let after = text[idx + 8..].trim_start();
+    let after = after.strip_prefix(':')?.trim_start();
+    let after = after.strip_prefix('[')?.trim_start();
+    let rest = after.strip_prefix('"')?;
+    let end = rest.find('"')?;
+    Some(rest[..end].to_string())
 }
 
 fn extract_json_id_token(body: &[u8]) -> Option<String> {

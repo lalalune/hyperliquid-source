@@ -4,17 +4,22 @@ use std::path::PathBuf;
 use std::sync::{Arc, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use clearinghouse::liquidation::LiquidationAction;
 use evm::system::{
     BIG_BLOCK_GAS_LIMIT, CORE_WRITER_VERSION_V1, CoreWriterFrameError, SMALL_BLOCK_GAS_LIMIT,
     encode_core_writer_frame,
 };
+use exchange::bole_liquidation::{BOLE_LIQUIDATOR_ADDRESS, BeginBlockPhase, SpotPairMeta};
 use global_constants::ChainName;
-use hl_node::engine::{EngineError, NodeBlock, NodeEngine};
+use hl_node::engine::{EngineError, NodeBlock, NodeEngine, format_hex_32};
 use hl_node::http_server::{HttpServerConfig, LocalHttpServer, http_get, http_post};
 use hl_node::peer_loopback::run_loopback_peer_sync;
 use node115_abci::state::{ApplyBlockPreconditionError, REQUIRED_FEATURE_VERSION};
+use node115_assets::pdi::Side;
+use node115_assets::qtys::{Px, Sz};
 use node115_fees::fee_schedule_compose::Outcome as FeeOutcome;
 use node115_fees::tiers::{BaseFeeRates, FeeSchedule};
+use node115_orderbook::trigger::{Tpsl, TriggerCondition, TriggerOrder};
 use node115_staking::jailing::JailingTime;
 use node115_staking::withdrawal_queue::WithdrawalQueueError;
 
@@ -391,5 +396,187 @@ fn e2e_abci_6_guards_fees_solvency_evm_corewriter_bridge_and_staking_queue() {
     assert!(big.body.contains("\"result\":true"));
     server.stop();
 
+    let _ = fs::remove_dir_all(&data_dir);
+}
+
+#[test]
+fn e2e_lthash_homomorphic_persistence_lifecycle_and_live_jsonrpc_endpoints() {
+    let data_dir = unique_temp_dir("lthash-lifecycle-rpc");
+
+    let (expected_storage_cs, expected_root_hex) = {
+        let mut eng = NodeEngine::open_or_restore(ChainName::Mainnet, &data_dir).expect("open");
+        assert_eq!(eng.lt_hashes().storage_hash.n_elements, 0);
+
+        for blk in sample_blocks(3) {
+            eng.apply_block(blk).expect("apply block");
+        }
+
+        // 1. Verify all 7 Exchange::begin_block phases executed in exact #115 order
+        assert_eq!(eng.last_begin_block_phases().len(), 7);
+        assert_eq!(
+            eng.last_begin_block_phases()[0],
+            BeginBlockPhase::DistributeFunding.name()
+        );
+        assert_eq!(
+            eng.last_begin_block_phases()[6],
+            BeginBlockPhase::ApplyBoleLiquidations.name()
+        );
+
+        // 2. Verify homomorphic LtHashes updated across blocks & persisted into lt_hashes.json
+        assert!(eng.lt_hashes().accounts_hash.n_elements == 3);
+        assert!(eng.lt_hashes().storage_hash.n_elements >= 6);
+        let (_, _, stg_cs) = eng.lt_hashes().checksums();
+        let cp_dir = eng.persist_checkpoint().expect("persist checkpoint");
+        let lt_json = fs::read_to_string(cp_dir.join("lt_hashes.json")).expect("read lt_hashes");
+        assert!(lt_json.contains("\"accounts_hash\""));
+        assert!(lt_json.contains("\"contracts_hash\""));
+        assert!(lt_json.contains("\"storage_hash\""));
+        assert!(lt_json.contains(&format_hex_32(&stg_cs)));
+
+        // 3. Clearinghouse liquidation classification & pro-rata backstop allocation
+        assert_eq!(
+            eng.classify_account_liquidation(500, 400, 266),
+            LiquidationAction::Healthy
+        );
+        assert_eq!(
+            eng.classify_account_liquidation(300, 400, 266),
+            LiquidationAction::MarketLiquidate {
+                shortfall_to_maintenance: 100
+            }
+        );
+        assert_eq!(
+            eng.classify_account_liquidation(200, 400, 266),
+            LiquidationAction::BackstopLiquidate {
+                shortfall_to_backstop: 66
+            }
+        );
+        assert_eq!(
+            eng.classify_account_liquidation(-50, 400, 266),
+            LiquidationAction::AdlDeficit { deficit_usd: 50 }
+        );
+        let mut remaining = 200i64;
+        let alloc = eng
+            .allocate_backstop_liquidation(0, 10, &[100], 1_000, 200, &mut remaining)
+            .expect("backstop alloc")
+            .expect("some alloc");
+        assert_eq!(alloc.allocated_margin, 200);
+        assert_eq!(remaining, 0);
+
+        // 4. Exchange bole liquidation forced IOC cross order
+        let spots = [SpotPairMeta {
+            spot_id: 7,
+            base_token: 2,
+            quote_token: 0,
+        }];
+        let bole_order = eng
+            .build_bole_liquidation_order(2, 50, 0.95, [0x44u8; 20], &spots, Some(1_000))
+            .expect("bole order");
+        assert_eq!(bole_order.liquidator, BOLE_LIQUIDATOR_ADDRESS);
+        assert_eq!(bole_order.tif, 1);
+        assert_eq!(bole_order.limit_px, 950);
+
+        // 5. Orderbook TriggerBook activation check
+        eng.trigger_book_mut().insert(TriggerOrder {
+            oid: 99,
+            user: [0x22u8; 20],
+            side: Side::Ask,
+            limit_px: Px(105),
+            sz: Sz(10),
+            reduce_only: true,
+            is_position_tpsl: true,
+            trigger: TriggerCondition {
+                is_market: true,
+                trigger_px: Px(100),
+                tpsl: Tpsl::Tp,
+            },
+            timestamp: 1,
+            cloid: None,
+            peer_oid: None,
+        });
+        assert!(eng.check_triggers_at_mark(Px(99), &[99]).is_empty());
+        assert_eq!(eng.check_triggers_at_mark(Px(100), &[99]), vec![99]);
+
+        (stg_cs, eng.abci_state_root_hex())
+    };
+
+    // 6. Restart from disk checkpoint: verify LtHashes + live /info & /evm JSON-RPC 2.0 responses
+    let resumed = NodeEngine::open_or_restore(ChainName::Mainnet, &data_dir).expect("restore");
+    assert_eq!(resumed.lt_hashes().checksums().2, expected_storage_cs);
+    assert_eq!(resumed.abci_state_root_hex(), expected_root_hex);
+
+    let shared = Arc::new(RwLock::new(resumed));
+    let server = LocalHttpServer::start(
+        Arc::clone(&shared),
+        HttpServerConfig {
+            bind_addr: SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)),
+            serve_info: true,
+            serve_evm_rpc: true,
+        },
+    )
+    .expect("start server");
+    let addr = server.local_addr();
+
+    for (info_type, expected_substr) in [
+        ("exchangeStatus", "\"ltHashes\""),
+        ("spotMeta", "\"type\":\"spotMeta\""),
+        ("clearinghouseState", "\"marginSummary\""),
+        ("openOrders", "\"orders\":[]"),
+        ("userFees", "\"protocolFeeScalesCount\":6"),
+        ("fileSnapshot", "\"storageHashChecksum\""),
+    ] {
+        let resp = http_post(addr, "/info", &format!("{{\"type\":\"{info_type}\"}}"))
+            .expect("POST /info");
+        assert_eq!(resp.status_code, 200, "info {info_type}: {}", resp.body);
+        assert!(
+            resp.body.contains(expected_substr),
+            "info {info_type} missing {expected_substr}: {}",
+            resp.body
+        );
+    }
+
+    let block_rpc = http_post(
+        addr,
+        "/evm",
+        r#"{"jsonrpc":"2.0","id":10,"method":"eth_getBlockByNumber","params":["latest",false]}"#,
+    )
+    .expect("eth_getBlockByNumber");
+    assert!(block_rpc.body.contains("\"number\":\"0x3\""));
+    assert!(block_rpc.body.contains(&expected_root_hex));
+    assert!(block_rpc.body.contains("\"gasLimit\":\"0x2dc6c0\""));
+
+    let fee_hist = http_post(
+        addr,
+        "/evm",
+        r#"{"jsonrpc":"2.0","id":11,"method":"eth_feeHistory","params":[5,"latest",[]]}"#,
+    )
+    .expect("eth_feeHistory");
+    assert!(fee_hist.body.contains("\"oldestBlock\":\"0x0\""));
+    assert!(fee_hist.body.contains("\"blockCount\":4"));
+
+    let logs = http_post(
+        addr,
+        "/evm",
+        r#"{"jsonrpc":"2.0","id":12,"method":"eth_getLogs","params":[{}]}"#,
+    )
+    .expect("eth_getLogs");
+    assert!(logs.body.contains("\"result\":[]"));
+
+    let tx_ok = http_post(
+        addr,
+        "/evm",
+        r#"{"jsonrpc":"2.0","id":13,"method":"eth_sendRawTransaction","params":["0xdeadbeef"]}"#,
+    )
+    .expect("eth_sendRawTransaction ok");
+    assert!(tx_ok.body.contains("\"result\":\"0x"));
+
+    let tx_bad = http_post(
+        addr,
+        "/evm",
+        r#"{"jsonrpc":"2.0","id":14,"method":"eth_sendRawTransaction","params":["0xZZZ"]}"#,
+    )
+    .expect("eth_sendRawTransaction bad");
+    assert!(tx_bad.body.contains("-32602"));
+
+    server.stop();
     let _ = fs::remove_dir_all(&data_dir);
 }

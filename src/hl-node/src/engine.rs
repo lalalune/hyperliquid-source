@@ -11,8 +11,16 @@ use bincode_fork::{
     decode_from_slice, encode_to_vec, standard,
 };
 use bridge::contracts::{canonical_bridge2_address, canonical_usdc2_address};
+use clearinghouse::liquidation::{
+    BackstopPositionAllocation, LiquidationAction, backstop_liquidate_position_allocation,
+    classify_liquidation,
+};
+use clearinghouse::margin_user_state::MarginStateError;
 use evm::system::{
     CoreWriterFrame, CoreWriterFrameError, EvmBlockKind, parse_core_writer_frame,
+};
+use exchange::bole_liquidation::{
+    BeginBlockPhase, BoleLiquidationCrossOrder, SpotPairMeta, build_bole_liquidation_spot_order,
 };
 use global_constants::{ChainDisplay, ChainName};
 use node_runtime::error::NodeError;
@@ -23,12 +31,16 @@ use node115_abci::abci_hash::{
 use node115_abci::checkpoint_replay_fixture::{
     DEFAULT_ROOT_CADENCE_MODULUS, ReplayInitializer, RestoredState,
 };
+use node115_abci::lt_hash::{LT_HASH_BYTES, LtHash, LtHashes};
 use node115_abci::state::{
     AbciState, ApplyBlockPreconditionError, REQUIRED_FEATURE_VERSION,
 };
+use node115_assets::qtys::Px;
 use node115_db::db_home::{DbHome, DbHomeError};
 use node115_fees::tiers::FeeSchedule;
 use node115_orderbook::Books;
+use node115_orderbook::trigger::TriggerBook;
+use node115_orderbook::twap::TwapEngine;
 use node115_staking::delegation::StakingChain;
 use node115_staking::jailing::{Address as StakingAddress, JailingTime};
 use node115_staking::withdrawal_queue::{
@@ -100,6 +112,15 @@ pub struct CheckpointRecord {
     pub staking_digest: [u8; 32],
     pub bridge_digest: [u8; 32],
     pub abci_state_root: [u8; 32],
+    pub lt_accounts_bytes: Vec<u8>,
+    pub lt_accounts_count: u64,
+    pub lt_accounts_nbytes: u64,
+    pub lt_contracts_bytes: Vec<u8>,
+    pub lt_contracts_count: u64,
+    pub lt_contracts_nbytes: u64,
+    pub lt_storage_bytes: Vec<u8>,
+    pub lt_storage_count: u64,
+    pub lt_storage_nbytes: u64,
     pub evm_kvs: Vec<(Vec<u8>, Vec<u8>)>,
     pub applied_blocks: Vec<NodeBlock>,
 }
@@ -116,6 +137,15 @@ impl Encode for CheckpointRecord {
         encoder.write_bytes(&self.staking_digest)?;
         encoder.write_bytes(&self.bridge_digest)?;
         encoder.write_bytes(&self.abci_state_root)?;
+        ByteVec(self.lt_accounts_bytes.clone()).encode(encoder)?;
+        encoder.write_u64(self.lt_accounts_count)?;
+        encoder.write_u64(self.lt_accounts_nbytes)?;
+        ByteVec(self.lt_contracts_bytes.clone()).encode(encoder)?;
+        encoder.write_u64(self.lt_contracts_count)?;
+        encoder.write_u64(self.lt_contracts_nbytes)?;
+        ByteVec(self.lt_storage_bytes.clone()).encode(encoder)?;
+        encoder.write_u64(self.lt_storage_count)?;
+        encoder.write_u64(self.lt_storage_nbytes)?;
         encoder.write_usize(self.evm_kvs.len())?;
         for (k, v) in &self.evm_kvs {
             ByteVec(k.clone()).encode(encoder)?;
@@ -151,6 +181,15 @@ impl Decode for CheckpointRecord {
         let staking_digest = read_array::<32, _>(decoder)?;
         let bridge_digest = read_array::<32, _>(decoder)?;
         let abci_state_root = read_array::<32, _>(decoder)?;
+        let lt_accounts_bytes = ByteVec::decode(decoder)?.0;
+        let lt_accounts_count = decoder.read_u64()?;
+        let lt_accounts_nbytes = decoder.read_u64()?;
+        let lt_contracts_bytes = ByteVec::decode(decoder)?.0;
+        let lt_contracts_count = decoder.read_u64()?;
+        let lt_contracts_nbytes = decoder.read_u64()?;
+        let lt_storage_bytes = ByteVec::decode(decoder)?.0;
+        let lt_storage_count = decoder.read_u64()?;
+        let lt_storage_nbytes = decoder.read_u64()?;
         let kv_len = decoder.read_usize()?;
         let mut evm_kvs = Vec::with_capacity(kv_len.min(1024));
         for _ in 0..kv_len {
@@ -173,6 +212,15 @@ impl Decode for CheckpointRecord {
             staking_digest,
             bridge_digest,
             abci_state_root,
+            lt_accounts_bytes,
+            lt_accounts_count,
+            lt_accounts_nbytes,
+            lt_contracts_bytes,
+            lt_contracts_count,
+            lt_contracts_nbytes,
+            lt_storage_bytes,
+            lt_storage_count,
+            lt_storage_nbytes,
             evm_kvs,
             applied_blocks,
         })
@@ -303,10 +351,35 @@ fn new_abci_state(checkpoint_path: PathBuf, height: u64, round: u64) -> AbciStat
     )
 }
 
+fn encode_kv_entry(k: &[u8], v: &[u8]) -> Vec<u8> {
+    let mut buf = Vec::with_capacity(16 + k.len() + v.len());
+    buf.extend_from_slice(&(k.len() as u64).to_le_bytes());
+    buf.extend_from_slice(k);
+    buf.extend_from_slice(&(v.len() as u64).to_le_bytes());
+    buf.extend_from_slice(v);
+    buf
+}
+
+fn lt_hash_from_parts(bytes: &[u8], n_elements: u64, n_bytes: u64) -> Result<LtHash, EngineError> {
+    if bytes.len() != LT_HASH_BYTES {
+        return Err(EngineError::Codec(format!(
+            "invalid LtHash length: {} != {LT_HASH_BYTES}",
+            bytes.len()
+        )));
+    }
+    let mut hash = [0u8; LT_HASH_BYTES];
+    hash.copy_from_slice(bytes);
+    Ok(LtHash {
+        hash,
+        n_elements,
+        n_bytes,
+    })
+}
+
 /// Deterministic offline node execution engine wiring storage (`node115-db`),
-/// ABCI BLAKE3 state-root hashing (`node115-abci` + `node115-abci-blake3`),
-/// serialization (`bincode-fork` + `net-utils` LZ4), books, staking withdrawal queue,
-/// bridge contracts, clearinghouse, exchange, fee solvency, and EVM KVS/CoreWriter state.
+/// ABCI BLAKE3 state-root hashing & `LtHashes` (`node115-abci` + `node115-abci-blake3`),
+/// serialization (`bincode-fork` + `net-utils` LZ4), books/TWAP/triggers, staking withdrawal queue,
+/// bridge contracts, clearinghouse liquidation, exchange lifecycle, fee solvency, and EVM KVS/CoreWriter.
 pub struct NodeEngine {
     chain: ChainName,
     db_home: DbHome,
@@ -316,8 +389,13 @@ pub struct NodeEngine {
     using_big_blocks: bool,
     blocks_digest: [u8; 32],
     evm_kvs: BTreeMap<Vec<u8>, Vec<u8>>,
+    lt_hashes: LtHashes,
     applied_blocks: Vec<NodeBlock>,
     books: Books<u32>,
+    twap_engine: TwapEngine,
+    trigger_book: TriggerBook,
+    last_begin_block_phases: Vec<&'static str>,
+    next_bole_oid: u64,
     withdrawal_queue: WithdrawalQueueState,
     abci_state_root: [u8; 32],
     restored_from_checkpoint: Option<u64>,
@@ -325,7 +403,7 @@ pub struct NodeEngine {
 
 impl NodeEngine {
     /// Open `data_dir` via `DbHome::new` and restore the highest valid checkpoint
-    /// (verifying both LZ4/bincode payload integrity and exact BLAKE3 reduction-tree root),
+    /// (verifying LZ4/bincode payload integrity, `LtHashes` checksums, and exact BLAKE3 reduction-tree root),
     /// or initialize deterministic genesis state at height 0.
     pub fn open_or_restore(chain: ChainName, data_dir: &Path) -> Result<Self, EngineError> {
         let db_home = DbHome::new(data_dir)?;
@@ -344,8 +422,13 @@ impl NodeEngine {
                 using_big_blocks: false,
                 blocks_digest: blake3_hash(&[chain_to_u8(chain)]),
                 evm_kvs: BTreeMap::new(),
+                lt_hashes: LtHashes::new(),
                 applied_blocks: Vec::new(),
                 books: Books::new(),
+                twap_engine: TwapEngine::new(),
+                trigger_book: TriggerBook::new(),
+                last_begin_block_phases: Vec::new(),
+                next_bole_oid: 1,
                 withdrawal_queue: WithdrawalQueueState::default(),
                 abci_state_root: [0u8; 32],
                 restored_from_checkpoint: None,
@@ -383,6 +466,24 @@ impl NodeEngine {
             });
         }
 
+        let lt_hashes = LtHashes {
+            accounts_hash: lt_hash_from_parts(
+                &rec.lt_accounts_bytes,
+                rec.lt_accounts_count,
+                rec.lt_accounts_nbytes,
+            )?,
+            contracts_hash: lt_hash_from_parts(
+                &rec.lt_contracts_bytes,
+                rec.lt_contracts_count,
+                rec.lt_contracts_nbytes,
+            )?,
+            storage_hash: lt_hash_from_parts(
+                &rec.lt_storage_bytes,
+                rec.lt_storage_count,
+                rec.lt_storage_nbytes,
+            )?,
+        };
+
         let evm_kvs: BTreeMap<Vec<u8>, Vec<u8>> = rec.evm_kvs.into_iter().collect();
         let mut engine = Self {
             chain,
@@ -393,8 +494,13 @@ impl NodeEngine {
             using_big_blocks: false,
             blocks_digest: rec.blocks_digest,
             evm_kvs,
+            lt_hashes,
             applied_blocks: rec.applied_blocks,
             books: Books::new(),
+            twap_engine: TwapEngine::new(),
+            trigger_book: TriggerBook::new(),
+            last_begin_block_phases: Vec::new(),
+            next_bole_oid: 1,
             withdrawal_queue: WithdrawalQueueState::default(),
             abci_state_root: [0u8; 32],
             restored_from_checkpoint: Some(rec.height),
@@ -408,18 +514,25 @@ impl NodeEngine {
         }
         engine.abci_state_root = computed;
 
-        // Cross-check companion `lt_hashes.json` written by `DbHome::lt_hashes_path`.
+        // Cross-check companion `lt_hashes.json` written by `DbHome::lt_hashes_path`
+        // including exact node #115 `accounts_hash`, `contracts_hash`, `storage_hash` checksums.
         let lt_text = fs::read_to_string(&lt_path).map_err(|e| EngineError::LtHashesMismatch {
             path: lt_path.clone(),
             reason: e.to_string(),
         })?;
-        let expected_root_hex = format_hex_32(&computed);
-        let expected_needle = format!("\"abci_state_root\":\"{expected_root_hex}\"");
-        if !lt_text.contains(&expected_needle) {
-            return Err(EngineError::LtHashesMismatch {
-                path: lt_path,
-                reason: format!("missing expected {expected_needle}"),
-            });
+        let (acc_cs, ctr_cs, stg_cs) = engine.lt_hashes.checksums();
+        for needle in [
+            format!("\"abci_state_root\":\"{}\"", format_hex_32(&computed)),
+            format!("\"accounts_hash\":{{\"n_elements\":{},\"n_bytes\":{},\"checksum\":\"{}\"}}", engine.lt_hashes.accounts_hash.n_elements, engine.lt_hashes.accounts_hash.n_bytes, format_hex_32(&acc_cs)),
+            format!("\"contracts_hash\":{{\"n_elements\":{},\"n_bytes\":{},\"checksum\":\"{}\"}}", engine.lt_hashes.contracts_hash.n_elements, engine.lt_hashes.contracts_hash.n_bytes, format_hex_32(&ctr_cs)),
+            format!("\"storage_hash\":{{\"n_elements\":{},\"n_bytes\":{},\"checksum\":\"{}\"}}", engine.lt_hashes.storage_hash.n_elements, engine.lt_hashes.storage_hash.n_bytes, format_hex_32(&stg_cs)),
+        ] {
+            if !lt_text.contains(&needle) {
+                return Err(EngineError::LtHashesMismatch {
+                    path: lt_path,
+                    reason: format!("missing expected {needle}"),
+                });
+            }
         }
 
         Ok(engine)
@@ -544,6 +657,106 @@ impl NodeEngine {
         self.books.len()
     }
 
+    pub fn lt_hashes(&self) -> &LtHashes {
+        &self.lt_hashes
+    }
+
+    pub fn twap_engine_mut(&mut self) -> &mut TwapEngine {
+        &mut self.twap_engine
+    }
+
+    pub fn trigger_book_mut(&mut self) -> &mut TriggerBook {
+        &mut self.trigger_book
+    }
+
+    pub fn active_twap_count(&self) -> usize {
+        self.twap_engine.meta.len()
+    }
+
+    pub fn active_trigger_count(&self) -> usize {
+        self.trigger_book.len()
+    }
+
+    pub fn last_begin_block_phases(&self) -> &[&'static str] {
+        &self.last_begin_block_phases
+    }
+
+    pub fn pending_staking_withdrawals_count(&self) -> usize {
+        self.withdrawal_queue.pending_by_user.len()
+    }
+
+    /// Evaluate clearinghouse liquidation/backstop/ADL status (`clearinghouse::liquidation`).
+    pub fn classify_account_liquidation(
+        &self,
+        account_value: i64,
+        maintenance_margin: u64,
+        backstop_margin: u64,
+    ) -> LiquidationAction {
+        classify_liquidation(account_value, maintenance_margin, backstop_margin)
+    }
+
+    /// Compute pro-rata cross-margin backstop liquidation allocation (`0x44dcf80`).
+    pub fn allocate_backstop_liquidation(
+        &self,
+        asset: usize,
+        szi: i64,
+        oracle_pxs: &[i64],
+        total_abs_ntl: u64,
+        account_value: i64,
+        remaining_account_value: &mut i64,
+    ) -> Result<Option<BackstopPositionAllocation>, MarginStateError> {
+        backstop_liquidate_position_allocation(
+            asset,
+            szi,
+            oracle_pxs,
+            total_abs_ntl,
+            account_value,
+            remaining_account_value,
+        )
+    }
+
+    /// Construct a forced IOC `bole` liquidation spot cross order (`0x2c80670`).
+    pub fn build_bole_liquidation_order(
+        &mut self,
+        token: usize,
+        size_sz: u64,
+        price_multiplier: f64,
+        liquidated_user: [u8; 20],
+        token_spots: &[SpotPairMeta],
+        spot_px: Option<u64>,
+    ) -> Option<BoleLiquidationCrossOrder> {
+        build_bole_liquidation_spot_order(
+            token,
+            size_sz,
+            price_multiplier,
+            liquidated_user,
+            token_spots,
+            spot_px,
+            &mut self.next_bole_oid,
+        )
+    }
+
+    /// Identify resting trigger orders whose `TriggerCondition` activates at `mark_px`.
+    pub fn check_triggers_at_mark(&self, mark_px: Px, oids: &[u64]) -> Vec<u64> {
+        oids.iter()
+            .copied()
+            .filter(|oid| {
+                self.trigger_book
+                    .get(*oid)
+                    .is_some_and(|ord| ord.trigger.should_trigger(ord.side, mark_px))
+            })
+            .collect()
+    }
+
+    fn upsert_evm_kv(&mut self, k: Vec<u8>, v: Vec<u8>) {
+        let old_enc = self.evm_kvs.get(&k).map(|old_v| encode_kv_entry(&k, old_v));
+        let new_enc = encode_kv_entry(&k, &v);
+        self.lt_hashes
+            .storage_hash
+            .replace(old_enc.as_deref(), &new_enc);
+        self.evm_kvs.insert(k, v);
+    }
+
     /// Apply a single block enforcing all 6 ordered node #115 `AbciEngine::apply_block`
     /// pre-execution guards (`0x5a04ec3..0x5a04f59`), updating EVM KVS state, and
     /// recomputing the exact node #115 BLAKE3 reduction-tree ABCI state root.
@@ -576,6 +789,12 @@ impl NodeEngine {
             });
         }
 
+        // Execute node #115 `Exchange::begin_block` (`0x2bdf8f0`) 7 periodic phases in VA order.
+        self.last_begin_block_phases = BeginBlockPhase::SCHEDULE_ORDER
+            .iter()
+            .map(|phase| phase.name())
+            .collect();
+
         // Deterministic rolling block digest using node115-abci-blake3
         let mut pre = Vec::with_capacity(64 + block.tx_payload.len());
         pre.extend_from_slice(&self.blocks_digest);
@@ -585,12 +804,12 @@ impl NodeEngine {
         pre.extend_from_slice(&block.tx_payload);
         self.blocks_digest = blake3_hash(&pre);
 
-        // Apply EVM KVS writes and record block height key via `evm_rpc::store`
+        // Homomorphically update `LtHashes::accounts_hash` and `storage_hash` (`0x3c287d0`)
+        self.lt_hashes.accounts_hash.mix_in(&self.blocks_digest);
         let height_key = evm_rpc::store::build_block_height_key(b"blk:", block.height);
-        self.evm_kvs
-            .insert(height_key, self.blocks_digest.to_vec());
+        self.upsert_evm_kv(height_key, self.blocks_digest.to_vec());
         for (k, v) in &block.evm_kvs_writes {
-            self.evm_kvs.insert(k.clone(), v.clone());
+            self.upsert_evm_kv(k.clone(), v.clone());
         }
 
         self.abci_state.advance_block(block.round);
@@ -614,13 +833,13 @@ impl NodeEngine {
     }
 
     /// Apply a batch of EVM KVS pairs received from an `EvmKvs` stream (port 3998)
-    /// and recompute the BLAKE3 ABCI state root.
+    /// and recompute both `LtHashes::storage_hash` and the BLAKE3 ABCI state root.
     pub fn apply_evm_kvs_pairs(
         &mut self,
         pairs: impl IntoIterator<Item = (Vec<u8>, Vec<u8>)>,
     ) -> Result<[u8; 32], EngineError> {
         for (k, v) in pairs {
-            self.evm_kvs.insert(k, v);
+            self.upsert_evm_kv(k, v);
         }
         let root = self.compute_state_root()?;
         self.abci_state_root = root;
@@ -628,9 +847,13 @@ impl NodeEngine {
     }
 
     fn compute_slot_digests(&self) -> ([u8; 32], [u8; 32], [u8; 32], [u8; 32]) {
-        // Slot 1: EVM KVS deterministic BTreeMap fold
+        // Slot 1: EVM KVS deterministic BTreeMap + homomorphic `LtHashes` checksums
+        let (acc_cs, ctr_cs, stg_cs) = self.lt_hashes.checksums();
         let mut evm_buf = Vec::new();
         evm_buf.extend_from_slice(&(evm::LT_HASH_LANES as u64).to_le_bytes());
+        evm_buf.extend_from_slice(&acc_cs);
+        evm_buf.extend_from_slice(&ctr_cs);
+        evm_buf.extend_from_slice(&stg_cs);
         for (k, v) in &self.evm_kvs {
             evm_buf.extend_from_slice(&(k.len() as u64).to_le_bytes());
             evm_buf.extend_from_slice(k);
@@ -713,6 +936,15 @@ impl NodeEngine {
             staking_digest,
             bridge_digest,
             abci_state_root: self.abci_state_root,
+            lt_accounts_bytes: self.lt_hashes.accounts_hash.hash.to_vec(),
+            lt_accounts_count: self.lt_hashes.accounts_hash.n_elements,
+            lt_accounts_nbytes: self.lt_hashes.accounts_hash.n_bytes,
+            lt_contracts_bytes: self.lt_hashes.contracts_hash.hash.to_vec(),
+            lt_contracts_count: self.lt_hashes.contracts_hash.n_elements,
+            lt_contracts_nbytes: self.lt_hashes.contracts_hash.n_bytes,
+            lt_storage_bytes: self.lt_hashes.storage_hash.hash.to_vec(),
+            lt_storage_count: self.lt_hashes.storage_hash.n_elements,
+            lt_storage_nbytes: self.lt_hashes.storage_hash.n_bytes,
             evm_kvs: self.evm_kvs_snapshot(),
             applied_blocks: self.applied_blocks.clone(),
         };
@@ -727,15 +959,25 @@ impl NodeEngine {
         let cp_path = cp_dir.join("checkpoint.bin");
         fs::write(&cp_path, compressed)?;
 
+        let (acc_cs, ctr_cs, stg_cs) = self.lt_hashes.checksums();
         let lt_path = self.db_home.lt_hashes_path(self.latest_height());
         let lt_json = format!(
-            "{{\"chain\":\"{}\",\"height\":{},\"round\":{},\"lt_hash_lanes\":{},\"abci_state_root\":\"{}\",\"evm_kvs_digest\":\"{}\"}}\n",
+            "{{\"chain\":\"{}\",\"height\":{},\"round\":{},\"lt_hash_lanes\":{},\"abci_state_root\":\"{}\",\"evm_kvs_digest\":\"{}\",\"accounts_hash\":{{\"n_elements\":{},\"n_bytes\":{},\"checksum\":\"{}\"}},\"contracts_hash\":{{\"n_elements\":{},\"n_bytes\":{},\"checksum\":\"{}\"}},\"storage_hash\":{{\"n_elements\":{},\"n_bytes\":{},\"checksum\":\"{}\"}}}}\n",
             self.chain_display(),
             self.latest_height(),
             self.latest_round(),
             evm::LT_HASH_LANES,
             format_hex_32(&self.abci_state_root),
             format_hex_32(&evm_kvs_digest),
+            self.lt_hashes.accounts_hash.n_elements,
+            self.lt_hashes.accounts_hash.n_bytes,
+            format_hex_32(&acc_cs),
+            self.lt_hashes.contracts_hash.n_elements,
+            self.lt_hashes.contracts_hash.n_bytes,
+            format_hex_32(&ctr_cs),
+            self.lt_hashes.storage_hash.n_elements,
+            self.lt_hashes.storage_hash.n_bytes,
+            format_hex_32(&stg_cs),
         );
         fs::write(lt_path, lt_json)?;
 
