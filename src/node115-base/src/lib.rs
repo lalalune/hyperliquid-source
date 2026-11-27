@@ -2,12 +2,17 @@
 //! Integrated node #115 `base` (`foundation`) crate.
 //!
 //! Links all 39 Cargo-packaged `foundation` micro-crates and exposes binary-grounded
-//! `cid`, `api_url`, `build_mode`, `time`, and `guards` modules.
+//! `cid`, `api_url`, `build_mode`, `time`, `guards`, `short_string`, `bucket_guard`,
+//! `lock_id`, and `log_settings` modules.
 
 pub mod api_url;
+pub mod bucket_guard;
 pub mod build_mode;
 pub mod cid;
 pub mod guards;
+pub mod lock_id;
+pub mod log_settings;
+pub mod short_string;
 pub mod time;
 
 pub use node115_billion_remainder as billion_remainder;

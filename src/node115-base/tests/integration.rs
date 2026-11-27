@@ -1,8 +1,19 @@
 use node115_base::api_url::ApiUrlKind;
+use node115_base::bucket_guard::{BucketGuard, BucketTimeError, MAX_FAST_PATH_MILLIS};
 use node115_base::build_mode::BuildMode;
 use node115_base::cid::Cid;
 use node115_base::guards::{AlreadySetError, CGuard, EmaTracker, SingletonSet};
-use node115_base::time::{NANOS_PER_SEC, TimeDecodeError, split_unix_day_seconds};
+use node115_base::lock_id::{
+    CodeLocation, LockId, LockLocation, LockOrderWitness, LockOrderingViolation,
+};
+use node115_base::log_settings::{
+    Crate, LogLevel, LogSettings, PhraseCheckError, Signature, ZipInnerArgs,
+};
+use node115_base::short_string::{MAX_INLINE_LEN, short_string_pack_rec, try_pack_short_string};
+use node115_base::time::{
+    HourDecodeError, MAX_EXTENDED_DAY_SECS, MAX_U8_HOUR_SECS, NANOS_PER_SEC, TimeDecodeError,
+    hour_from_secs_of_day, split_unix_day_seconds,
+};
 
 #[test]
 fn cid_hex_and_bytes_match_node115_rodata() {
@@ -98,4 +109,122 @@ fn linked_foundation_micro_crates_compose_cleanly() {
         node115_base::three_digit_decimal::parse_three_digit_ascii(b"123"),
         123
     );
+}
+
+#[test]
+fn short_string_pack_rec_matches_node115_little_endian_contract() {
+    assert_eq!(short_string_pack_rec(b"", 0), 0);
+    assert_eq!(short_string_pack_rec(b"A", 0), 0x41);
+    assert_eq!(short_string_pack_rec(b"ABCD", 0), 0x4443_4241);
+    let max_16 = "0123456789abcdef";
+    assert_eq!(max_16.len(), MAX_INLINE_LEN);
+    let expected = u128::from_le_bytes(*b"0123456789abcdef");
+    assert_eq!(try_pack_short_string(max_16), Some(expected));
+    assert_eq!(try_pack_short_string("0123456789abcdefg"), None);
+}
+
+#[test]
+fn bucket_guard_and_hour_from_secs_match_node115_bounds() {
+    let mut guard = BucketGuard::new(60_000);
+    assert_eq!(guard.bucket_start_millis(0), 0);
+    assert_eq!(guard.bucket_start_millis(u64::MAX), u64::MAX);
+    assert_eq!(
+        guard.bucket_start_time(u64::MAX),
+        Err(BucketTimeError::OverflowedMillis)
+    );
+    let t = guard.bucket_start_time(1_441).unwrap();
+    // 1_441 * 60_000 ms = 86_460_000 ms = 1 day + 60s
+    assert_eq!(t.secs_of_day, 60);
+    assert_eq!(t.subsec_nanos, 0);
+
+    let subsec_guard = BucketGuard::new(1_250);
+    let t2 = subsec_guard.bucket_start_time(1).unwrap();
+    assert_eq!(t2.secs_of_day, 1);
+    assert_eq!(t2.subsec_nanos, 250_000_000);
+
+    let too_large = BucketGuard::new(MAX_FAST_PATH_MILLIS + 1);
+    assert_eq!(
+        too_large.bucket_start_time(1),
+        Err(BucketTimeError::MillisOutOfRange)
+    );
+
+    assert!(guard.guard(60_000));
+    assert!(!guard.guard(119_999));
+    assert!(guard.guard(120_000));
+
+    assert_eq!(hour_from_secs_of_day(0), Ok(0));
+    assert_eq!(hour_from_secs_of_day(86_399), Ok(23));
+    assert_eq!(hour_from_secs_of_day(MAX_EXTENDED_DAY_SECS - 1), Ok(24));
+    assert_eq!(
+        hour_from_secs_of_day(MAX_EXTENDED_DAY_SECS),
+        Err(HourDecodeError::ExceedsExtendedDayWindow)
+    );
+    assert_eq!(
+        hour_from_secs_of_day(MAX_U8_HOUR_SECS),
+        Err(HourDecodeError::ExceedsU8HourRange)
+    );
+}
+
+#[test]
+fn base_debug_structs_and_enums_format_binary_verified_fields() {
+    assert_eq!(Crate::ALL.len(), 13);
+    assert_eq!(format!("{:?}", Crate::Base), "Base");
+    assert_eq!(format!("{:?}", Crate::EvmRpc), "EvmRpc");
+    assert_eq!(
+        format!("{:?}", PhraseCheckError::ExpectedPhraseNotFound),
+        "ExpectedPhraseNotFound"
+    );
+    let loc = CodeLocation {
+        fln: "base/src/lock_id.rs",
+        line: 42,
+    };
+    assert!(format!("{loc:?}").contains("CodeLocation") && format!("{loc:?}").contains("fln"));
+    let lock_a = LockLocation {
+        id: LockId {
+            inner: "a".to_owned(),
+            deadlock_detection: true,
+        },
+        call_location: loc,
+    };
+    let lock_b = LockLocation {
+        id: LockId {
+            inner: "b".to_owned(),
+            deadlock_detection: false,
+        },
+        call_location: loc,
+    };
+    let violation = LockOrderingViolation {
+        reverse_edge: (lock_b.id.clone(), lock_a.id.clone()),
+        reverse_witness: LockOrderWitness {
+            a_lock_code_location: loc,
+            b_lock_code_location: loc,
+        },
+        lock_a,
+        lock_b,
+    };
+    let rendered = format!("{violation:?}");
+    assert!(rendered.contains("LockOrderingViolation"));
+    assert!(rendered.contains("reverse_edge"));
+    assert!(rendered.contains("reverse_witness"));
+    let settings = LogSettings {
+        level: LogLevel::Info,
+        err_fln: "err.log".to_owned(),
+        stdout_fln: "out.log".to_owned(),
+        throttle: true,
+        log_to_stdout: false,
+        n_overflow_files: 4,
+        custom_dir: None,
+    };
+    assert!(format!("{settings:?}").contains("n_overflow_files"));
+    let zip = ZipInnerArgs {
+        silent: true,
+        remove_orig: false,
+    };
+    assert!(format!("{zip:?}").contains("remove_orig"));
+    let sig = Signature {
+        r: [1, 2, 3, 4],
+        s: [5, 6, 7, 8],
+        v: 27,
+    };
+    assert!(format!("{sig:?}").contains("Signature"));
 }
