@@ -15,7 +15,13 @@
 //! - [`delegation`]: delegation/undelegation lifecycle (`0x2c68bb0` / `0x3c34fd0` /
 //!   `0x4221f40` / `0x4221510` / `0x42258d0` / `0x4225a30`), 4-chain lockup table
 //!   (`0x4578a0`), 1-year self-delegation lock (`0x459058`), and epoch-min tracking;
-//! - [`governance`]: staking proposal creation gate (`0x3c348b0`, slot `0x64e5bd0`).
+//! - [`governance`]: staking proposal creation gate (`0x3c348b0`, slot `0x64e5bd0`);
+//! - [`validator_lifecycle`]: validator registration (`0x2c77640` / `0x4225b80`),
+//!   profile/IPv4/commission validation (`0x469b540`), signer/IP cooldowns
+//!   (`0x3c3d480`), and zero-delegation unregister guard (`0x144`);
+//! - [`withdrawal_queue`]: CStaking unstaking queue (`0x3c3bbd0` / `0x36cb770` /
+//!   `0x3c3b790`), 5-concurrent cap (`0x143`), long-term lockup (`0x141`), and
+//!   7-day/300-second delay table (`0x450d00`).
 //!
 //! All semantics are bound to Linux x86-64 node #115
 //! (`a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`).
@@ -26,6 +32,8 @@ pub mod delegation;
 pub mod governance;
 pub mod jailing;
 pub mod snapshot;
+pub mod validator_lifecycle;
+pub mod withdrawal_queue;
 
 // Re-export all integrated node #115 staking, validator, and governance micro-crates.
 pub use node115_governance_codec as governance_codec;
@@ -69,4 +77,22 @@ pub use jailing::{
 pub use snapshot::{
     EpochSnapshot, STATUS_MISSING_EPOCH, STATUS_NOT_VALIDATOR, SnapshotError, SnapshotStore,
     ValidatorEntry, ValidatorKey,
+};
+pub use validator_lifecycle::{
+    MAX_COMMISSION_BPS, MAX_COMMISSION_INCREASE_BPS, MAX_INITIAL_WEI, MAX_REGISTERED_VALIDATORS,
+    RegisteredValidator, TAG_ACTION_DISABLED_ON_CHAIN, TAG_CANNOT_UNREGISTER_WITH_DELEGATIONS,
+    TAG_INVALID_INPUT, TAG_INVALID_INPUT_NUMBER, TAG_INVALID_VALIDATOR,
+    TAG_OTHER_VALIDATOR_RECENT_SIGNER_OR_IP_CHANGE, TAG_TOO_MANY_VALIDATORS,
+    TAG_VALIDATOR_ALREADY_REGISTERED, TAG_VALIDATOR_COMMISSION_INVALID, TAG_VALIDATOR_DESC_LEN,
+    TAG_VALIDATOR_IP_NOT_GLOBAL, TAG_VALIDATOR_NAME_LEN, TAG_VALIDATOR_RECENT_SIGNER_OR_IP_CHANGE,
+    VALIDATOR_DESC_MAX_LEN, VALIDATOR_DESC_MIN_LEN, VALIDATOR_NAME_MAX_LEN, VALIDATOR_NAME_MIN_LEN,
+    ValidatorLifecycleError, ValidatorLifecycleState, ValidatorProfileInput, is_global_ipv4,
+    validate_validator_profile,
+};
+pub use withdrawal_queue::{
+    MAX_CONCURRENT_WITHDRAWALS_PER_USER, PendingWithdrawalSummary, QueuedWithdrawal,
+    TAG_INSUFFICIENT_WITHDRAW_BALANCE, TAG_LONG_TERM_STAKING_LOCKED,
+    TAG_TOO_MANY_CONCURRENT_WITHDRAWALS, WITHDRAWAL_DELAY_LOCAL_MAINNET_BITS,
+    WITHDRAWAL_DELAY_SANDBOX_TESTNET_BITS, WithdrawalQueueError, WithdrawalQueueState,
+    withdrawal_delay_secs,
 };
