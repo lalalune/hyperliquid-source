@@ -13,6 +13,8 @@
 //! - [`tc_verify`]: timeout certificate verification (`0x5960390` + `0x564b510`);
 //! - [`timeout_flow`]: first-timer polling selector (`0x2cdca20`) and
 //!   saturating timeout counter (`0x2e098e0` arm `0x8000000000000006`);
+//! - [`voting`]: HotStuff voting (`0x2e07a00`), QC equivocation detection
+//!   (`0x2e08750` / `0x2e1fe30`), and uncommitted ancestor walk (`0x2e20b00`);
 //! - [`wire_codec`]: 5-variant bincode signing payload serializer (`0x5823db0`)
 //!   and `try_propose` pre-proposal guards (`0x2e13ea0`).
 //!
@@ -27,6 +29,7 @@ pub mod proposer;
 pub mod round_progression;
 pub mod tc_verify;
 pub mod timeout_flow;
+pub mod voting;
 pub mod wire_codec;
 
 // Re-export integrated node #115 consensus micro-crates for downstream
@@ -81,4 +84,10 @@ pub use round_progression::{
 pub use timeout_flow::{
     SelectorOutcome, TimerArm, TimerState, TimeoutCounterOutcome, poll_timer_arms,
     saturating_timeout_tick,
+};
+pub use voting::{
+    AncestorChainOutcome, GENESIS_HASH, HotStuffVoteState, MAX_BLOCK_TX_BYTES,
+    MAX_FUTURE_BLOCK_DRIFT_NANOS, MAX_FUTURE_BLOCK_DRIFT_SECS_BITS, PendingBlockHeader,
+    ProcessQcOutcome, QcEquivocationAlert, QcSummary, TryVoteOutcome, VOTE_PACING_DELAY_NANOS,
+    VOTE_PACING_DELAY_SECS_BITS,
 };
