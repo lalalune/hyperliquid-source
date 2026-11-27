@@ -7,6 +7,13 @@ use action_wire::{
         decode_template, known_wire_error_text, render_template, TemplateDecodeError,
         TemplatePiece, ACTION_SUCCESS_TAG, TAG_NONCE_TOO_LOW,
     },
+    rmp_signable::{
+        check_user_outcome_entry, connection_id, connection_id_preimage, fold_action_result,
+        ActionEnvelopeFold, DelayedActionRecord, UserOutcomeEntryReject,
+        ACTION_DELAYER_FIELD_COUNT, ENVELOPE_ERR_BYTE, ENVELOPE_OK_BYTE,
+        USER_OUTCOME_BLOCKED_SUBCODE, USER_OUTCOME_BLOCKED_TAG, USER_OUTCOME_DISABLED_TAG,
+        USER_OUTCOME_UNKNOWN_USER_TAG,
+    },
     signed_action_four_field::{
         encode_body as encode_four_field, ContainerMode, FourFieldAction, HyperliquidChain,
     },
@@ -146,4 +153,95 @@ fn micro_crate_codecs_compose_cleanly() {
         },
     );
     assert!(!uct.is_empty());
+}
+
+#[test]
+fn rmp_signable_connection_id_matches_node115_layout_rules() {
+    let payload = [0x81, 0xa4, b't', b'y', b'p', b'e', 0xa4, b'n', b'o', b'o', b'p'];
+    let nonce = 0x0102_0304_0506_0708u64;
+    let vault = [0xab; 20];
+    let expires = 0x1122_3344_5566_7788u64;
+
+    // No vault, no expires_after: payload || be64(nonce) || 0x00.
+    let p_plain = connection_id_preimage(&payload, nonce, None, None);
+    assert_eq!(p_plain.len(), payload.len() + 8 + 1);
+    assert_eq!(&p_plain[payload.len()..payload.len() + 8], &nonce.to_be_bytes());
+    assert_eq!(p_plain[payload.len() + 8], 0x00);
+
+    // With vault, no expires_after: payload || be64(nonce) || 0x01 || vault[20].
+    let p_vault = connection_id_preimage(&payload, nonce, Some(vault), None);
+    assert_eq!(p_vault.len(), payload.len() + 8 + 1 + 20);
+    assert_eq!(p_vault[payload.len() + 8], 0x01);
+    assert_eq!(&p_vault[payload.len() + 9..payload.len() + 29], &vault);
+
+    // With vault and expires_after: ... || 0x00 || be64(expires).
+    let p_exp = connection_id_preimage(&payload, nonce, Some(vault), Some(expires));
+    assert_eq!(p_exp.len(), payload.len() + 8 + 1 + 20 + 1 + 8);
+    assert_eq!(p_exp[payload.len() + 29], 0x00);
+    assert_eq!(&p_exp[payload.len() + 30..], &expires.to_be_bytes());
+
+    // Connection IDs must differ across vault / expires_after variations.
+    let id_plain = connection_id(&payload, nonce, None, None);
+    let id_vault = connection_id(&payload, nonce, Some(vault), None);
+    let id_exp = connection_id(&payload, nonce, Some(vault), Some(expires));
+    assert_ne!(id_plain, id_vault);
+    assert_ne!(id_vault, id_exp);
+}
+
+#[test]
+fn vault_transfer_withdraw3_fold_user_outcome_and_delayer_match_node115() {
+    // Success tag 0x1a2 folds to 0x0e (0x283c6b0 / 0x246cd10).
+    let mut ok_slot = [0u8; 0x70];
+    ok_slot[0..2].copy_from_slice(&ACTION_SUCCESS_TAG.to_le_bytes());
+    assert_eq!(
+        fold_action_result(&ok_slot),
+        ActionEnvelopeFold::Ok {
+            tag_byte: ENVELOPE_OK_BYTE,
+        }
+    );
+
+    // Error tag != 0x1a2 folds to 0x0f with full 0x70-byte error copy.
+    let mut err_slot = [0x55u8; 0x70];
+    err_slot[0..2].copy_from_slice(&TAG_NONCE_TOO_LOW.to_le_bytes());
+    assert_eq!(
+        fold_action_result(&err_slot),
+        ActionEnvelopeFold::Err {
+            tag_byte: ENVELOPE_ERR_BYTE,
+            error_tag: TAG_NONCE_TOO_LOW,
+            payload: err_slot,
+        }
+    );
+
+    // user_outcome.rs entry guard precedence: disabled (0x92) -> blocked (0x193/7) -> unknown user (0x15).
+    assert_eq!(
+        check_user_outcome_entry(false, true, false),
+        Err(UserOutcomeEntryReject::Disabled {
+            tag: USER_OUTCOME_DISABLED_TAG
+        })
+    );
+    assert_eq!(
+        check_user_outcome_entry(true, true, false),
+        Err(UserOutcomeEntryReject::Blocked {
+            tag: USER_OUTCOME_BLOCKED_TAG,
+            subcode: USER_OUTCOME_BLOCKED_SUBCODE,
+        })
+    );
+    assert_eq!(
+        check_user_outcome_entry(true, false, false),
+        Err(UserOutcomeEntryReject::UnknownUser {
+            tag: USER_OUTCOME_UNKNOWN_USER_TAG
+        })
+    );
+    assert_eq!(check_user_outcome_entry(true, false, true), Ok(()));
+
+    // ActionDelayer schema field count & record representation.
+    assert_eq!(ACTION_DELAYER_FIELD_COUNT, 6);
+    let rec = DelayedActionRecord {
+        id: 1,
+        action_index: 14,
+        is_frontend: true,
+        expires_after: Some(1_700_000_000_000),
+        delay_scale: 1,
+    };
+    assert_eq!(rec.action_index, 14);
 }

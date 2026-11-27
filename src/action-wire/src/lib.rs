@@ -7,6 +7,7 @@
 
 pub mod eip712;
 pub mod error_display;
+pub mod rmp_signable;
 pub mod variants;
 
 pub use l1_shared::nonce_set;
