@@ -40,7 +40,7 @@ These inventory counts describe available work, not completed components.
 | Component work areas with registered Rust paths | 23/23 | 100.00% |
 | Active `src/` Rust areas registered in `components.json` | 270/271 | 99.63% |
 | Research work items with top-level `MANIFEST.sha256` | 4,734/4,856 | 97.49% |
-| Tracked research questions with reviewed evidence | 5/5 | 100.00% |
+| Tracked research questions with reviewed evidence | 3/5 | 60.00% |
 
 Gate percentages require acceptance of the full component scope.
 Byte percentages cover the authenticated comparison registry, including dependencies;
