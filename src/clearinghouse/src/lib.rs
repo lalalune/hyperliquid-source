@@ -9,6 +9,7 @@ pub mod liquidation;
 pub mod margin_user_state;
 pub mod position_risk;
 pub mod reference_oracle;
+pub mod spot_clearinghouse;
 
 pub use node115_borrow_lend_codec as borrow_lend_codec;
 pub use node115_borrow_lend_content_assembly as borrow_lend_content_assembly;

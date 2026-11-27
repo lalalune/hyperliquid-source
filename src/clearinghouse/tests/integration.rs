@@ -517,3 +517,318 @@ fn liquidation_backstop_allocation_0x44dcf80_and_adl_classification_match_rules(
     );
     assert_eq!(classify_liquidation(500, 500, 333), LiquidationAction::Healthy);
 }
+
+#[test]
+fn spot_clearinghouse_genesis_validation_and_hyperliquidity_rules_match_node115() {
+    use clearinghouse::spot_clearinghouse::{
+        SpotClearinghouse, SpotClearinghouseError, SpotTokenSpec, TokenGenesis,
+        ERR_BLACKLISTED_USER_BALANCE_UPDATE, ERR_BLACKLIST_EXCEEDS_1000,
+        ERR_BLACKLIST_WITH_BALANCES, ERR_GENESIS_ALREADY_HAPPENED,
+        ERR_GENESIS_MAX_SUPPLY_INCORRECT, ERR_HYPERLIQUIDITY_MIN_1PCT,
+        ERR_HYPERLIQUIDITY_NONZERO_WHEN_DISABLED, ERR_MAX_SUPPLY_MIN_100M_LOTS,
+        ERR_MISSING_TOKEN_GENESIS_INFO, HYPERLIQUIDITY_ADDRESS,
+        MAX_GENESIS_BLACKLIST_UPDATE_LEN,
+    };
+
+    let mut ch = SpotClearinghouse::new();
+    ch.tokens.push(SpotTokenSpec {
+        name: "USDC".into(),
+        sz_decimals: 8,
+        wei_decimals: 8,
+    });
+    ch.tokens.push(SpotTokenSpec {
+        name: "PURR".into(),
+        sz_decimals: 0,
+        wei_decimals: 5, // 10^5 wei per lot -> min 100M lots = 10^13 wei
+    });
+    ch.tokens.push(SpotTokenSpec {
+        name: "HYPE".into(),
+        sz_decimals: 2,
+        wei_decimals: 8, // 10^6 wei per lot -> min 100M lots = 10^14 wei
+    });
+
+    // #66500 (0x3bfa810): USDC (0) rejected, out-of-range rejected, fresh token accepted.
+    assert_eq!(
+        ch.validate_token_before_genesis(0),
+        Err(SpotClearinghouseError::GenesisFailed(
+            ERR_GENESIS_ALREADY_HAPPENED
+        ))
+    );
+    assert_eq!(
+        ch.validate_token_before_genesis(99),
+        Err(SpotClearinghouseError::InvalidToken(99))
+    );
+    assert_eq!(ch.validate_token_before_genesis(1), Ok(1));
+
+    // #66499 (0x3bfa400): > 1000 blacklist update rejected; blacklist + balances rejected.
+    let too_many: Vec<([u8; 20], bool)> = (0..=MAX_GENESIS_BLACKLIST_UPDATE_LEN)
+        .map(|i| {
+            let mut addr = [0u8; 20];
+            addr[0..2].copy_from_slice(&(i as u16).to_le_bytes());
+            (addr, true)
+        })
+        .collect();
+    assert_eq!(
+        ch.validate_token_genesis_update(1, &[], &[], Some(&too_many)),
+        Err(SpotClearinghouseError::GenesisUpdateRejected(
+            ERR_BLACKLIST_EXCEEDS_1000
+        ))
+    );
+    assert_eq!(
+        ch.validate_token_genesis_update(1, &[([1u8; 20], 10)], &[], Some(&[([2u8; 20], true)])),
+        Err(SpotClearinghouseError::GenesisUpdateRejected(
+            ERR_BLACKLIST_WITH_BALANCES
+        ))
+    );
+    assert_eq!(
+        ch.validate_token_genesis_update(1, &[], &[], Some(&[([2u8; 20], true)])),
+        Ok(())
+    );
+
+    // Blacklisted user in user_and_wei rejected.
+    let alice = [0x11; 20];
+    let bob = [0x22; 20];
+    let mut purr_genesis = TokenGenesis::default();
+    purr_genesis.blacklist_users.insert(bob);
+    ch.token_to_genesis.insert(1, purr_genesis);
+    assert_eq!(
+        ch.validate_token_genesis_update(1, &[(bob, 500)], &[], None),
+        Err(SpotClearinghouseError::GenesisUpdateRejected(
+            ERR_BLACKLISTED_USER_BALANCE_UPDATE
+        ))
+    );
+    assert_eq!(
+        ch.validate_token_genesis_update(1, &[(alice, 500)], &[], None),
+        Ok(())
+    );
+
+    // #66488 (0x3bf5120): min 100M lots, missing genesis, 1% HL rule, HYPE exemption, exact sum.
+    assert_eq!(
+        ch.validate_genesis_supply_and_hyperliquidity(1, 9_999_999_999_999, false, true),
+        Err(SpotClearinghouseError::GenesisFailed(
+            ERR_MAX_SUPPLY_MIN_100M_LOTS
+        ))
+    );
+    assert_eq!(
+        ch.validate_genesis_supply_and_hyperliquidity(2, 100_000_000_000_000, false, true),
+        Err(SpotClearinghouseError::GenesisFailed(
+            ERR_MISSING_TOKEN_GENESIS_INFO
+        ))
+    );
+
+    let max_sup = 10_000_000_000_000u64; // exactly 100M lots at 10^5 wei/lot
+    ch.token_to_genesis
+        .get_mut(&1)
+        .unwrap()
+        .user_balances
+        .insert(alice, max_sup - 50_000_000_000);
+    ch.token_to_genesis
+        .get_mut(&1)
+        .unwrap()
+        .user_balances
+        .insert(HYPERLIQUIDITY_ADDRESS, 50_000_000_000); // 0.5% < 1%
+    assert_eq!(
+        ch.validate_genesis_supply_and_hyperliquidity(1, max_sup, false, true),
+        Err(SpotClearinghouseError::GenesisFailed(
+            ERR_HYPERLIQUIDITY_MIN_1PCT
+        ))
+    );
+    assert_eq!(
+        ch.validate_genesis_supply_and_hyperliquidity(1, max_sup, true, true),
+        Err(SpotClearinghouseError::GenesisFailed(
+            ERR_HYPERLIQUIDITY_NONZERO_WHEN_DISABLED
+        ))
+    );
+
+    // Raise Hyperliquidity to exact 1% (100B wei) -> passes.
+    ch.token_to_genesis
+        .get_mut(&1)
+        .unwrap()
+        .user_balances
+        .insert(alice, max_sup - 100_000_000_000);
+    ch.token_to_genesis
+        .get_mut(&1)
+        .unwrap()
+        .user_balances
+        .insert(HYPERLIQUIDITY_ADDRESS, 100_000_000_000);
+    assert_eq!(
+        ch.validate_genesis_supply_and_hyperliquidity(1, max_sup, false, true),
+        Ok(())
+    );
+    // Supply mismatch rejected.
+    assert_eq!(
+        ch.validate_genesis_supply_and_hyperliquidity(1, max_sup + 1, false, true),
+        Err(SpotClearinghouseError::GenesisFailed(
+            ERR_GENESIS_MAX_SUPPLY_INCORRECT
+        ))
+    );
+
+    // HYPE exemption: 0 Hyperliquidity passes even when no_hyperliquidity=false & enforce=true!
+    let hype_max = 100_000_000_000_000u64;
+    let mut hype_genesis = TokenGenesis::default();
+    hype_genesis.user_balances.insert(alice, hype_max);
+    ch.token_to_genesis.insert(2, hype_genesis);
+    assert_eq!(
+        ch.validate_genesis_supply_and_hyperliquidity(2, hype_max, false, true),
+        Ok(())
+    );
+}
+
+#[test]
+fn spot_clearinghouse_pro_rata_distribution_balance_and_fill_deltas_match_node115() {
+    use clearinghouse::spot_clearinghouse::{
+        reconcile_pro_rata_distribution, SpotBalance, SpotClearinghouse, SpotClearinghouseError,
+        SpotFillDeltaAccumulator, SpotFillDeltaInput, SpotFillRecordFlags, SpotTokenSpec,
+        TokenGenesis, DEFAULT_GENESIS_MAX_CLAWBACK_FRACTION,
+        ERR_EXISTING_TOKEN_MISSING_MAX_SUPPLY,
+    };
+
+    // #66504 (0x3bfb650) + #66512 (0x3bfd3c0) + #69259 (0x3d5e540):
+    // Dust filter (1e-6 * existing_max_supply), blacklist skip, shortfall top-up to largest holder.
+    let mut ch = SpotClearinghouse::new();
+    ch.tokens.push(SpotTokenSpec {
+        name: "USDC".into(),
+        sz_decimals: 8,
+        wei_decimals: 8,
+    });
+    ch.tokens.push(SpotTokenSpec {
+        name: "OLD".into(),
+        sz_decimals: 0,
+        wei_decimals: 6,
+    });
+    ch.tokens.push(SpotTokenSpec {
+        name: "NEW".into(),
+        sz_decimals: 0,
+        wei_decimals: 6,
+    });
+
+    assert_eq!(
+        ch.distribute_to_existing_token_holders(2, 1, 1000, 1),
+        Err(SpotClearinghouseError::GenesisFailed(
+            ERR_EXISTING_TOKEN_MISSING_MAX_SUPPLY
+        ))
+    );
+
+    ch.token_to_max_supply.insert(1, 1_000_000_000); // dust threshold = 1_000 wei
+    let u1 = [0x01; 20];
+    let u2 = [0x02; 20];
+    let u3 = [0x03; 20];
+    let dust_user = [0x04; 20];
+    let blacklisted = [0x05; 20];
+    for (u, amt) in [
+        (u1, 100_000u64),
+        (u2, 100_000),
+        (u3, 100_000),
+        (dust_user, 999), // below 1e-6 * 1e9 = 1000 -> filtered out!
+        (blacklisted, 500_000),
+    ] {
+        ch.user_states.entry(u).or_default().insert(
+            1,
+            SpotBalance {
+                total: amt,
+                hold: 0,
+                entry_ntl: 0,
+            },
+        );
+    }
+    let mut new_gen = TokenGenesis::default();
+    new_gen.blacklist_users.insert(blacklisted);
+    ch.token_to_genesis.insert(2, new_gen);
+
+    // Target 100 across 3 equal eligible holders: floor(33.33)=33 each = 99 -> deficit 1 goes to index 0!
+    let dist = ch
+        .distribute_to_existing_token_holders(2, 1, 100, 1)
+        .unwrap();
+    assert_eq!(dist.len(), 3);
+    assert_eq!(dist.iter().map(|(_, w)| *w).sum::<u64>(), 100);
+    assert_eq!(dist[0], (u1, 34));
+    assert_eq!(dist[1], (u2, 33));
+    assert_eq!(dist[2], (u3, 33));
+
+    // Direct zero-balance rejection.
+    assert!(reconcile_pro_rata_distribution(
+        vec![(u1, 0)],
+        100,
+        1,
+        DEFAULT_GENESIS_MAX_CLAWBACK_FRACTION
+    )
+    .is_err());
+
+    // #66501 (0x3bfa910): SpotBalance credit/debit + proportional entry_ntl + hold clamp.
+    let mut bal = SpotBalance {
+        total: 1_000,
+        hold: 200,
+        entry_ntl: 5_000,
+    };
+    let debit_out = bal
+        .apply_delta(1, true, 250, true, |w| Some(w * 5))
+        .unwrap();
+    assert!(debit_out.hold_underflow_clamped);
+    assert_eq!(bal.total, 750);
+    assert_eq!(bal.hold, 0);
+    assert_eq!(bal.entry_ntl, 3_750); // 5000 * (750 / 1000)
+
+    let credit_out = bal
+        .apply_delta(1, false, 250, true, |w| Some(w * 6))
+        .unwrap();
+    assert!(!credit_out.total_overflow_saturated);
+    assert_eq!(bal.total, 1_000);
+    assert_eq!(bal.entry_ntl, 5_250); // 3750 + 250 * 6
+
+    // Debit > total returns InsufficientBalance (types.rs:159:50 panic site).
+    assert_eq!(
+        bal.apply_delta(1, true, 1_001, true, |_| None),
+        Err(SpotClearinghouseError::InsufficientBalance {
+            total: 1_000,
+            debit: 1_001,
+        })
+    );
+
+    // #69050 (0x3d4e560): SpotFillDeltaAccumulator bid/ask scaling + fees.
+    let mut acc = SpotFillDeltaAccumulator::default();
+    let f_bid = acc
+        .record_fill(&SpotFillDeltaInput {
+            is_bid: true,
+            credit_raw: 500,
+            debit_raw: 2_000,
+            mul_scale: 3,
+            div_scale: 2, // 2000 * 3 / 2 = 3000 -> base_debit
+            primary_fee: Some(10),
+            secondary_fee: Some(5),
+            builder_fee: 2, // fees -> quote_debit on bid
+        })
+        .unwrap();
+    assert_eq!(
+        f_bid,
+        SpotFillRecordFlags {
+            credited: true,
+            debited: true
+        }
+    );
+    assert_eq!(acc.quote_credit, 500);
+    assert_eq!(acc.base_debit, 3_000);
+    assert_eq!(acc.quote_debit, 17);
+
+    let f_ask = acc
+        .record_fill(&SpotFillDeltaInput {
+            is_bid: false,
+            credit_raw: 400,
+            debit_raw: 1_000,
+            mul_scale: 5,
+            div_scale: 4, // 400 * 5 / 4 = 500 -> base_credit
+            primary_fee: Some(7),
+            secondary_fee: None,
+            builder_fee: 3, // fees -> base_debit on ask
+        })
+        .unwrap();
+    assert_eq!(
+        f_ask,
+        SpotFillRecordFlags {
+            credited: true,
+            debited: true
+        }
+    );
+    assert_eq!(acc.base_credit, 500);
+    assert_eq!(acc.quote_debit, 1_017);
+    assert_eq!(acc.base_debit, 3_010);
+}

@@ -1,0 +1,110 @@
+{
+  "work_item": "RE-007-node115-spot-clearinghouse-accounting",
+  "component": "risk",
+  "target_binary": "artifacts/node/115/hl-node",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "fdes": [
+    {
+      "name": "validate_genesis_supply_and_hyperliquidity",
+      "start_va": "0x3bf5120",
+      "end_va": "0x3bf5fb3",
+      "size": 3731
+    },
+    {
+      "name": "validate_token_genesis_update",
+      "start_va": "0x3bfa400",
+      "end_va": "0x3bfa80f",
+      "size": 1039
+    },
+    {
+      "name": "validate_token_before_genesis",
+      "start_va": "0x3bfa810",
+      "end_va": "0x3bfa90d",
+      "size": 253
+    },
+    {
+      "name": "spot_balance_apply_delta",
+      "start_va": "0x3bfa910",
+      "end_va": "0x3bfac09",
+      "size": 761
+    },
+    {
+      "name": "distribute_to_existing_token_holders",
+      "start_va": "0x3bfb650",
+      "end_va": "0x3bfbeee",
+      "size": 2206
+    },
+    {
+      "name": "spot_clearinghouse_debug_fmt",
+      "start_va": "0x3bfd020",
+      "end_va": "0x3bfd340",
+      "size": 800
+    },
+    {
+      "name": "reconcile_pro_rata_distribution",
+      "start_va": "0x3bfd3c0",
+      "end_va": "0x3bfdb3c",
+      "size": 1916
+    },
+    {
+      "name": "spot_fill_delta_accumulator_record_fill",
+      "start_va": "0x3d4e560",
+      "end_va": "0x3d4e8ff",
+      "size": 927
+    },
+    {
+      "name": "compute_pro_rata_allocations",
+      "start_va": "0x3d5e540",
+      "end_va": "0x3d5e817",
+      "size": 727
+    }
+  ],
+  "rodata_strings": [
+    { "va": "0x7baebd", "text": "genesis supply error" },
+    { "va": "0x7baed1", "text": "Hyperliquidity must be at least 1% of max supply" },
+    { "va": "0x7baf01", "text": "Hyperliquidity balance should be 0 if no hyperliquidity is set." },
+    { "va": "0x7baf40", "text": "genesis max supply incorrect" },
+    { "va": "0x7baf5c", "text": "missing token genesis information" },
+    { "va": "0x7baf7d", "text": "max supply must be at least 100M lots" },
+    { "va": "0x7bafa2", "text": "cannot update blacklist users when either user_and_wei or existing_token_and_wei is non-empty" },
+    { "va": "0x7bafff", "text": "blacklist users to update exceeds 1000" },
+    { "va": "0x7bb025", "text": "cannot update token genesis balance for blacklisted user(s), either remove blacklisted user(s) from user_and_wei or remove the relevant user(s) from the blacklist" },
+    { "va": "0x7bb0c7", "text": "genesis already happened" },
+    { "va": "0x7bb0df", "text": "unable to distribute genesis tokens to users" },
+    { "va": "0x7bb10b", "text": "invalid genesis distribution" },
+    { "va": "0x7bb127", "text": "existing token missing max supply" },
+    { "va": "0x7bb159", "text": "total balance of token is zero" },
+    { "va": "0x7bb177", "text": "no user has wei after distributing" },
+    { "va": "0x444ed1", "text": "error while computing existing token balances total_wei=" },
+    { "va": "0x433b5d", "text": "BUG: distributing to existing token final_allocation_check=" },
+    { "va": "0x4424b8", "text": "could not distribute remainder=" }
+  ],
+  "rodata_bytes": [
+    {
+      "name": "hyperliquidity_address",
+      "va": "0x7baea9",
+      "hex": "ffffffffffffffffffffffffffffffffffffffff"
+    }
+  ],
+  "rodata_f64": [
+    { "name": "existing_token_dust_fraction", "va": "0x459130", "bits_hex": "0x3eb0c6f7a0b5ed8d", "value": 1e-06 },
+    { "name": "default_genesis_max_clawback_fraction", "va": "0x458e48", "bits_hex": "0x3f847ae147ae147b", "value": 0.01 },
+    { "name": "pro_rata_ratio_max", "va": "0x4590b8", "bits_hex": "0x3ff028f5c28f5c29", "value": 1.01 }
+  ],
+  "instruction_anchors": [
+    { "name": "min_genesis_100m_lots_imm", "va": "0x3bf5188", "hex": "b900e1f505" },
+    { "name": "hype_exemption_cmpl", "va": "0x3bf56da", "hex": "813848595045" },
+    { "name": "blacklist_max_1000_cmpq", "va": "0x3bfa429", "hex": "48817810e8030000" },
+    { "name": "entry_ntl_scale_limit_movabs", "va": "0x3bfaab3", "hex": "48b95c8fc2f5285c8f02" }
+  ],
+  "panic_locations": [
+    { "va": "0x6479c20", "file": "l1/src/spot_clearinghouse/spot_clearinghouse.rs", "line": 959, "col": 98 },
+    { "va": "0x6476690", "file": "l1/src/spot_clearinghouse/types.rs", "line": 159, "col": 50 },
+    { "va": "0x6479cc8", "file": "l1/src/spot_clearinghouse/cl_trait.rs", "line": 940, "col": 73 },
+    { "va": "0x6479c50", "file": "l1/src/spot_clearinghouse/cl_trait.rs", "line": 995, "col": 61 },
+    { "va": "0x6479c68", "file": "l1/src/spot_clearinghouse/cl_trait.rs", "line": 1003, "col": 63 },
+    { "va": "0x6479c80", "file": "l1/src/spot_clearinghouse/cl_trait.rs", "line": 1015, "col": 63 },
+    { "va": "0x6479c98", "file": "l1/src/spot_clearinghouse/cl_trait.rs", "line": 1023, "col": 63 },
+    { "va": "0x6479cb0", "file": "l1/src/spot_clearinghouse/cl_trait.rs", "line": 1031, "col": 73 }
+  ]
+}
