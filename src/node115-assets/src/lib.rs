@@ -32,9 +32,9 @@ pub use node115_three_digit_decimal as three_digit_decimal;
 pub use node115_u256_decimal_scale as u256_decimal_scale;
 
 pub use meta::{
-    DeployerFeeShareError, LEGACY_MAINNET_TOKEN_MAX, MAINNET_CHAIN_TAG,
+    BUILTIN_MARGIN_TABLE_LIMIT, DeployerFeeShareError, LEGACY_MAINNET_TOKEN_MAX, MAINNET_CHAIN_TAG,
     MAX_DEPLOYER_TRADING_FEE_SHARE_E5, MetaError, PerpAssetMeta, PerpMeta, SpotMeta, SpotPairMeta,
-    SpotTokenMeta, update_deployer_trading_fee_share,
+    SpotTokenMeta, is_builtin_margin_table_id, update_deployer_trading_fee_share,
 };
 pub use pdi::{PDI_STRIDE, Pdi, PerpAsset, Side, SpotAsset, Token};
 pub use qtys::{

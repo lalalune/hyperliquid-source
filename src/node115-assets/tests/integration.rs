@@ -337,4 +337,11 @@ fn meta_scaling_lookups_deployer_fee_share_and_clamped_f64_match_node115() {
         scale_nonneg_i64_by_f64_clamped(i64::MAX, 2.0),
         Some(i64::MAX as u64)
     );
+
+    // Built-in vs custom margin-table ID threshold (`l1/src/perp_meta.rs:247:72`, `0x3c4315d`)
+    assert_eq!(node115_assets::BUILTIN_MARGIN_TABLE_LIMIT, 50);
+    assert!(node115_assets::is_builtin_margin_table_id(0));
+    assert!(node115_assets::is_builtin_margin_table_id(49));
+    assert!(!node115_assets::is_builtin_margin_table_id(50));
+    assert!(!node115_assets::is_builtin_margin_table_id(100));
 }

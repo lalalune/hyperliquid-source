@@ -35,6 +35,18 @@ pub const LEGACY_MAINNET_TOKEN_MAX: u64 = 195;
 /// Chain discriminant checked at `[rsi + 0xb9a]` in `#115` `0x2c588d1` (`3 == Mainnet`).
 pub const MAINNET_CHAIN_TAG: u8 = 3;
 
+/// Exclusive upper bound on built-in 1-tier static margin table IDs in `#115` `0x3c4315d`
+/// (`l1/src/perp_meta.rs:247:72`, `cmp edx, 0x32`): IDs `< 50` resolve against the static
+/// built-in table array (`0x64fb8f0`), whereas IDs `>= 50` look up custom multi-tier tables.
+pub const BUILTIN_MARGIN_TABLE_LIMIT: u32 = 50;
+
+/// Returns `true` iff `margin_table_id` maps to a built-in static 1-tier margin table (`id < 50`).
+#[inline]
+#[must_use]
+pub const fn is_builtin_margin_table_id(margin_table_id: u32) -> bool {
+    margin_table_id < BUILTIN_MARGIN_TABLE_LIMIT
+}
+
 /// Errors produced by `#115` `0x2c58880` (`SpotMeta::set_deployer_trading_fee_share`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DeployerFeeShareError {
