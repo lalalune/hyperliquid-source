@@ -257,3 +257,63 @@ fn position_projection_and_replica_response_json_integration() {
     };
     assert!(opts.include_users && !opts.include_trigger_orders);
 }
+
+#[test]
+fn position_boundary_overflow_and_request_corruption_cases() {
+    // Negative mark word -> MarkOrProductBoundary
+    assert_eq!(
+        project_position_integers(NonZeroI64::new(1).unwrap(), u64::MAX, 0),
+        PositionIntegerObservation::MarkOrProductBoundary
+    );
+    // Signed multiplication overflow -> MarkOrProductBoundary
+    assert_eq!(
+        project_position_integers(NonZeroI64::new(i64::MAX).unwrap(), 2, 0),
+        PositionIntegerObservation::MarkOrProductBoundary
+    );
+    // Negative entry word -> EntrySignBoundary
+    assert_eq!(
+        project_position_integers(NonZeroI64::new(2).unwrap(), 10, u64::MAX),
+        PositionIntegerObservation::EntrySignBoundary
+    );
+    // Entry == 0 -> division None, pnl 0
+    assert_eq!(
+        project_position_integers(NonZeroI64::new(-4).unwrap(), 5, 0),
+        PositionIntegerObservation::Normal {
+            product_word: (-20i64) as u64,
+            pnl_word: 0,
+            division: None,
+        }
+    );
+    // Wide64 division path (entry_word > u32::MAX)
+    let big_entry = u64::from(u32::MAX) + 10;
+    let wide = project_position_integers(NonZeroI64::new(2).unwrap(), 10, big_entry);
+    match wide {
+        PositionIntegerObservation::Normal {
+            division: Some(div),
+            ..
+        } => {
+            assert_eq!(div.width, DivisionWidth::Wide64);
+            assert_eq!(div.quotient, big_entry / 2);
+            assert_eq!(div.remainder, big_entry % 2);
+        }
+        other => panic!("expected Wide64 division, got {other:?}"),
+    }
+    // Entry < magnitude -> division None
+    match project_position_integers(NonZeroI64::new(10).unwrap(), 10, 5) {
+        PositionIntegerObservation::Normal { division, .. } => assert_eq!(division, None),
+        other => panic!("expected Normal with division None, got {other:?}"),
+    }
+
+    // Non-object / truncated / invalid JSON syntax rejected
+    assert!(parse_info_request_kind(b"[]").is_err());
+    assert!(parse_info_request_kind(b"").is_err());
+    assert!(parse_info_request_kind(br#"{"type":123}"#).is_err());
+    assert!(parse_info_request_kind(br#"{"type":"meta""#).is_err());
+
+    // Non-loopback IPv6 rejected for FileSnapshot
+    let remote_v6 = IpAddr::V6(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1));
+    assert_eq!(
+        check_request_access(InfoRequestKind::FileSnapshot, remote_v6),
+        RequestAccess::RejectedNotLocalhost
+    );
+}
