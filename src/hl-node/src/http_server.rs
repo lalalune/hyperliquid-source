@@ -205,10 +205,11 @@ fn dispatch_request(
     if method == "GET" && path == "/health" {
         let eng = state.engine.read().expect("engine read lock");
         let json = format!(
-            "{{\"status\":\"ok\",\"chain\":\"{}\",\"height\":{},\"round\":{},\"abciStateRoot\":\"{}\",\"evmKvCount\":{},\"evmBlockGasLimit\":{},\"serveInfo\":{},\"serveEvmRpc\":{},\"subsystems\":26}}",
+            "{{\"status\":\"ok\",\"chain\":\"{}\",\"height\":{},\"round\":{},\"committedRound\":{},\"abciStateRoot\":\"{}\",\"evmKvCount\":{},\"evmBlockGasLimit\":{},\"serveInfo\":{},\"serveEvmRpc\":{},\"subsystems\":26}}",
             eng.chain_display(),
             eng.latest_height(),
             eng.latest_round(),
+            eng.committed_round(),
             eng.abci_state_root_hex(),
             eng.evm_kv_count(),
             eng.evm_block_gas_limit(),
@@ -272,10 +273,11 @@ fn handle_info_request(
     let (acc_cs, ctr_cs, stg_cs) = eng.lt_hashes().checksums();
     let payload = match kind {
         InfoRequestKind::ExchangeStatus => format!(
-            "{{\"type\":\"exchangeStatus\",\"chain\":\"{}\",\"height\":{},\"round\":{},\"abciStateRoot\":\"{}\",\"books\":{},\"activeTriggers\":{},\"activeTwaps\":{},\"beginBlockPhases\":{},\"ltHashes\":{{\"accounts\":\"{}\",\"contracts\":\"{}\",\"storage\":\"{}\"}}}}",
+            "{{\"type\":\"exchangeStatus\",\"chain\":\"{}\",\"height\":{},\"round\":{},\"committedRound\":{},\"abciStateRoot\":\"{}\",\"books\":{},\"activeTriggers\":{},\"activeTwaps\":{},\"beginBlockPhases\":{},\"ltHashes\":{{\"accounts\":\"{}\",\"contracts\":\"{}\",\"storage\":\"{}\"}}}}",
             eng.chain_display(),
             eng.latest_height(),
             eng.latest_round(),
+            eng.committed_round(),
             eng.abci_state_root_hex(),
             eng.book_count(),
             eng.active_trigger_count(),

@@ -33,12 +33,25 @@ use node115_abci::checkpoint_replay_fixture::{
 };
 use node115_abci::lt_hash::{LT_HASH_BYTES, LtHash, LtHashes};
 use node115_abci::state::{
-    AbciState, ApplyBlockPreconditionError, REQUIRED_FEATURE_VERSION,
+    AbciState, ApplyBlockPreconditionError, REQUIRED_FEATURE_VERSION, StateHardforkNewerError,
+    validate_state_hardfork_not_newer,
 };
-use node115_assets::qtys::Px;
-use node115_db::db_home::{DbHome, DbHomeError};
+use node115_assets::pdi::Side;
+use node115_assets::qtys::{NoopOverflowSink, Ntl, Px, Sz};
+use node115_base::bucket_guard::BucketGuard;
+use node115_base::short_string::try_pack_short_string;
+use node115_consensus::commit::{
+    CertifiedBlockNode, RegisterBlockOutcome, TwoChainCommitOutcome, TwoChainCommitStore,
+    has_strict_two_thirds_quorum_u128,
+};
+use node115_db::db_home::{DbHome, DbHomeError, LoadLatestCheckpointError};
+use node115_db::rocks_db::{
+    PersistentShardKvStore, RocksDbShard, RocksDbTooLargeError, validate_tcp_rocksdb_size,
+};
 use node115_fees::tiers::FeeSchedule;
 use node115_orderbook::Books;
+use node115_orderbook::impact_walk::{aggregate_l2_levels, impact_walk_levels};
+use node115_orderbook::matching::L2Level;
 use node115_orderbook::trigger::TriggerBook;
 use node115_orderbook::twap::TwapEngine;
 use node115_staking::delegation::StakingChain;
@@ -237,6 +250,8 @@ pub enum EngineError {
     ChainMismatch { expected: u8, got: u8 },
     StateRootMismatch { expected: String, computed: String },
     LtHashesMismatch { path: PathBuf, reason: String },
+    StateHardforkNewer(StateHardforkNewerError),
+    CheckpointLoad(String),
 }
 
 impl fmt::Display for EngineError {
@@ -261,6 +276,8 @@ impl fmt::Display for EngineError {
             Self::LtHashesMismatch { path, reason } => {
                 write!(f, "lt_hashes.json verification failed at {}: {reason}", path.display())
             }
+            Self::StateHardforkNewer(e) => write!(f, "{e}"),
+            Self::CheckpointLoad(msg) => write!(f, "checkpoint load error: {msg}"),
         }
     }
 }
@@ -380,10 +397,15 @@ fn lt_hash_from_parts(bytes: &[u8], n_elements: u64, n_bytes: u64) -> Result<LtH
 /// ABCI BLAKE3 state-root hashing & `LtHashes` (`node115-abci` + `node115-abci-blake3`),
 /// serialization (`bincode-fork` + `net-utils` LZ4), books/TWAP/triggers, staking withdrawal queue,
 /// bridge contracts, clearinghouse liquidation, exchange lifecycle, fee solvency, and EVM KVS/CoreWriter.
+/// Binary hardfork version enforced on checkpoint load (`0x15a2219`/`0x15a2ae9`).
+pub const BINARY_HARDFORK_VERSION: u64 = 1;
+
 pub struct NodeEngine {
     chain: ChainName,
     db_home: DbHome,
+    evm_kv_store: PersistentShardKvStore,
     abci_state: AbciState,
+    binary_hardfork_version: u64,
     state_time: (u64, u64),
     feature_version: u8,
     using_big_blocks: bool,
@@ -394,6 +416,8 @@ pub struct NodeEngine {
     books: Books<u32>,
     twap_engine: TwapEngine,
     trigger_book: TriggerBook,
+    commit_store: TwoChainCommitStore,
+    bucket_guard: BucketGuard,
     last_begin_block_phases: Vec<&'static str>,
     next_bole_oid: u64,
     withdrawal_queue: WithdrawalQueueState,
@@ -403,49 +427,70 @@ pub struct NodeEngine {
 
 impl NodeEngine {
     /// Open `data_dir` via `DbHome::new` and restore the highest valid checkpoint
-    /// (verifying LZ4/bincode payload integrity, `LtHashes` checksums, and exact BLAKE3 reduction-tree root),
+    /// (verifying `CHECKPOINT_COMPLETE`, hardfork version compatibility, LZ4/bincode payload
+    /// integrity, `LtHashes` checksums, and exact BLAKE3 reduction-tree root),
     /// or initialize deterministic genesis state at height 0.
     pub fn open_or_restore(chain: ChainName, data_dir: &Path) -> Result<Self, EngineError> {
         let db_home = DbHome::new(data_dir)?;
         fs::create_dir_all(db_home.checkpoint_subdir())?;
+        let evm_kv_store = PersistentShardKvStore::open(db_home.root(), RocksDbShard::EvmState)?;
 
-        if let Some(height) = find_latest_persisted_checkpoint(&db_home)? {
-            Self::restore_checkpoint(chain, db_home, height)
-        } else {
-            let cp_root = db_home.checkpoint_subdir();
-            let mut engine = Self {
-                chain,
-                db_home,
-                abci_state: new_abci_state(cp_root, 0, 0),
-                state_time: (0, 0),
-                feature_version: REQUIRED_FEATURE_VERSION,
-                using_big_blocks: false,
-                blocks_digest: blake3_hash(&[chain_to_u8(chain)]),
-                evm_kvs: BTreeMap::new(),
-                lt_hashes: LtHashes::new(),
-                applied_blocks: Vec::new(),
-                books: Books::new(),
-                twap_engine: TwapEngine::new(),
-                trigger_book: TriggerBook::new(),
-                last_begin_block_phases: Vec::new(),
-                next_bole_oid: 1,
-                withdrawal_queue: WithdrawalQueueState::default(),
-                abci_state_root: [0u8; 32],
-                restored_from_checkpoint: None,
-            };
-            engine.abci_state_root = engine.compute_state_root()?;
-            Ok(engine)
+        match db_home.load_latest_checkpoint(Some("checkpoint.bin")) {
+            Ok(candidate) => Self::restore_checkpoint(chain, db_home, evm_kv_store, candidate.height),
+            Err(
+                LoadLatestCheckpointError::OuterDirDoesNotExist { .. }
+                | LoadLatestCheckpointError::NoCheckpointsToLoad { .. },
+            ) => {
+                let cp_root = db_home.checkpoint_subdir();
+                let mut engine = Self {
+                    chain,
+                    db_home,
+                    evm_kv_store,
+                    abci_state: new_abci_state(cp_root, 0, 0),
+                    binary_hardfork_version: BINARY_HARDFORK_VERSION,
+                    state_time: (0, 0),
+                    feature_version: REQUIRED_FEATURE_VERSION,
+                    using_big_blocks: false,
+                    blocks_digest: blake3_hash(&[chain_to_u8(chain)]),
+                    evm_kvs: BTreeMap::new(),
+                    lt_hashes: LtHashes::new(),
+                    applied_blocks: Vec::new(),
+                    books: Books::new(),
+                    twap_engine: TwapEngine::new(),
+                    trigger_book: TriggerBook::new(),
+                    commit_store: TwoChainCommitStore::new(0, 0),
+                    bucket_guard: BucketGuard::new(60_000),
+                    last_begin_block_phases: Vec::new(),
+                    next_bole_oid: 1,
+                    withdrawal_queue: WithdrawalQueueState::default(),
+                    abci_state_root: [0u8; 32],
+                    restored_from_checkpoint: None,
+                };
+                engine.abci_state_root = engine.compute_state_root()?;
+                Ok(engine)
+            }
+            Err(err) => Err(EngineError::CheckpointLoad(err.to_string())),
         }
     }
 
     fn restore_checkpoint(
         chain: ChainName,
         db_home: DbHome,
+        evm_kv_store: PersistentShardKvStore,
         height: u64,
     ) -> Result<Self, EngineError> {
         let cp_dir = db_home.checkpoint_dir_for_height(height);
         let cp_path = cp_dir.join("checkpoint.bin");
         let lt_path = db_home.lt_hashes_path(height);
+        let meta_path = cp_dir.join("abci_state_meta.json");
+
+        if meta_path.is_file() {
+            let meta_text = fs::read_to_string(&meta_path)?;
+            if let Some(state_hf) = extract_json_u64(&meta_text, "\"hardfork_version\":") {
+                validate_state_hardfork_not_newer(state_hf, BINARY_HARDFORK_VERSION)
+                    .map_err(EngineError::StateHardforkNewer)?;
+            }
+        }
 
         let compressed = fs::read(&cp_path)?;
         let raw = net_utils::decompress_size_prepended(&compressed, MAX_CHECKPOINT_BYTES)
@@ -488,7 +533,9 @@ impl NodeEngine {
         let mut engine = Self {
             chain,
             db_home,
+            evm_kv_store,
             abci_state: new_abci_state(cp_dir, rec.height, rec.round),
+            binary_hardfork_version: BINARY_HARDFORK_VERSION,
             state_time: (rec.height, 0),
             feature_version: REQUIRED_FEATURE_VERSION,
             using_big_blocks: false,
@@ -499,6 +546,8 @@ impl NodeEngine {
             books: Books::new(),
             twap_engine: TwapEngine::new(),
             trigger_book: TriggerBook::new(),
+            commit_store: TwoChainCommitStore::new(rec.round, rec.round),
+            bucket_guard: BucketGuard::new(60_000),
             last_begin_block_phases: Vec::new(),
             next_bole_oid: 1,
             withdrawal_queue: WithdrawalQueueState::default(),
@@ -748,13 +797,73 @@ impl NodeEngine {
             .collect()
     }
 
-    fn upsert_evm_kv(&mut self, k: Vec<u8>, v: Vec<u8>) {
+    /// Read a key directly from the persistent `EvmStateStorage` column family (`node115-db`).
+    pub fn persistent_evm_storage_get(&self, key: &[u8]) -> Option<&[u8]> {
+        self.evm_kv_store.get("EvmStateStorage", key)
+    }
+
+    /// Enforce node #115's 100 GB TCP-streamed RocksDB ceiling (`0x5a69415`).
+    pub fn validate_rocksdb_stream_size(size_bytes: u64) -> Result<(), RocksDbTooLargeError> {
+        validate_tcp_rocksdb_size(size_bytes)
+    }
+
+    /// Register a certified block under node #115's HotStuff-2 `register_block` guards (`0x2e1da10`).
+    pub fn register_certified_block(&mut self, block: CertifiedBlockNode) -> RegisterBlockOutcome {
+        self.commit_store.register_block(block)
+    }
+
+    /// Evaluate HotStuff-2 certified two-chain finality (`0x2e157c0`).
+    pub fn try_two_chain_commit(&mut self, certified_hash: &[u8; 32]) -> TwoChainCommitOutcome {
+        self.commit_store.try_two_chain_commit(certified_hash)
+    }
+
+    /// Highest round committed via HotStuff-2 two-chain finality.
+    pub fn committed_round(&self) -> u64 {
+        self.commit_store.committed_round
+    }
+
+    /// Exact node #115 128-bit strict 2/3 stake quorum check (`0x4d3e1a0`).
+    pub fn has_strict_two_thirds_quorum(signed_stake: u64, total_stake: u64) -> bool {
+        has_strict_two_thirds_quorum_u128(signed_stake, total_stake)
+    }
+
+    /// Compute orderbook impact price via node #115 `0x46a6370`.
+    pub fn compute_impact_price(levels: &[(Px, Sz)], target_ntl: Ntl) -> Option<Px> {
+        let mut sink = NoopOverflowSink;
+        impact_walk_levels(levels.iter().copied(), target_ntl, &mut sink)
+    }
+
+    /// Aggregate L2 levels via node #115 conservative `nSigFigs`/`mantissa` bucketing.
+    pub fn aggregate_l2_book(
+        levels: &[L2Level],
+        side: Side,
+        n_sig_figs: Option<u32>,
+        mantissa: Option<u64>,
+        max_levels: usize,
+    ) -> Vec<L2Level> {
+        aggregate_l2_levels(levels, side, n_sig_figs, mantissa, max_levels)
+    }
+
+    /// Advance the `base/src/bucket_guard.rs` monotonic periodic timer guard.
+    pub fn advance_bucket_guard(&mut self, time_ms: u64) -> bool {
+        self.bucket_guard.guard(time_ms)
+    }
+
+    /// Pack an inline (`<= 16`-byte) name via `base/src/short_string.rs:52` (`0x15472b0`).
+    pub fn pack_short_name(name: &str) -> Option<u128> {
+        try_pack_short_string(name)
+    }
+
+    fn upsert_evm_kv(&mut self, k: Vec<u8>, v: Vec<u8>) -> Result<(), EngineError> {
         let old_enc = self.evm_kvs.get(&k).map(|old_v| encode_kv_entry(&k, old_v));
         let new_enc = encode_kv_entry(&k, &v);
         self.lt_hashes
             .storage_hash
             .replace(old_enc.as_deref(), &new_enc);
+        self.evm_kv_store
+            .put("EvmStateStorage", k.clone(), v.clone())?;
         self.evm_kvs.insert(k, v);
+        Ok(())
     }
 
     /// Apply a single block enforcing all 6 ordered node #115 `AbciEngine::apply_block`
@@ -807,9 +916,9 @@ impl NodeEngine {
         // Homomorphically update `LtHashes::accounts_hash` and `storage_hash` (`0x3c287d0`)
         self.lt_hashes.accounts_hash.mix_in(&self.blocks_digest);
         let height_key = evm_rpc::store::build_block_height_key(b"blk:", block.height);
-        self.upsert_evm_kv(height_key, self.blocks_digest.to_vec());
+        self.upsert_evm_kv(height_key, self.blocks_digest.to_vec())?;
         for (k, v) in &block.evm_kvs_writes {
-            self.upsert_evm_kv(k.clone(), v.clone());
+            self.upsert_evm_kv(k.clone(), v.clone())?;
         }
 
         self.abci_state.advance_block(block.round);
@@ -839,7 +948,7 @@ impl NodeEngine {
         pairs: impl IntoIterator<Item = (Vec<u8>, Vec<u8>)>,
     ) -> Result<[u8; 32], EngineError> {
         for (k, v) in pairs {
-            self.upsert_evm_kv(k, v);
+            self.upsert_evm_kv(k, v)?;
         }
         let root = self.compute_state_root()?;
         self.abci_state_root = root;
@@ -981,32 +1090,26 @@ impl NodeEngine {
         );
         fs::write(lt_path, lt_json)?;
 
+        let meta_json = format!(
+            "{{\"height\":{},\"round\":{},\"hardfork_version\":{},\"committed_round\":{}}}\n",
+            self.latest_height(),
+            self.latest_round(),
+            self.binary_hardfork_version,
+            self.commit_store.committed_round,
+        );
+        fs::write(cp_dir.join("abci_state_meta.json"), meta_json)?;
+        fs::write(cp_dir.join("CHECKPOINT_COMPLETE"), b"")?;
+
         Ok(cp_dir)
     }
 }
 
-fn find_latest_persisted_checkpoint(db_home: &DbHome) -> Result<Option<u64>, EngineError> {
-    let dir = db_home.checkpoint_subdir();
-    if !dir.is_dir() {
-        return Ok(None);
-    }
-    let mut best: Option<u64> = None;
-    for entry in fs::read_dir(dir)? {
-        let entry = entry?;
-        if !entry.file_type()?.is_dir() {
-            continue;
-        }
-        let Some(name) = entry.file_name().to_str().map(str::to_owned) else {
-            continue;
-        };
-        let Ok(h) = name.parse::<u64>() else {
-            continue;
-        };
-        if entry.path().join("checkpoint.bin").is_file() {
-            best = Some(best.map_or(h, |cur| cur.max(h)));
-        }
-    }
-    Ok(best)
+fn extract_json_u64(src: &str, key: &str) -> Option<u64> {
+    let rest = src.split_once(key)?.1.trim_start();
+    let end = rest
+        .find(|c: char| !c.is_ascii_digit())
+        .unwrap_or(rest.len());
+    rest[..end].parse::<u64>().ok()
 }
 
 /// Wire `NodeEngine` directly into `node_runtime::peer_sync::BlockSink` so blocks

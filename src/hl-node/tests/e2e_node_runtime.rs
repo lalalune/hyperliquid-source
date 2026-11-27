@@ -11,14 +11,21 @@ use evm::system::{
 };
 use exchange::bole_liquidation::{BOLE_LIQUIDATOR_ADDRESS, BeginBlockPhase, SpotPairMeta};
 use global_constants::ChainName;
-use hl_node::engine::{EngineError, NodeBlock, NodeEngine, format_hex_32};
+use hl_node::engine::{
+    BINARY_HARDFORK_VERSION, EngineError, NodeBlock, NodeEngine, format_hex_32,
+};
 use hl_node::http_server::{HttpServerConfig, LocalHttpServer, http_get, http_post};
 use hl_node::peer_loopback::run_loopback_peer_sync;
 use node115_abci::state::{ApplyBlockPreconditionError, REQUIRED_FEATURE_VERSION};
 use node115_assets::pdi::Side;
-use node115_assets::qtys::{Px, Sz};
+use node115_assets::qtys::{Ntl, Px, Sz};
+use node115_consensus::commit::{
+    CertifiedBlockNode, RegisterBlockOutcome, TwoChainCommitOutcome,
+};
+use node115_db::rocks_db::TCP_ROCKSDB_MAX_BYTES;
 use node115_fees::fee_schedule_compose::Outcome as FeeOutcome;
 use node115_fees::tiers::{BaseFeeRates, FeeSchedule};
+use node115_orderbook::matching::L2Level;
 use node115_orderbook::trigger::{Tpsl, TriggerCondition, TriggerOrder};
 use node115_staking::jailing::JailingTime;
 use node115_staking::withdrawal_queue::WithdrawalQueueError;
@@ -578,5 +585,114 @@ fn e2e_lthash_homomorphic_persistence_lifecycle_and_live_jsonrpc_endpoints() {
     assert!(tx_bad.body.contains("-32602"));
 
     server.stop();
+    let _ = fs::remove_dir_all(&data_dir);
+}
+
+#[test]
+fn e2e_persistent_kv_hardfork_guard_hotstuff2_and_impact_l2() {
+    let data_dir = unique_temp_dir("kv-hf-hotstuff2-l2");
+
+    // 1. Open engine, apply blocks -> persists to PersistentShardKvStore ("EvmStateStorage" CF)
+    let cp_dir = {
+        let mut eng = NodeEngine::open_or_restore(ChainName::Mainnet, &data_dir).expect("open");
+        for blk in sample_blocks(2) {
+            eng.apply_block(blk).expect("apply");
+        }
+        assert_eq!(eng.persistent_evm_storage_get(b"slot:1"), Some(b"val:1".as_slice()));
+        assert_eq!(eng.persistent_evm_storage_get(b"slot:2"), Some(b"val:2".as_slice()));
+
+        // TCP RocksDB 100 GB ceiling (`0x5a69415`)
+        assert!(NodeEngine::validate_rocksdb_stream_size(TCP_ROCKSDB_MAX_BYTES - 1).is_ok());
+        assert!(NodeEngine::validate_rocksdb_stream_size(TCP_ROCKSDB_MAX_BYTES).is_err());
+
+        // 2. HotStuff-2 two-chain commit rule + 128-bit strict 2/3 quorum
+        assert!(NodeEngine::has_strict_two_thirds_quorum(67, 100));
+        assert!(!NodeEngine::has_strict_two_thirds_quorum(66, 100));
+        let h1 = [0x11u8; 32];
+        let h2 = [0x22u8; 32];
+        let b1 = CertifiedBlockNode {
+            block_hash: h1,
+            parent_hash: [0u8; 32],
+            parent_cert_round: 0,
+        };
+        let b2 = CertifiedBlockNode {
+            block_hash: h2,
+            parent_hash: h1,
+            parent_cert_round: 1,
+        };
+        assert_eq!(eng.register_certified_block(b1.clone()), RegisterBlockOutcome::Registered);
+        assert_eq!(
+            eng.register_certified_block(b1),
+            RegisterBlockOutcome::NotNew { tag: 4 }
+        );
+        assert_eq!(eng.register_certified_block(b2), RegisterBlockOutcome::Registered);
+        match eng.try_two_chain_commit(&h2) {
+            TwoChainCommitOutcome::Committed {
+                new_committed_round,
+                committed_blocks,
+            } => {
+                assert_eq!(new_committed_round, 1);
+                assert_eq!(committed_blocks.len(), 1);
+            }
+            other => panic!("expected two-chain commit, got {other:?}"),
+        }
+        assert_eq!(eng.committed_round(), 1);
+
+        // 3. Orderbook impact walk (0x46a6370) + L2 bucketing + base BucketGuard & short_string
+        let levels = [(Px(100), Sz(5)), (Px(110), Sz(10))];
+        assert_eq!(NodeEngine::compute_impact_price(&levels, Ntl(500)), Some(Px(100)));
+        let l2 = [
+            L2Level {
+                px: Px(123456),
+                sz: Sz(10),
+                n_orders: 1,
+            },
+            L2Level {
+                px: Px(123459),
+                sz: Sz(20),
+                n_orders: 2,
+            },
+        ];
+        let agg = NodeEngine::aggregate_l2_book(&l2, Side::Bid, Some(5), None, 10);
+        assert_eq!(agg.len(), 1);
+        assert_eq!(agg[0].sz, Sz(30));
+
+        assert!(eng.advance_bucket_guard(60_000));
+        assert!(!eng.advance_bucket_guard(90_000));
+        assert!(eng.advance_bucket_guard(120_000));
+        assert_eq!(NodeEngine::pack_short_name("ABCD"), Some(0x4443_4241));
+        assert_eq!(NodeEngine::pack_short_name("0123456789abcdefg"), None);
+
+        let cp = eng.persist_checkpoint().expect("persist checkpoint");
+        assert!(cp.join("CHECKPOINT_COMPLETE").is_file());
+        assert!(cp.join("abci_state_meta.json").is_file());
+        cp
+    };
+
+    // 4. Restart succeeds via DbHome::load_latest_checkpoint and retains persistent KV + state
+    {
+        let eng = NodeEngine::open_or_restore(ChainName::Mainnet, &data_dir).expect("restore");
+        assert_eq!(eng.restored_from_checkpoint(), Some(2));
+        assert_eq!(eng.persistent_evm_storage_get(b"slot:2"), Some(b"val:2".as_slice()));
+    }
+
+    // 5. Fail-closed hardfork compatibility guard (`validate_state_hardfork_not_newer`):
+    //    reject a snapshot whose hardfork_version exceeds BINARY_HARDFORK_VERSION.
+    fs::write(
+        cp_dir.join("abci_state_meta.json"),
+        format!(
+            "{{\"height\":2,\"round\":4,\"hardfork_version\":{},\"committed_round\":1}}\n",
+            BINARY_HARDFORK_VERSION + 1
+        ),
+    )
+    .expect("write newer hardfork meta");
+    let err = NodeEngine::open_or_restore(ChainName::Mainnet, &data_dir)
+        .err()
+        .expect("must reject newer state hardfork version");
+    assert!(
+        matches!(err, EngineError::StateHardforkNewer(_)),
+        "expected StateHardforkNewer, got {err:?}"
+    );
+
     let _ = fs::remove_dir_all(&data_dir);
 }
