@@ -313,12 +313,15 @@ def verify_records(expected: dict, *, allow_corrupt_check: bool = False) -> None
     if actual != expected:
         raise RuntimeError("Rebuilt compiled-byte records do not match committed records.json")
 
-    # Ensure zero overlap with existing research/byte-windows.json and sibling byte-match packets
-    existing: list[tuple[int, int, str]] = []
+    # Ensure zero overlap with dependency windows, zero partial overlap with first-party
+    # byte-windows.json entries (allowing exact (s, e) == (es, ee) first-party consolidation),
+    # and zero overlap with sibling byte-match packets.
     bw = json.loads(BYTE_WINDOWS_JSON.read_text(encoding="utf-8"))
-    for w in bw["windows"]:
-        existing.append((int(w["start"]), int(w["end"]), "byte-windows.json"))
+    bw_entries: list[tuple[int, int, bool]] = [
+        (int(w["start"]), int(w["end"]), "dependency" in w) for w in bw["windows"]
+    ]
 
+    sibling_entries: list[tuple[int, int, str]] = []
     for sibling_rel in (
         "research/work-items/RE-007-node115-stream-e2-byte-matches/records.json",
         "research/work-items/RE-009-node115-storage-abci-byte-matches/records.json",
@@ -333,7 +336,7 @@ def verify_records(expected: dict, *, allow_corrupt_check: bool = False) -> None
                     continue
                 si = int(sv, 16) if isinstance(sv, str) else int(sv)
                 ei = int(ev, 16) if isinstance(ev, str) else int(ev)
-                existing.append((si, ei, sibling_rel))
+                sibling_entries.append((si, ei, sibling_rel))
 
     seen = set()
     for r in expected["windows"]:
@@ -341,7 +344,17 @@ def verify_records(expected: dict, *, allow_corrupt_check: bool = False) -> None
         if s in seen:
             raise RuntimeError(f"Duplicate start VA 0x{s:x}")
         seen.add(s)
-        for es, ee, src_name in existing:
+        for es, ee, is_dep in bw_entries:
+            if s < ee and es < e:
+                if is_dep:
+                    raise RuntimeError(
+                        f"Window 0x{s:x}..0x{e:x} overlaps dependency window 0x{es:x}..0x{ee:x}"
+                    )
+                if (s, e) != (es, ee):
+                    raise RuntimeError(
+                        f"Window 0x{s:x}..0x{e:x} partially overlaps first-party window 0x{es:x}..0x{ee:x}"
+                    )
+        for es, ee, src_name in sibling_entries:
             if s < ee and es < e:
                 raise RuntimeError(
                     f"Window 0x{s:x}..0x{e:x} overlaps {src_name} 0x{es:x}..0x{ee:x}"

@@ -64,9 +64,14 @@ def verify_all(run_self_test: bool = False) -> dict:
     _, fdes, _ = fde_extents(data)
     fde_map = {f["start"]: f for f in fdes if f["section"] == ".text"}
 
-    # Check zero overlap with research/byte-windows.json
+    # Check overlap with research/byte-windows.json:
+    # - forbid ANY overlap with dependency windows ("dependency" in w)
+    # - forbid ANY partial overlap with first-party windows
+    # - allow exact (start, end) == (es, ee) consolidation into first-party windows
     bw = json.loads((ROOT / "research/byte-windows.json").read_text(encoding="utf-8"))
-    existing_ranges = [(w["start"], w["end"]) for w in bw.get("windows", [])]
+    existing_ranges = [
+        (w["start"], w["end"], bool(w.get("dependency"))) for w in bw.get("windows", [])
+    ]
 
     # Build .rela.dyn map for pointer table verification
     relas: dict[int, int] = {}
@@ -107,9 +112,13 @@ def verify_all(run_self_test: bool = False) -> dict:
         if sz != w["size_bytes"]:
             raise AssertionError(f"Size mismatch for {w['id']}: FDE={sz} vs record={w['size_bytes']}")
 
-        for es, ee in existing_ranges:
+        for es, ee, is_dep in existing_ranges:
             if not (fde["end"] <= es or fde["start"] >= ee):
-                raise AssertionError(f"Window {w['id']} ({hex(va)}) overlaps existing byte-windows.json [{hex(es)}, {hex(ee)})")
+                if is_dep or (fde["start"], fde["end"]) != (es, ee):
+                    raise AssertionError(
+                        f"Window {w['id']} ({hex(va)}) overlaps existing byte-windows.json "
+                        f"[{hex(es)}, {hex(ee)}) (dependency={is_dep})"
+                    )
 
         # Verify rodata anchor or pointer-table anchor in target binary
         anchor_bytes = w["anchor_str"].encode("utf-8")
