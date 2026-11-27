@@ -1,0 +1,23 @@
+[package]
+name = "node-runtime"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license = "MIT"
+description = "Independently authored Rust reconstruction of Hyperliquid node #115 node runtime (CLI, startup, gossip config, peer discovery, block sync, firewall, restart)"
+
+[dependencies]
+bincode-fork = { path = "../bincode-fork" }
+net-utils = { path = "../net-utils" }
+node115-cli-validators = { path = "../node115-cli-validators" }
+node115-restart-delay = { path = "../node115-restart-delay" }
+node115-restart-threshold = { path = "../node115-restart-threshold" }
+node115-startup-admission = { path = "../node115-startup-admission" }
+node115-startup-output = { path = "../node115-startup-output" }
+node115-startup-path-join = { path = "../node115-startup-path-join" }
+node115-startup-sorted-admission = { path = "../node115-startup-sorted-admission" }
+
+[profile.release]
+opt-level = 3
+panic = "abort"
+codegen-units = 1
