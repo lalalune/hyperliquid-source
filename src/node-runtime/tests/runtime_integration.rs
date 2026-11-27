@@ -1,10 +1,10 @@
-use net_utils::{GossipRpcRequest, PeerEntry, TcpListener};
+use net_utils::{GossipRpcRequest, GossipStatus, Hardfork, PeerEntry, TcpListener};
 use node_runtime::{
     AcceptAllConsensus, BlockSink, Chain, Command, DEFAULT_RESTART_CAP_SECS, FirewallIps,
     GossipConfigInner, GossipConfigReloader, MemoryBlockStore, NodeError, NodePort, PeerTable,
     ReplicaStyle, RestartSupervisor, UNREACHABLE_PEERS_MSG, WaitPlan, check_peer_reachability,
-    discover_peers_from, metadata_gate_opens, parse_args, replica_style_str, serve_one_gossip_rpc,
-    sync_client_blocks,
+    discover_peers_from, metadata_gate_opens, parse_args, query_gossip_status, replica_style_str,
+    serve_one_gossip_rpc, sync_client_blocks,
 };
 use std::collections::BTreeSet;
 use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
@@ -178,20 +178,29 @@ fn loopback_peer_discovery_and_block_sync_over_net_utils() {
     let advertised = vec![
         PeerEntry {
             ip: Ipv4Addr::new(10, 1, 2, 3),
-            port: NodePort::GossipRpc.port(),
             is_validator: true,
+            value: 100,
         },
         PeerEntry {
             ip: Ipv4Addr::new(10, 1, 2, 4),
-            port: NodePort::GossipRpc.port(),
             is_validator: false,
+            value: 200,
         },
     ];
+    let advertised_status = Some(GossipStatus {
+        hardfork_height: 90,
+        latest_height: 102,
+        hardfork: Hardfork {
+            version: 1,
+            round: 50,
+        },
+        latest_consensus_round: Some(55),
+    });
 
     let server = thread::spawn(move || {
-        let req1 = serve_one_gossip_rpc(&listener, &advertised, &seed_store, None).unwrap();
+        let req1 = serve_one_gossip_rpc(&listener, &advertised, &seed_store, advertised_status).unwrap();
         assert_eq!(req1, GossipRpcRequest::Peers);
-        let req2 = serve_one_gossip_rpc(&listener, &advertised, &seed_store, None).unwrap();
+        let req2 = serve_one_gossip_rpc(&listener, &advertised, &seed_store, advertised_status).unwrap();
         assert_eq!(
             req2,
             GossipRpcRequest::ClientBlocks {
@@ -199,6 +208,8 @@ fn loopback_peer_discovery_and_block_sync_over_net_utils() {
                 end_height: 102
             }
         );
+        let req3 = serve_one_gossip_rpc(&listener, &advertised, &seed_store, advertised_status).unwrap();
+        assert_eq!(req3, GossipRpcRequest::Status);
     });
 
     let cfg = GossipConfigInner::default_for_chain(Chain::Local, vec![Ipv4Addr::LOCALHOST]).unwrap();
@@ -219,6 +230,9 @@ fn loopback_peer_discovery_and_block_sync_over_net_utils() {
     assert_eq!(synced, 3);
     assert_eq!(local_store.latest_height(), 102);
     assert_eq!(local_store.get_range(101, 101)[0].0, vec![0xab; 2048]);
+
+    let status = query_gossip_status(addr).unwrap();
+    assert_eq!(status, advertised_status);
 
     server.join().unwrap();
 }

@@ -1,0 +1,68 @@
+{
+  "work_item": "RE-012",
+  "components": ["transport", "node-runtime"],
+  "target": {
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "fdes": [
+    {"name": "gossip_rpc_request_decode", "start_va": "0x5aac6a0", "end_va": "0x5aac7b7", "size_bytes": 279},
+    {"name": "gossip_rpc_response_decode_a", "start_va": "0x5aac7c0", "end_va": "0x5aacc22", "size_bytes": 1122},
+    {"name": "gossip_rpc_response_decode_b", "start_va": "0x2e466b0", "end_va": "0x2e469a9", "size_bytes": 761},
+    {"name": "client_blocks_error_debug", "start_va": "0x5a2d540", "end_va": "0x5a2d788", "size_bytes": 584},
+    {"name": "gossip_status_decode", "start_va": "0x5aabd20", "end_va": "0x5aabf7a", "size_bytes": 602},
+    {"name": "gossip_status_debug", "start_va": "0x2c7c740", "end_va": "0x2c7c7dc", "size_bytes": 156},
+    {"name": "peers_elem_decode", "start_va": "0x5aaa460", "end_va": "0x5aaa628", "size_bytes": 456},
+    {"name": "peers_set_decode", "start_va": "0x4de6210", "end_va": "0x4de6467", "size_bytes": 599},
+    {"name": "connections_handler", "start_va": "0x2accee0", "end_va": "0x2ad0db0", "size_bytes": 16080},
+    {"name": "local_abci_state_init", "start_va": "0x2adce40", "end_va": "0x2ae00f8", "size_bytes": 12984}
+  ],
+  "jump_tables": {
+    "client_blocks_error_debug": {
+      "base_va": "0x938ee8",
+      "targets": ["0x5a2d55f", "0x5a2d5cc", "0x5a2d591", "0x5a2d5aa", "0x5a2d578", "0x5a2d637", "0x5a2d6b0"]
+    },
+    "client_blocks_error_decode": {
+      "base_va": "0x939f28",
+      "targets": ["0x5aaca29", "0x5aacadc", "0x5aaca2b", "0x5aacb28", "0x5aacad2", "0x5aacb53", "0x5aacb91"]
+    }
+  },
+  "rodata_anchors": {
+    "gossip_rpc_request": {"va": "0x4519b0", "text": "GossipRpcRequest"},
+    "gossip_rpc_response": {"va": "0x93c571", "text": "GossipRpcResponse"},
+    "client_blocks_error": {"va": "0x93c560", "text": "ClientBlocksError"},
+    "err_peer_only": {"va": "0x93c19f", "text": "PeerOnlyRequest"},
+    "err_invalid_range": {"va": "0x93c1ae", "text": "InvalidRange"},
+    "err_range_too_large": {"va": "0x93c1ba", "text": "RangeTooLarge"},
+    "err_rate_limited": {"va": "0x93c1c7", "text": "RateLimited"},
+    "err_no_client_blocks": {"va": "0x93b3b7", "text": "NoClientBlocks"},
+    "err_round_too_small": {"va": "0x93c1d2", "text": "RoundTooSmall"},
+    "err_round_too_large": {"va": "0x93c1f1", "text": "RoundTooLarge"},
+    "gossip_status": {"va": "0x60f574", "text": "GossipStatus"},
+    "hardfork_height": {"va": "0x60f580", "text": "hardfork_height"},
+    "latest_height": {"va": "0x60f58f", "text": "latest_height"},
+    "latest_consensus_round": {"va": "0x60f59c", "text": "latest_consensus_round"},
+    "node_ip": {"va": "0x93a9f1", "text": "NodeIp"},
+    "connection_checks": {"va": "0x6055a3", "text": "connection_checks"},
+    "connection_checks_timed_out": {"va": "0x6055b4", "text": "connection checks timed out"},
+    "no_quorum_yet": {"va": "0x6055cf", "text": "closing gossip stream because no quorum yet"},
+    "could_not_read_greeting": {"va": "0x6055fa", "text": "could not read tcp greeting"},
+    "failed_to_verify_peer": {"va": "0x605615", "text": "closing gossip stream because failed to verify peer"},
+    "peer_already_connected": {"va": "0x60567b", "text": "closing gossip stream because peer is already connected"},
+    "handle_node_connection": {"va": "0x6056c8", "text": "handle_node_connection"},
+    "max_connection_age": {"va": "0x6056f1", "text": "max connection age reached"},
+    "local_abci_state_path": {"va": "0x44ac48", "text": "node/src/local_abci_state.rs"},
+    "connections_path": {"va": "0x445db6", "text": "node/src/connections.rs"},
+    "stale_hardfork": {"va": "0x605992", "text": "local height is from stale hardfork"},
+    "too_far_behind": {"va": "0x6059b5", "text": "local height is too far behind"},
+    "applying_hardfork": {"va": "0x60592f", "text": "applying hardfork to frozen local abci_state"},
+    "init_local_state": {"va": "0x60595b", "text": "initializing with local abci_state"},
+    "min_rpc_statuses": {"va": "0x605a53", "text": "unable to find at least 2 valid rpc statuses"}
+  },
+  "constants": {
+    "connection_checks_timeout_secs": {"va": "0x4593d0", "type": "f64", "value": 5.0},
+    "handle_node_connection_timeout_secs": {"va": "0x4594a0", "type": "f64", "value": 10000000000.0},
+    "max_local_height_lag": {"text_va": "0x2add493", "imm32": 20000},
+    "upgrade_round_window": {"text_va": "0x2add534", "imm32": 400}
+  }
+}

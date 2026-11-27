@@ -11,9 +11,11 @@
 
 pub mod artifact;
 pub mod cli;
+pub mod connections;
 pub mod error;
 pub mod firewall;
 pub mod gossip_config;
+pub mod local_abci_state;
 pub mod node_port;
 pub mod peer_sync;
 pub mod restart;
@@ -28,6 +30,10 @@ pub use cli::{
     Chain, CliArgs, Command, NODE115_BUILD_STAMP, PROGRAM_ABOUT, PROGRAM_NAME, PROGRAM_VERSION,
     parse_args, replica_style_str,
 };
+pub use connections::{
+    CONNECTION_CHECKS_TIMEOUT_SECS, ConnectionRegistry, ConnectionRejectReason,
+    HANDLE_NODE_CONNECTION_TIMEOUT_SECS,
+};
 pub use error::NodeError;
 pub use firewall::{
     FirewallDiff, FirewallIps, PUBLISHER_VISOR_TIME_LOCK_DIR, UNREACHABLE_PEERS_MSG,
@@ -36,13 +42,19 @@ pub use firewall::{
 pub use gossip_config::{
     GossipConfigInner, GossipConfigReloader, OVERRIDE_GOSSIP_CONFIG_FILENAME, metadata_gate_opens,
 };
+pub use local_abci_state::{
+    APPLYING_HARDFORK_MSG, INITIALIZING_FOR_UPGRADE_MSG, INITIALIZING_WITH_LOCAL_STATE_MSG,
+    INSUFFICIENT_RPC_STATUSES_MSG, LOCAL_HEIGHT_STALE_HARDFORK_MSG,
+    LOCAL_HEIGHT_TOO_FAR_BEHIND_MSG, LocalAbciSnapshot, LocalStateDecision, MAX_LOCAL_HEIGHT_LAG,
+    MIN_VALID_RPC_STATUSES, UPGRADE_ROUND_WINDOW, evaluate_local_abci_state,
+};
 pub use net_utils;
 pub use node115_cli_validators as cli_validators;
 pub use node115_startup_output::{OutputSettings, ReplicaStyle, StyleError};
 pub use node_port::NodePort;
 pub use peer_sync::{
     AcceptAllConsensus, BlockSink, ConsensusHook, MemoryBlockStore, PeerTable,
-    discover_peers_from, serve_one_gossip_rpc, sync_client_blocks,
+    discover_peers_from, query_gossip_status, serve_one_gossip_rpc, sync_client_blocks,
 };
 pub use restart::{DEFAULT_RESTART_CAP_SECS, RestartSupervisor, WaitPlan};
 pub use stream_msg::{

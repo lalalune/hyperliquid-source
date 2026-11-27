@@ -31,7 +31,10 @@ pub mod framing {
 }
 
 pub use bincode_fork;
-pub use gossip::{GossipRpcRequest, GossipRpcResponse, PeerEntry};
+pub use gossip::{
+    ClientBlocksError, GossipRpcRequest, GossipRpcResponse, GossipStatus, Hardfork,
+    PEERS_RESPONSE_LIMIT, PeerEntry,
+};
 pub use ip_semaphore::{IpSemaphore, IpSemaphorePermit, SemaphoreError};
 pub use lz4::{Lz4Error, compress_prepend_size, decompress_size_prepended, should_compress_for_port};
 pub use primitives::{

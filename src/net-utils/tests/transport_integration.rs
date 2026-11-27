@@ -1,12 +1,12 @@
 use net_utils::framing::{h2_framing, http_header_writer, newline_requests};
 use net_utils::gossip::greeting_encoder::{self, Greeting};
 use net_utils::{
-    AlertConfig, BoundedChannel, ChannelError, DEFAULT_MAX_FRAME_BYTES, Direction,
-    GossipRpcRequest, GossipRpcResponse, IpSemaphore, Lz4Error, Lz4Stats, PeerEntry,
-    ProfiledRwLock, RateLimitDecision, RateLimiter, RetryPolicy, SemaphoreError, TcpClient,
-    TcpError, TcpListener, TrafficRecorder, compress_prepend_size, decompress_size_prepended,
-    encode_frame, read_bincode_frame, read_frame, should_compress_for_port, sleep_retry,
-    write_bincode_frame,
+    AlertConfig, BoundedChannel, ChannelError, ClientBlocksError, DEFAULT_MAX_FRAME_BYTES,
+    Direction, GossipRpcRequest, GossipRpcResponse, GossipStatus, Hardfork, IpSemaphore, Lz4Error,
+    Lz4Stats, PEERS_RESPONSE_LIMIT, PeerEntry, ProfiledRwLock, RateLimitDecision, RateLimiter,
+    RetryPolicy, SemaphoreError, TcpClient, TcpError, TcpListener, TrafficRecorder,
+    compress_prepend_size, decompress_size_prepended, encode_frame, read_bincode_frame, read_frame,
+    should_compress_for_port, sleep_retry, write_bincode_frame,
 };
 use std::io::Cursor;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
@@ -106,13 +106,13 @@ fn loopback_tcp_client_listener_bincode_gossip_roundtrip() {
         let resp = GossipRpcResponse::Peers(vec![
             PeerEntry {
                 ip: Ipv4Addr::new(10, 0, 0, 1),
-                port: 4001,
                 is_validator: true,
+                value: 4001,
             },
             PeerEntry {
                 ip: Ipv4Addr::new(10, 0, 0, 2),
-                port: 4002,
                 is_validator: false,
+                value: 4002,
             },
         ]);
         conn.send_bincode(resp).unwrap();
@@ -128,24 +128,97 @@ fn loopback_tcp_client_listener_bincode_gossip_roundtrip() {
     client.connect().unwrap();
     assert!(client.is_connected());
     let resp: GossipRpcResponse = client
-        .send_bincode_and_read_response(GossipRpcRequest::Peers, Some(4096))
+        .send_bincode_and_read_response(GossipRpcRequest::Peers, Some(PEERS_RESPONSE_LIMIT))
         .unwrap();
     assert_eq!(
         resp,
         GossipRpcResponse::Peers(vec![
             PeerEntry {
                 ip: Ipv4Addr::new(10, 0, 0, 1),
-                port: 4001,
                 is_validator: true,
+                value: 4001,
             },
             PeerEntry {
                 ip: Ipv4Addr::new(10, 0, 0, 2),
-                port: 4002,
                 is_validator: false,
+                value: 4002,
             },
         ])
     );
     server.join().unwrap();
+}
+
+#[test]
+fn gossip_rpc_response_exact_node115_wire_bytes() {
+    use bincode_fork::{decode_from_slice, encode_to_vec, standard};
+
+    // Tag 0 = ClientBlocks(Err(ClientBlocksError)) covering all 7 variants 0..=6
+    let errs = [
+        (ClientBlocksError::PeerOnlyRequest, vec![0, 1, 0]),
+        (
+            ClientBlocksError::InvalidRange {
+                start_round: 10,
+                end_round: 5,
+            },
+            vec![0, 1, 1, 10, 5],
+        ),
+        (ClientBlocksError::RangeTooLarge, vec![0, 1, 2]),
+        (ClientBlocksError::RateLimited, vec![0, 1, 3]),
+        (ClientBlocksError::NoClientBlocks, vec![0, 1, 4]),
+        (
+            ClientBlocksError::RoundTooSmall {
+                start_round: 1,
+                first_parent_round: 20,
+            },
+            vec![0, 1, 5, 1, 20],
+        ),
+        (
+            ClientBlocksError::RoundTooLarge {
+                end_round: 99,
+                max_round: 50,
+            },
+            vec![0, 1, 6, 99, 50],
+        ),
+    ];
+    for (err, expected) in errs {
+        let resp = GossipRpcResponse::ClientBlocks(Err(err));
+        let wire = encode_to_vec(&resp, standard()).unwrap();
+        assert_eq!(wire, expected, "wire mismatch for {err:?}");
+        let (back, consumed): (GossipRpcResponse, usize) =
+            decode_from_slice(&wire, standard()).unwrap();
+        assert_eq!(back, resp);
+        assert_eq!(consumed, wire.len());
+    }
+    // Tag 7 out of range must fail with UnexpectedVariant
+    assert!(decode_from_slice::<GossipRpcResponse>(&[0, 1, 7], standard()).is_err());
+
+    // Tag 1 = Peers(Vec<PeerEntry>) with NodeIp tag 0 + 4 IPv4 bytes + bool + u64 varint
+    let peers = GossipRpcResponse::Peers(vec![PeerEntry {
+        ip: Ipv4Addr::new(10, 20, 30, 40),
+        is_validator: true,
+        value: 7,
+    }]);
+    let peers_wire = encode_to_vec(&peers, standard()).unwrap();
+    assert_eq!(peers_wire, vec![1, 1, 0, 10, 20, 30, 40, 1, 7]);
+    let (peers_back, _): (GossipRpcResponse, usize) =
+        decode_from_slice(&peers_wire, standard()).unwrap();
+    assert_eq!(peers_back, peers);
+
+    // Tag 2 = GossipStatus(Option<GossipStatus>) with 4 u64 + Option<u64>
+    let status = GossipRpcResponse::GossipStatus(Some(GossipStatus {
+        hardfork_height: 100,
+        latest_height: 120,
+        hardfork: Hardfork {
+            version: 3,
+            round: 40,
+        },
+        latest_consensus_round: Some(45),
+    }));
+    let status_wire = encode_to_vec(&status, standard()).unwrap();
+    assert_eq!(status_wire, vec![2, 1, 100, 120, 3, 40, 1, 45]);
+    let (status_back, _): (GossipRpcResponse, usize) =
+        decode_from_slice(&status_wire, standard()).unwrap();
+    assert_eq!(status_back, status);
 }
 
 #[test]

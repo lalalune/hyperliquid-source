@@ -6,13 +6,12 @@ use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 
 use bincode_fork::ByteVec;
 use net_utils::{
-    DEFAULT_MAX_FRAME_BYTES, GossipRpcRequest, GossipRpcResponse, PeerEntry, TcpClient,
-    TcpListener,
+    ClientBlocksError, DEFAULT_MAX_FRAME_BYTES, GossipRpcRequest, GossipRpcResponse, GossipStatus,
+    PEERS_RESPONSE_LIMIT, PeerEntry, TcpClient, TcpListener,
 };
 
 use crate::error::NodeError;
 use crate::gossip_config::GossipConfigInner;
-use crate::node_port::NodePort;
 
 /// Storage/ABCI integration hook for committing synchronized client blocks.
 /// Ready to wire directly to `storage-abci` (`node115-db` / `abci`).
@@ -97,8 +96,8 @@ impl PeerTable {
                 ip,
                 PeerEntry {
                     ip,
-                    port: NodePort::GossipRpc.port(),
                     is_validator: true,
+                    value: 0,
                 },
             );
         }
@@ -116,7 +115,7 @@ impl PeerTable {
     pub fn merge_discovered(&mut self, entries: &[PeerEntry]) -> usize {
         let mut added = 0;
         for &entry in entries {
-            if entry.ip.is_unspecified() || entry.port == 0 {
+            if entry.ip.is_unspecified() {
                 continue;
             }
             if self.discovered_peers.contains_key(&entry.ip) {
@@ -151,7 +150,7 @@ pub fn serve_one_gossip_rpc(
     listener: &TcpListener,
     peers: &[PeerEntry],
     store: &MemoryBlockStore,
-    status_fields: Option<[u64; 4]>,
+    status: Option<GossipStatus>,
 ) -> Result<GossipRpcRequest, NodeError> {
     let (mut stream, _addr) = listener
         .accept()
@@ -166,12 +165,17 @@ pub fn serve_one_gossip_rpc(
             end_height,
         } => {
             if start_height > end_height {
-                GossipRpcResponse::ClientBlocks(Err("invalid height range".into()))
+                GossipRpcResponse::ClientBlocks(Err(ClientBlocksError::InvalidRange {
+                    start_round: *start_height,
+                    end_round: *end_height,
+                }))
+            } else if store.is_empty() {
+                GossipRpcResponse::ClientBlocks(Err(ClientBlocksError::NoClientBlocks))
             } else {
                 GossipRpcResponse::ClientBlocks(Ok(store.get_range(*start_height, *end_height)))
             }
         }
-        GossipRpcRequest::Status => GossipRpcResponse::Status(status_fields),
+        GossipRpcRequest::Status => GossipRpcResponse::GossipStatus(status),
     };
     stream
         .send_bincode(resp)
@@ -190,12 +194,30 @@ pub fn discover_peers_from(
         .connect()
         .map_err(|e| NodeError::GossipRpc(e.to_string()))?;
     let resp: GossipRpcResponse = client
-        .send_bincode_and_read_response(GossipRpcRequest::Peers, Some(DEFAULT_MAX_FRAME_BYTES))
+        .send_bincode_and_read_response(GossipRpcRequest::Peers, Some(PEERS_RESPONSE_LIMIT))
         .map_err(|e| NodeError::GossipRpc(e.to_string()))?;
     match resp {
         GossipRpcResponse::Peers(entries) => Ok(table.merge_discovered(&entries)),
         other => Err(NodeError::GossipRpc(format!(
             "unexpected response to Peers: {other:?}"
+        ))),
+    }
+}
+
+/// Query remote `GossipStatus` over gossip RPC (`node/src/local_abci_state.rs`).
+pub fn query_gossip_status(addr: SocketAddrV4) -> Result<Option<GossipStatus>, NodeError> {
+    let mut client = TcpClient::new(SocketAddr::V4(addr), "gossip_rpc_status")
+        .map_err(|e| NodeError::GossipRpc(e.to_string()))?;
+    client
+        .connect()
+        .map_err(|e| NodeError::GossipRpc(e.to_string()))?;
+    let resp: GossipRpcResponse = client
+        .send_bincode_and_read_response(GossipRpcRequest::Status, Some(DEFAULT_MAX_FRAME_BYTES))
+        .map_err(|e| NodeError::GossipRpc(e.to_string()))?;
+    match resp {
+        GossipRpcResponse::GossipStatus(status) => Ok(status),
+        other => Err(NodeError::GossipRpc(format!(
+            "incorrect rpc response variant: {other:?}"
         ))),
     }
 }
@@ -226,8 +248,8 @@ pub fn sync_client_blocks<S: BlockSink, C: ConsensusHook>(
 
     let blocks = match resp {
         GossipRpcResponse::ClientBlocks(Ok(blocks)) => blocks,
-        GossipRpcResponse::ClientBlocks(Err(msg)) => {
-            return Err(NodeError::QueryClientBlocks(msg));
+        GossipRpcResponse::ClientBlocks(Err(err)) => {
+            return Err(NodeError::QueryClientBlocks(err.to_string()));
         }
         other => {
             return Err(NodeError::QueryClientBlocks(format!(
