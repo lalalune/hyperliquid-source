@@ -1,0 +1,41 @@
+[workspace]
+
+[package]
+name = "hl-node"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "Unified node #115 Cargo workspace and independently authored hl-node CLI binary"
+
+[dependencies]
+action-dispatch = { path = "../action-dispatch" }
+action-wire = { path = "../action-wire" }
+bincode-fork = { path = "../bincode-fork" }
+bridge = { path = "../bridge" }
+clearinghouse = { path = "../clearinghouse" }
+dex-registry = { path = "../dex-registry" }
+evm = { path = "../evm" }
+exchange = { path = "../exchange" }
+global-constants = { path = "../global-constants" }
+l1-shared = { path = "../l1-shared" }
+net-utils = { path = "../net-utils" }
+node-runtime = { path = "../node-runtime" }
+node115-abci = { path = "../node115-abci" }
+node115-abci-checkpoint-replay-fixture = { path = "../node115-abci-checkpoint-replay-fixture" }
+node115-assets = { path = "../node115-assets" }
+node115-base = { path = "../node115-base" }
+node115-cli-validators = { path = "../node115-cli-validators" }
+node115-consensus = { path = "../node115-consensus" }
+node115-db = { path = "../node115-db" }
+node115-fees = { path = "../node115-fees" }
+node115-orderbook = { path = "../node115-orderbook" }
+node115-staking = { path = "../node115-staking" }
+node115-startup-output = { path = "../node115-startup-output" }
+vaults = { path = "../vaults" }
+
+[profile.release]
+opt-level = 3
+overflow-checks = true
+codegen-units = 16
+lto = false
+panic = "unwind"
