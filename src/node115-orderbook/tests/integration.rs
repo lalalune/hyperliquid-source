@@ -592,3 +592,156 @@ fn priority_level_queue_splicing_modify_sz_diff_and_layout_match_node115() {
     assert!(sink.events.is_empty());
     let _ = (s102, s104);
 }
+
+#[test]
+fn impact_walk_l2_aggregation_and_order_price_shape_match_node115() {
+    use node115_assets::qtys::Ntl;
+    use node115_orderbook::{
+        MAX_IMPACT_NOTIONAL_PRODUCT, MAX_SHAPED_NOTIONAL_CAP, PriceMove, PriceShapeContext,
+        PriceShapeError, PriceShapeRequest, SYSTEM_USER_EE, SYSTEM_USER_FF, bucket_l2_px,
+        impact_walk_levels, shape_order_price,
+    };
+
+    let mut book = Book::new();
+    let mut risk = UnboundedRiskOracle::default();
+    let mut sink = RecordingOverflowSink::default();
+
+    // Populate Bids (1000x50, 995x100, 990x200) and Asks (1005x40, 1010x100, 1020x200)
+    book.insert_order(order_req(1, user(1), Side::Bid, 1000, 50, Tif::Gtc, false), &mut risk, &mut sink).unwrap();
+    book.insert_order(order_req(2, user(1), Side::Bid, 995, 100, Tif::Gtc, false), &mut risk, &mut sink).unwrap();
+    book.insert_order(order_req(3, user(1), Side::Bid, 990, 200, Tif::Gtc, false), &mut risk, &mut sink).unwrap();
+    book.insert_order(order_req(4, user(2), Side::Ask, 1005, 40, Tif::Gtc, false), &mut risk, &mut sink).unwrap();
+    book.insert_order(order_req(5, user(2), Side::Ask, 1010, 100, Tif::Gtc, false), &mut risk, &mut sink).unwrap();
+    book.insert_order(order_req(6, user(2), Side::Ask, 1020, 200, Tif::Gtc, false), &mut risk, &mut sink).unwrap();
+
+    // Impact walk (`0x46a6370`): target_ntl = 100_000
+    // Bid side: lvl1 1000*50=50_000 (<100k); lvl2 rem=50_000 -> q=50_000/995=50, p=49_750, total=99_750, count=100 -> floor(99750/100)=997
+    // Ask side: lvl1 1005*40=40_200 (<100k); lvl2 rem=59_800 -> q=59_800/1010=59, p=59_590, total=99_790, count=99 -> floor(99790/99)=1007
+    assert_eq!(
+        book.impact_pxs(Ntl(100_000), &mut sink),
+        (Some(Px(997)), Some(Px(1007)))
+    );
+    // Exhausted book returns None
+    assert_eq!(book.impact_px(Side::Bid, Ntl(10_000_000), &mut sink), None);
+    // Overflow past 0x7fff_ffff_ffff_fffe returns None
+    assert_eq!(
+        impact_walk_levels([(Px(MAX_IMPACT_NOTIONAL_PRODUCT), Sz(2))], Ntl(10), &mut sink),
+        None
+    );
+
+    // L2 aggregation: 123456 with n_sig_figs=3 -> bid 123000, ask 124000; n_sig_figs=5, mantissa=5 -> step 50
+    assert_eq!(bucket_l2_px(Px(123_456), Side::Bid, 3, None), Px(123_000));
+    assert_eq!(bucket_l2_px(Px(123_456), Side::Ask, 3, None), Px(124_000));
+    assert_eq!(bucket_l2_px(Px(123_456), Side::Bid, 5, Some(5)), Px(123_450));
+    assert_eq!(bucket_l2_px(Px(123_456), Side::Ask, 5, Some(5)), Px(123_500));
+    let (agg_bids, agg_asks) = book.l2_snapshot_aggregated(Some(2), None, 10);
+    // Bids 1000->1000, 995->990, 990->990 => 2 buckets: (1000, 50) and (990, 300)
+    assert_eq!(agg_bids.len(), 2);
+    assert_eq!((agg_bids[0].px, agg_bids[0].sz), (Px(1000), Sz(50)));
+    assert_eq!((agg_bids[1].px, agg_bids[1].sz, agg_bids[1].n_orders), (Px(990), Sz(300), 2));
+    assert!(!agg_asks.is_empty());
+
+    // Order price shaping (`0x5a21510`): Bid 1.1x / Ask 0.9x, tick snap, caps, system user, band gate
+    let base_ctx = PriceShapeContext {
+        user_blocked: false,
+        mark_px: Px(100_000),
+        tick: 10,
+        available_notional: 500_000_000,
+        skip_min_notional: false,
+        book_ref_pxs: (0, 0),
+        rate_limited: false,
+        now_ms: 10_000,
+        last_alert_ms: 4_000,
+        band_exempt: false,
+        band_p: 0.20,
+    };
+    let shaped_bid = shape_order_price(
+        PriceShapeRequest {
+            user: user(1),
+            side: Side::Bid,
+            sz: Sz(200),
+            optional_ref: None,
+            price_move: PriceMove::ByFraction(0),
+        },
+        base_ctx,
+    )
+    .unwrap();
+    assert_eq!(shaped_bid.limit_px, Px(110_000));
+    assert_eq!(shaped_bid.stop_px, Some(Px(100_000)));
+
+    // Ask 0.9x + 1 tick (`q + 1`)
+    let shaped_ask = shape_order_price(
+        PriceShapeRequest {
+            user: user(1),
+            side: Side::Ask,
+            sz: Sz(200),
+            optional_ref: None,
+            price_move: PriceMove::ByFraction(0),
+        },
+        base_ctx,
+    )
+    .unwrap();
+    assert_eq!(shaped_ask.limit_px, Px(90_010));
+
+    // Exact status words (`0x19c`, `0xde`, `0x6d`, `0x6c`, `0xc8`, `0x78`, `0x63`)
+    assert_eq!(
+        shape_order_price(
+            PriceShapeRequest { user: user(1), side: Side::Bid, sz: Sz(200), optional_ref: None, price_move: PriceMove::ByAmount(0) },
+            PriceShapeContext { user_blocked: true, ..base_ctx }
+        ).unwrap_err().status_word(),
+        0x19c
+    );
+    assert_eq!(
+        shape_order_price(
+            PriceShapeRequest { user: user(1), side: Side::Ask, sz: Sz(200), optional_ref: None, price_move: PriceMove::ByAmount(100_000) },
+            base_ctx
+        ).unwrap_err().status_word(),
+        0xde
+    );
+    assert_eq!(
+        shape_order_price(
+            PriceShapeRequest { user: user(1), side: Side::Bid, sz: Sz(MAX_SHAPED_NOTIONAL_CAP), optional_ref: None, price_move: PriceMove::ByAmount(0) },
+            base_ctx
+        ).unwrap_err().status_word(),
+        0x6d
+    );
+    assert_eq!(
+        shape_order_price(
+            PriceShapeRequest { user: user(1), side: Side::Bid, sz: Sz(10_000), optional_ref: None, price_move: PriceMove::ByAmount(0) },
+            base_ctx
+        ).unwrap_err().status_word(),
+        0x6c
+    );
+    // Min notional $10 rejected for normal user, allowed for system users `[0xff; 20]` / `[0xee; 20]`
+    assert_eq!(
+        shape_order_price(
+            PriceShapeRequest { user: user(1), side: Side::Bid, sz: Sz(10), optional_ref: None, price_move: PriceMove::ByAmount(0) },
+            base_ctx
+        ).unwrap_err().status_word(),
+        0xc8
+    );
+    assert!(shape_order_price(
+        PriceShapeRequest { user: SYSTEM_USER_FF, side: Side::Bid, sz: Sz(10), optional_ref: None, price_move: PriceMove::ByAmount(0) },
+        base_ctx
+    ).is_ok());
+    assert!(shape_order_price(
+        PriceShapeRequest { user: SYSTEM_USER_EE, side: Side::Bid, sz: Sz(10), optional_ref: None, price_move: PriceMove::ByAmount(0) },
+        base_ctx
+    ).is_ok());
+    // Rate limit (`0x78`, alert=true since 10_000 >= 4_000 + 5_000)
+    assert_eq!(
+        shape_order_price(
+            PriceShapeRequest { user: user(1), side: Side::Bid, sz: Sz(200), optional_ref: None, price_move: PriceMove::ByAmount(0) },
+            PriceShapeContext { rate_limited: true, ..base_ctx }
+        ),
+        Err(PriceShapeError::RateLimited { should_alert: true })
+    );
+    // Price band (`0x63` when band_p = 0.05 < 0.10)
+    assert_eq!(
+        shape_order_price(
+            PriceShapeRequest { user: user(1), side: Side::Bid, sz: Sz(200), optional_ref: None, price_move: PriceMove::ByAmount(0) },
+            PriceShapeContext { band_p: 0.05, ..base_ctx }
+        ),
+        Err(PriceShapeError::PriceBandExceeded { band_pct: 5.0 })
+    );
+}

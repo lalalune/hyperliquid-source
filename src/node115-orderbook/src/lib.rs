@@ -12,7 +12,9 @@
 #![forbid(unsafe_code)]
 
 pub mod books;
+pub mod impact_walk;
 pub mod matching;
+pub mod price_shape;
 pub mod priority_level;
 pub mod relations;
 pub mod schedule_cancel_book;
@@ -46,11 +48,20 @@ pub use node115_twap_quantity as twap_quantity;
 pub use node115_twap_tag4_cleanup as twap_tag4_cleanup;
 
 pub use books::Books;
+pub use impact_walk::{
+    MAX_IMPACT_NOTIONAL_PRODUCT, aggregate_l2_levels, bucket_l2_px, impact_walk_levels,
+};
 pub use matching::{
     BAD_ALO_HEAD, Book, BookKind, BookRiskOracle, CancelError, FillEvent, IOC_CANCEL_HEAD,
     InsertError, InsertOrderRequest, InsertOutcome, L2Level, MAX_ORDER_CAP, ModifyError,
     ModifyOrderRequest, OrderStatus, RestingCancelReason, UnboundedRiskOracle, cancel_oid_hash,
     would_cross,
+};
+pub use price_shape::{
+    ASK_SLIPPAGE_FACTOR, BID_SLIPPAGE_FACTOR, FRACTION_MOVE_DIVISOR, MAX_SHAPED_NOTIONAL_CAP,
+    MAX_SIGNED_NOTIONAL_PRODUCT, MIN_ORDER_NOTIONAL_THRESHOLD, PriceMove, PriceShapeContext,
+    PriceShapeError, PriceShapeRequest, SYSTEM_USER_EE, SYSTEM_USER_FF, ShapedOrderPrice,
+    shape_order_price,
 };
 pub use priority_level::{
     BOOK_STRUCT_STRIDE_BYTES, LEVEL_INSERT_DIFF_BYTES, LEVEL_MODIFY_DIFF_BYTES,

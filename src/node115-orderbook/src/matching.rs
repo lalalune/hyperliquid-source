@@ -725,6 +725,73 @@ impl Book {
             .map_err(ModifyError::Insert)?;
         Ok((cancelled, outcome))
     }
+
+    /// Compute the volume-weighted impact price on `side` for `target_ntl`, matching node #115
+    /// `0x46a6370` (`RE-014-book-impact-walk-115`) by summing resting order sizes per level
+    /// through `self.slab` in price-priority order.
+    pub fn impact_px(
+        &self,
+        side: Side,
+        target_ntl: node115_assets::qtys::Ntl,
+        sink: &mut impl OverflowSink,
+    ) -> Option<Px> {
+        let levels: Vec<(Px, Sz)> = self
+            .half(side)
+            .iter()
+            .map(|(&key, lvl)| {
+                let px = Px(key.unsigned_abs());
+                let mut sum = Sz::ZERO;
+                for slot in self.slab.level_slots(lvl) {
+                    if let Some(rec) = self.slab.get(slot) {
+                        sum = sum.sat_add(rec.sz, sink);
+                    }
+                }
+                (px, sum)
+            })
+            .collect();
+        crate::impact_walk::impact_walk_levels(levels, target_ntl, sink)
+    }
+
+    /// Compute `(bid_impact_px, ask_impact_px)` for `target_ntl` matching node #115 `0x44d9060`
+    /// (`0x44d91ec` & `0x44d9201` calling `0x46a6370`).
+    pub fn impact_pxs(
+        &self,
+        target_ntl: node115_assets::qtys::Ntl,
+        sink: &mut impl OverflowSink,
+    ) -> (Option<Px>, Option<Px>) {
+        (
+            self.impact_px(Side::Bid, target_ntl, sink),
+            self.impact_px(Side::Ask, target_ntl, sink),
+        )
+    }
+
+    /// Produce an L2 snapshot with optional `n_sig_figs` (`2..=5`) and `mantissa` (`2` or `5`)
+    /// bucketing (bids rounded down, asks rounded up), capped at `max_levels` per side.
+    pub fn l2_snapshot_aggregated(
+        &self,
+        n_sig_figs: Option<u32>,
+        mantissa: Option<u64>,
+        max_levels: usize,
+    ) -> (Vec<L2Level>, Vec<L2Level>) {
+        let raw_bids = self.l2_levels(Side::Bid, usize::MAX);
+        let raw_asks = self.l2_levels(Side::Ask, usize::MAX);
+        (
+            crate::impact_walk::aggregate_l2_levels(
+                &raw_bids,
+                Side::Bid,
+                n_sig_figs,
+                mantissa,
+                max_levels,
+            ),
+            crate::impact_walk::aggregate_l2_levels(
+                &raw_asks,
+                Side::Ask,
+                n_sig_figs,
+                mantissa,
+                max_levels,
+            ),
+        )
+    }
 }
 
 impl OrderRelations for Book {
