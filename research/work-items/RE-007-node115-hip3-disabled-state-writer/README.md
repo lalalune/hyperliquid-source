@@ -71,8 +71,10 @@ name `disableDex` to `0x26134f0`. This names the raw representation being used;
 it does not reconstruct its JSON decoder or signature checks.
 
 The actual common preparation function `0x29467e0` retains state in R15,
-identity in R14 and input in R12. After its preceding opaque identity/role
-gate, table `0x5fe548[14]` enters `0x2946a93`: it clones the input string
+identity in R14 and input in R12. After its identity lookup and local
+class/state predicate (whose lookup helper is traced in the companion
+[identity lookup packet](../RE-007-node115-hip3-disable-authz-path/README.md)),
+table `0x5fe548[14]` enters `0x2946a93`: it clones the input string
 (pointer +0x10, length +0x18), builds a tag-14 temporary with the owned
 capacity/pointer/length at +8/+0x10/+0x18, and passes that temporary, the same
 state and identity to `0x2c47660` at `0x294767d`. Empty input uses a non-dereferenced
@@ -103,8 +105,10 @@ Before authorization, the handler tests the selected row D:
 - If `D+0x378 == i64::MIN`, this action returns `0xf4`.
 - Otherwise it compares the supplied 20-byte identity with the owner bytes
   at `[D+0x4a0]+0x70`. A match proceeds directly. The alternate path calls
-  `0x469e170` with selector `0x13`; that helper's permission semantics remain
-  opaque. This packet does not model it as an always-successful check.
+  `0x469e170` with selector `0x13`; its bounded descriptor and 20-byte-key
+  search is documented in merged [PR #7109](https://github.com/lalalune/hyperliquid-source/pull/7109).
+  The selector's domain name and full permission policy remain unresolved.
+  This packet does not model the check as always successful.
 
 The selected owner-match path has a zero-length auxiliary row list and reaches
 the action-specific arm without claiming the semantics of other dispatch arms.
@@ -177,10 +181,11 @@ written, that a restart reads it, or that trading admission observes it.
 
 ## Remaining gaps
 
-The complete public decoder/action registration chain, cryptographic and role
-validation, permission helper `0x469e170`, system-disabled writers, enable or
-migration transitions, all trading-admission consumers, concurrent mutation,
-unwind cleanup, crash persistence and restart equivalence remain unclosed.
-The original target was inspected statically only. Existing codec work supplies
+The complete public decoder/action registration chain, cryptographic identity
+authentication, names for the common-gate role byte and selector `0x13`, role
+collection population paths, system-disabled writers, enable or migration
+transitions, all trading-admission consumers, concurrent mutation, unwind
+cleanup, crash persistence and restart equivalence remain unclosed. The
+original target was inspected statically only. Existing codec work supplies
 its own encoding contract; this packet adds the actual selected producer and
 its guard ordering without replacing those prerequisites.
