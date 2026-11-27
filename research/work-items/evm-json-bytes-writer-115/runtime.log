@@ -12,6 +12,6 @@ Commands and results:
 - `make verify`: PASS; artifact signatures, 32 pinned imports, 4,851 evidence-packet manifests / 34,474 entries.
 - `make catalogue-check`: PASS; catalogue and progress tables match pinned inputs.
 - `make doctor`: PASS before edits; `analysis_ready=true`, `exact_rebuild_ready=false`; Java/Ghidra unavailable.
-- `make test`: RUNNING in the original session; last observed progress 54/1,670 modules, with observed modules passing. Final exit status not yet available; do not treat this as a completed full-suite pass.
+- `make test`: completed in the original session; exit status 2. The isolated runner attempted all 1,670 test files and reported 13 failed. The session output retained here did not include the per-file failure summary, so the complete failure list is not claimed. The new `test_evm_json_bytes_writer_115.py` packet checks passed earlier; failures in unrelated platform-sensitive tests remain possible and the repository-wide suite is not green.
 
-The captured-node analysis itself was static and offline. GitHub was queried read-only to recheck PR overlap and repository state. No chain action, signing, or captured-binary execution was used.
+The captured-node analysis itself was static and offline. GitHub was queried read-only to recheck PR overlap and repository state; open PRs #7199-#7202 were present at the last check. No chain action, signing, or captured-binary execution was used.

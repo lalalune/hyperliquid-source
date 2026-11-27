@@ -38,9 +38,10 @@ This does not establish allocation-failure behavior, the complete `Result` contr
 ## Checks
 
 - `make doctor`: passed; `analysis_ready=true`, `exact_rebuild_ready=false` because recovered manifests/locks, exact Linux build flags/fork provenance and an accepted reconstruction/harness remain missing; Java/Ghidra unavailable.
-- `make verify`: passed after initializing the pinned `upstream/*` submodules; artifact signatures, 32 imports and 4,850 evidence-packet manifests / 34,470 entries verified.
-- `make catalogue-check`: passed before packet changes.
+- `make verify`: passed after initializing the pinned `upstream/*` submodules; artifact signatures, 32 imports and 4,851 evidence-packet manifests / 34,474 entries verified.
+- `make catalogue-check`: passed after packet and runtime-log updates.
 - Focused tests, final result and `make test` status are recorded in `runtime.log`.
+- Full `make test`: all 1,670 test files were attempted; 13 failed. The retained session output did not preserve the per-file failure list, so the complete list is not attributed here.
 - No captured executable was run or emulated.
 
 Next question: establish the serializer error/return contract under controlled offline evidence and determine whether the configuration bit has a supported runtime value, without claiming a full EVM component gate.
