@@ -467,3 +467,128 @@ fn cloid_spot_oi_cap_trigger_oco_twap_and_schedule_cancel() {
     assert_eq!(swept[0].0, user(1));
     assert_eq!(spot.open_order_count(&user(1)), 0);
 }
+
+#[test]
+fn priority_level_queue_splicing_modify_sz_diff_and_layout_match_node115() {
+    use node115_orderbook::{
+        BOOK_STRUCT_STRIDE_BYTES, LEVEL_INSERT_DIFF_BYTES, LEVEL_MODIFY_DIFF_BYTES,
+        PERP_DEX_STRUCT_STRIDE_BYTES, PRIORITY_RING_ENTRY_BYTES, LevelDiffEvent, PriorityKey,
+        PriorityLevelQueue, SLAB_ENTRY_STRIDE_BYTES,
+    };
+
+    // Exact node #115 layout constants (`0x22e7590`, `0x276e000`, `0x58df360`, `0x25da200`, `0x5911890`).
+    assert_eq!(BOOK_STRUCT_STRIDE_BYTES, 288);
+    assert_eq!(PERP_DEX_STRUCT_STRIDE_BYTES, 512);
+    assert_eq!(SLAB_ENTRY_STRIDE_BYTES, 272);
+    assert_eq!(LEVEL_INSERT_DIFF_BYTES, 696);
+    assert_eq!(LEVEL_MODIFY_DIFF_BYTES, 712);
+    assert_eq!(PRIORITY_RING_ENTRY_BYTES, 32);
+
+    // Exact `#115` `0x4dce580` key ordering: priority DESC, then oid ASC.
+    assert!(
+        PriorityKey { oid: 10, priority: 5 } < PriorityKey { oid: 1, priority: 2 }
+    );
+    assert!(
+        PriorityKey { oid: 1, priority: 5 } < PriorityKey { oid: 2, priority: 5 }
+    );
+
+    let mut slab = OrderSlab::new();
+    let mut queue = PriorityLevelQueue::new();
+    let mut book_total = Sz::ZERO;
+    let mut diffs = Vec::new();
+    let mut sink = RecordingOverflowSink::default();
+
+    let mk = |oid: u64, sz: u64| OrderRecord {
+        oid,
+        user: user(1),
+        side: Side::Bid,
+        limit_px: Px(1_000),
+        sz: Sz(sz),
+        orig_sz: Sz(sz),
+        reduce_only: false,
+        timestamp: oid,
+        cloid: None,
+        prev: None,
+        next: None,
+        peer_oid: None,
+        parent_oid: None,
+        child_oids: Vec::new(),
+    };
+
+    // 1. Non-priority order 100 initializes `level.cursor` (first non-priority).
+    let s100 = queue
+        .insert_resting(&mut slab, mk(100, 10), None, 1, &mut book_total, &mut diffs, &mut sink)
+        .unwrap();
+    assert_eq!(queue.level.cursor, Some(s100));
+
+    // 2. Non-priority order 101 appends after 100; cursor stays at s100.
+    let s101 = queue
+        .insert_resting(&mut slab, mk(101, 20), None, 2, &mut book_total, &mut diffs, &mut sink)
+        .unwrap();
+    assert_eq!(queue.level.cursor, Some(s100));
+
+    // 3. Priority-2 order 102 splices before first non-priority (s100).
+    let s102 = queue
+        .insert_resting(&mut slab, mk(102, 5), Some(2), 3, &mut book_total, &mut diffs, &mut sink)
+        .unwrap();
+    // 4. Priority-5 order 103 splices before priority-2 (s102).
+    let s103 = queue
+        .insert_resting(&mut slab, mk(103, 7), Some(5), 4, &mut book_total, &mut diffs, &mut sink)
+        .unwrap();
+    // 5. Priority-5 order 104 (higher OID) splices after 103 and before priority-2 (s102).
+    let s104 = queue
+        .insert_resting(&mut slab, mk(104, 8), Some(5), 5, &mut book_total, &mut diffs, &mut sink)
+        .unwrap();
+
+    // Expected queue order: [103 (p=5), 104 (p=5), 102 (p=2), 100 (none), 101 (none)].
+    let oids: Vec<u64> = slab
+        .level_slots(&queue.level)
+        .into_iter()
+        .map(|s| slab.get(s).unwrap().oid)
+        .collect();
+    assert_eq!(oids, vec![103, 104, 102, 100, 101]);
+    assert_eq!(queue.priority_ring.len(), 3);
+    assert_eq!(book_total, Sz(50));
+    assert_eq!(queue.level.total_sz, Sz(50));
+
+    // 6. Modify size (`0x25da200`): no-op on identical size; updates totals & emits diff on change.
+    assert!(!queue
+        .modify_order_sz(&mut slab, s104, Sz(8), 6, &mut book_total, &mut diffs, &mut sink)
+        .unwrap());
+    assert!(queue
+        .modify_order_sz(&mut slab, s104, Sz(18), 7, &mut book_total, &mut diffs, &mut sink)
+        .unwrap());
+    assert_eq!(book_total, Sz(60));
+    assert_eq!(queue.level.total_sz, Sz(60));
+    assert_eq!(
+        diffs.last().copied(),
+        Some(LevelDiffEvent::OrderSizeModified {
+            oid: 104,
+            user: user(1),
+            side: Side::Bid,
+            px: Px(1_000),
+            old_sz: Sz(8),
+            new_sz: Sz(18),
+            timestamp: 7,
+        })
+    );
+
+    // 7. Removing cursor (`s100`) advances `level.cursor` to `s101` (`0x58dfbc0`).
+    let removed_100 = queue
+        .remove_order(&mut slab, s100, None, &mut book_total, &mut diffs, &mut sink)
+        .unwrap()
+        .unwrap();
+    assert!(!removed_100.level_emptied);
+    assert_eq!(queue.level.cursor, Some(s101));
+
+    // Removing priority order `s103` removes it from `priority_orders`.
+    queue
+        .remove_order(&mut slab, s103, Some(5), &mut book_total, &mut diffs, &mut sink)
+        .unwrap()
+        .unwrap();
+    assert!(!queue.priority_orders.contains_key(&PriorityKey { oid: 103, priority: 5 }));
+    assert_eq!(book_total, Sz(43));
+    assert_eq!(queue.level.total_sz, Sz(43));
+    assert!(sink.events.is_empty());
+    let _ = (s102, s104);
+}

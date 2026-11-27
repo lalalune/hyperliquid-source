@@ -13,6 +13,7 @@
 
 pub mod books;
 pub mod matching;
+pub mod priority_level;
 pub mod relations;
 pub mod schedule_cancel_book;
 pub mod slab;
@@ -50,6 +51,11 @@ pub use matching::{
     InsertError, InsertOrderRequest, InsertOutcome, L2Level, MAX_ORDER_CAP, ModifyError,
     ModifyOrderRequest, OrderStatus, RestingCancelReason, UnboundedRiskOracle, cancel_oid_hash,
     would_cross,
+};
+pub use priority_level::{
+    BOOK_STRUCT_STRIDE_BYTES, LEVEL_INSERT_DIFF_BYTES, LEVEL_MODIFY_DIFF_BYTES,
+    PERP_DEX_STRUCT_STRIDE_BYTES, PRIORITY_RING_ENTRY_BYTES, LevelDiffEvent, PriorityKey,
+    PriorityLevelQueue, PriorityRingEntry, SLAB_ENTRY_STRIDE_BYTES,
 };
 pub use relations::{OrderRelations, detach_from_parent, link_peers};
 pub use schedule_cancel_book::ScheduleCancelEngine;
