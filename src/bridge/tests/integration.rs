@@ -269,3 +269,160 @@ fn canonical_arbitrum_contracts_and_bridge2_balance_guard() {
     );
     assert_eq!(bal, 600_000);
 }
+
+#[test]
+fn bridge_withdrawal_mutation_boundary_and_corruption_cases() {
+    use bridge::{bridge_preimage, bridge_preimage_digest, debit_bridge2_balance};
+
+    // Exact zero-remaining withdrawal debit succeeds; subsequent debit of 1 fails without mutating balance.
+    let mut bal = 123u64;
+    assert_eq!(debit_bridge2_balance(&mut bal, 123), Ok(0));
+    assert_eq!(bal, 0);
+    assert!(debit_bridge2_balance(&mut bal, 1).is_err());
+    assert_eq!(bal, 0);
+
+    // Zero debit on zero balance is a no-op; u64::MAX boundary debit succeeds cleanly.
+    assert_eq!(debit_bridge2_balance(&mut bal, 0), Ok(0));
+    let mut max_bal = u64::MAX;
+    assert_eq!(debit_bridge2_balance(&mut max_bal, u64::MAX), Ok(0));
+    assert_eq!(max_bal, 0);
+
+    // Duplicate withdrawal request key hits BeforeDuplicateUnwrap without mutating aggregate.
+    let mut st = WithdrawalMutationState {
+        requests: BTreeMap::new(),
+        aggregate: 500,
+    };
+    let key = bridge::BridgeRequestKey {
+        address: [0x11; 20],
+        word: 99,
+    };
+    assert_eq!(
+        apply_bridge_request_mutation(
+            &mut st,
+            key.clone(),
+            WithdrawalMutationRequest {
+                amount: 100,
+                recipient: [0x22; 20],
+            }
+        ),
+        WithdrawalMutationStop::AfterAggregateStore
+    );
+    assert_eq!(st.aggregate, 400);
+    assert_eq!(
+        apply_bridge_request_mutation(
+            &mut st,
+            key,
+            WithdrawalMutationRequest {
+                amount: 100,
+                recipient: [0x22; 20],
+            }
+        ),
+        WithdrawalMutationStop::BeforeDuplicateUnwrap
+    );
+    assert_eq!(st.aggregate, 400);
+
+    // Aggregate underflow hits BeforeBalancePanic, leaving aggregate unchanged while retaining the inserted entry.
+    let underflow_key = bridge::BridgeRequestKey {
+        address: [0x33; 20],
+        word: 100,
+    };
+    assert_eq!(
+        apply_bridge_request_mutation(
+            &mut st,
+            underflow_key.clone(),
+            WithdrawalMutationRequest {
+                amount: 401,
+                recipient: [0x44; 20],
+            }
+        ),
+        WithdrawalMutationStop::BeforeBalancePanic
+    );
+    assert_eq!(st.aggregate, 400);
+    assert!(st.requests.contains_key(&underflow_key));
+
+    // Preimage digest matches keccak256(preimage) across zero and max-byte boundary inputs.
+    let p_zero = bridge_preimage(&[0u8; 20], &[0u8; 32]);
+    assert_eq!(
+        bridge_preimage_digest(&[0u8; 20], &[0u8; 32]),
+        keccak256(&p_zero)
+    );
+    let p_max = bridge_preimage(&[0xff; 20], &[0xee; 32]);
+    assert_eq!(
+        bridge_preimage_digest(&[0xff; 20], &[0xee; 32]),
+        keccak256(&p_max)
+    );
+}
+
+#[test]
+fn eth_event_all_variants_msgpack_boundaries_and_empty_abi_arrays() {
+    let all_events = [
+        Node115BridgeEvent::Deposit,
+        Node115BridgeEvent::InvalidatedWithdrawal,
+        Node115BridgeEvent::RequestedWithdrawal,
+        Node115BridgeEvent::FinalizedWithdrawal,
+        Node115BridgeEvent::FinalizedValidatorSetUpdate,
+        Node115BridgeEvent::RequestedValidatorSetUpdateEvent,
+    ];
+    let boundary_vals = [
+        0u64,
+        0x7f,
+        0x80,
+        0xff,
+        0x100,
+        0xffff,
+        0x1_0000,
+        u64::from(u32::MAX),
+        u64::MAX,
+    ];
+    for (idx, &ev) in all_events.iter().enumerate() {
+        assert_eq!(
+            Node115BridgeEvent::from_bytes(ev.name().as_bytes()),
+            Some(ev)
+        );
+        assert_eq!(ev.tag(), idx as u8);
+        let val = boundary_vals[idx];
+        let id = EthEventId {
+            block_number: val,
+            t: boundary_vals[boundary_vals.len() - 1 - idx],
+            event_type: ev,
+            log_index: 0x1_0000,
+            tx_hash: [idx as u8; 32],
+        };
+        let mut named = Vec::new();
+        let mut compact = Vec::new();
+        id.encode_msgpack(true, &mut named);
+        id.encode_msgpack(false, &mut compact);
+        assert_eq!(named[0], 0x85);
+        assert_eq!(compact[0], 0x95);
+        assert!(id.to_json_string().contains(ev.name()));
+    }
+    assert_eq!(Node115BridgeEvent::from_bytes(b"UnknownBridgeEvent"), None);
+
+    // Empty dynamic arrays in UpdateValidatorSet / Unlock / InvalidateWithdrawals remain 32-byte aligned.
+    for req in [
+        BridgeRequest::UpdateValidatorSet {
+            epoch: 0,
+            hot_addresses: vec![],
+            cold_addresses: vec![],
+            powers: vec![],
+        },
+        BridgeRequest::Unlock {
+            epoch: u64::MAX,
+            hot_addresses: vec![],
+            cold_addresses: vec![],
+            powers: vec![],
+            nonce: u64::MAX,
+        },
+        BridgeRequest::InvalidateWithdrawals {
+            messages: vec![],
+            nonce: 0,
+        },
+    ] {
+        let encoded = req.abi_encode();
+        assert!(!encoded.is_empty());
+        assert_eq!(encoded.len() % 32, 0);
+        let payload = req.to_agent_payload(ChainName::Testnet, &[0x08; 20]);
+        assert_eq!(payload.source, BRIDGE_AGENT_SOURCE);
+        assert_eq!(payload.arb_chain_id, ARB_SEPOLIA_CHAIN_ID);
+    }
+}
