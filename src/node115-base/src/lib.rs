@@ -3,7 +3,7 @@
 //!
 //! Links all 39 Cargo-packaged `foundation` micro-crates and exposes binary-grounded
 //! `cid`, `api_url`, `build_mode`, `time`, `guards`, `short_string`, `bucket_guard`,
-//! `l1_map`, `lock_id`, and `log_settings` modules.
+//! `l1_map`, `lock_id`, `log_settings`, and `runtime_utils` modules.
 
 pub mod api_url;
 pub mod bucket_guard;
@@ -13,6 +13,7 @@ pub mod guards;
 pub mod l1_map;
 pub mod lock_id;
 pub mod log_settings;
+pub mod runtime_utils;
 pub mod short_string;
 pub mod time;
 

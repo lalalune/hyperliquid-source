@@ -228,3 +228,105 @@ fn base_debug_structs_and_enums_format_binary_verified_fields() {
     };
     assert!(format!("{sig:?}").contains("Signature"));
 }
+
+#[test]
+fn runtime_utils_cover_remaining_foundation_subsystems() {
+    use node115_base::runtime_utils::{
+        ApiSecrets, ChainKind, DataCache, FileModTimeTracker, HttpRequestSpec, LazyMutex,
+        LinerBuffer, LogHandle, ProductionGuard, QuorumPolicy, ShellSpec, SlackAlertThrottle,
+        WalletAddress, daily_liner_path, fodname, format_log_prefix, sanitize_rel_segment,
+        staging_rename_path,
+    };
+    use std::path::Path;
+
+    let mut secrets = ApiSecrets::new();
+    assert!(secrets.insert("", "x").is_err());
+    assert!(secrets.insert("rpc_key", "supersecret").is_ok());
+    assert_eq!(secrets.get("rpc_key"), Some("supersecret"));
+    assert!(!format!("{secrets:?}").contains("supersecret"));
+
+    assert!(ChainKind::Mainnet.is_production());
+    assert!(!ChainKind::Local.is_production());
+    assert!(ProductionGuard {
+        chain: ChainKind::Mainnet,
+        allow_unsafe_test_overrides: true,
+    }
+    .validate()
+    .is_err());
+    assert!(ProductionGuard {
+        chain: ChainKind::Local,
+        allow_unsafe_test_overrides: true,
+    }
+    .validate()
+    .is_ok());
+
+    let mut throttle = SlackAlertThrottle::new(1_000);
+    assert!(throttle.should_send("oom", 10_000));
+    assert!(!throttle.should_send("oom", 10_500));
+    assert!(throttle.should_send("oom", 11_000));
+
+    assert!(HttpRequestSpec::new("GET", "ftp://bad", 500).is_err());
+    assert!(HttpRequestSpec::new("POST", "https://api.hyperliquid.xyz/info", 0).is_err());
+    assert!(HttpRequestSpec::new("POST", "https://api.hyperliquid.xyz/info", 5_000).is_ok());
+
+    let mut liner = LinerBuffer::new();
+    assert!(liner.push_line("bad\nline").is_err());
+    assert!(liner.push_line("ok-line").is_ok());
+    assert_eq!(liner.lines(), &["ok-line"]);
+    assert_eq!(
+        daily_liner_path(Path::new("/data"), "20261127", "events.log"),
+        Path::new("/data/20261127/events.log")
+    );
+
+    let mut cache = DataCache::new(500);
+    cache.insert("k", 42u64, 1_000);
+    assert_eq!(cache.get_fresh(&"k", 1_500), Some(&42));
+    assert_eq!(cache.get_fresh(&"k", 1_501), None);
+
+    let mut mtime = FileModTimeTracker::new();
+    assert!(mtime.observe(100));
+    assert!(!mtime.observe(100));
+    assert!(mtime.observe(101));
+
+    assert!(fodname(Path::new("/data"), "20261127", 24, "x").is_none());
+    assert_eq!(
+        fodname(Path::new("/data"), "20261127", 5, "x"),
+        Some(Path::new("/data/20261127/5/x").to_path_buf())
+    );
+    assert!(sanitize_rel_segment("..").is_none());
+    assert_eq!(sanitize_rel_segment("state.bin"), Some("state.bin"));
+    assert_eq!(
+        staging_rename_path(Path::new("/tmp/a.bin"), 7),
+        Path::new("/tmp/a.bin.tmp.7")
+    );
+    assert_eq!(format_log_prefix("base", "INFO"), "[INFO][base]");
+
+    let lazy: LazyMutex<u64> = LazyMutex::new();
+    *lazy.lock_or_init(|| 10) += 5;
+    assert_eq!(*lazy.lock_or_init(|| 0), 15);
+
+    let handle = LogHandle::new(LogSettings {
+        level: LogLevel::Info,
+        err_fln: "e".to_owned(),
+        stdout_fln: "o".to_owned(),
+        throttle: false,
+        log_to_stdout: true,
+        n_overflow_files: 2,
+        custom_dir: None,
+    });
+    assert_eq!(handle.state().overflow_count, 0);
+
+    assert!(!QuorumPolicy::TWO_THIRDS.has_strict_quorum(2, 3));
+    assert!(QuorumPolicy::TWO_THIRDS.has_strict_quorum(7, 10));
+    assert!(!QuorumPolicy::TWO_THIRDS.has_strict_quorum(0, 0));
+
+    assert!(ShellSpec::new("", vec![]).is_err());
+    assert!(ShellSpec::new("ls", vec!["-la".to_owned()]).is_ok());
+
+    let addr = WalletAddress::parse_hex("0x0123456789abcdef0123456789abcdef01234567").unwrap();
+    assert_eq!(
+        addr.to_hex_lower(),
+        "0x0123456789abcdef0123456789abcdef01234567"
+    );
+    assert!(WalletAddress::parse_hex("0x1234").is_err());
+}
