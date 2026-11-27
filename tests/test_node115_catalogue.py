@@ -24,37 +24,19 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual(len(self.components), 23)
         self.assertEqual({c['artifact'] for c in self.components}, {'node115'})
         catalogue.validate_progress(self.components, self.progress, ROOT)
-        self.assertEqual(catalogue.progress_totals(self.components, self.progress), (45, 92))
-        accepted_three_of_four = {
-            'constants',
-            'serialization',
-            'storage',
-            'abci',
-            'fees',
-            'transport',
-            'node-runtime',
-            'consensus',
-            'orderbook',
-            'assets',
-            'vaults',
-            'staking',
-            'dex-registry',
-            'info-api',
-            'evm-rpc',
-        }
+        self.assertEqual(catalogue.progress_totals(self.components, self.progress), (69, 92))
         for comp_id, row in self.progress['components'].items():
-            if comp_id in accepted_three_of_four:
-                self.assertEqual(
-                    row['gates'],
-                    {'mapped': True, 'built': True, 'behavior': True, 'identity': False},
-                    f'unexpected gates on {comp_id}',
-                )
-            else:
-                self.assertFalse(any(row['gates'].values()), f'unearned gate on {comp_id}')
+            self.assertEqual(
+                row['gates'],
+                {'mapped': True, 'built': True, 'behavior': True, 'identity': False},
+                f'unexpected gates on {comp_id}',
+            )
 
     def test_completed_gate_requires_evidence(self):
         progress = copy.deepcopy(self.progress)
-        progress['components'][self.components[0]['id']]['gates']['built'] = True
+        first = progress['components'][self.components[0]['id']]
+        first['gates']['built'] = True
+        first['evidence'] = []
         with self.assertRaisesRegex(ValueError, 'Completed gates require reviewed evidence'):
             catalogue.validate_progress(self.components, progress, ROOT)
 

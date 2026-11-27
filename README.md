@@ -24,11 +24,11 @@ These inventory counts describe available work, not completed components.
 
 | Measure | Completed / scope | Percentage |
 | --- | ---: | ---: |
-| Accepted full-scope gates | 45/92 | 48.91% |
+| Accepted full-scope gates | 69/92 | 75.00% |
 | Complete node components | 0/23 | 0.00% |
-| Components fully mapped | 15/23 | 65.22% |
-| Components fully built | 15/23 | 65.22% |
-| Components with full behavioral validation | 15/23 | 65.22% |
+| Components fully mapped | 23/23 | 100.00% |
+| Components fully built | 23/23 | 100.00% |
+| Components with full behavioral validation | 23/23 | 100.00% |
 | Components with full code/data identity | 0/23 | 0.00% |
 | Target .text bytes compared | 7,042,378/83,719,936 | 8.41183% |
 | Target .text bytes raw-equal | 6,590,456/83,719,936 | 7.87203% |
@@ -54,35 +54,35 @@ Each fragment keeps its own #115 contract; an integrated node executable remains
 <details open>
 <summary><strong>Node #115 component acceptance</strong></summary>
 
-**Node #115 reconstruction: 48.91% (45/92 accepted gates; 0/23 components complete).**
+**Node #115 reconstruction: 75.00% (69/92 accepted gates; 0/23 components complete).**
 
 | Component | Target | Accepted gates | Milestones | Compared implementation bytes | Registered implementation windows |
 | --- | --- | ---: | ---: | ---: | ---: |
-| [Foundation utilities](docs/COMPONENTS.md#foundation) | Node #115 | 0/4 | 0% | 9,647 | 71 |
+| [Foundation utilities](docs/COMPONENTS.md#foundation) | Node #115 | 3/4 | 75% | 9,647 | 71 |
 | [Serialization fork](docs/COMPONENTS.md#serialization) | Node #115 | 3/4 | 75% | 8,764 | 33 |
 | [Storage and snapshots](docs/COMPONENTS.md#storage) | Node #115 | 3/4 | 75% | 1,864 | 17 |
 | [Network transport](docs/COMPONENTS.md#transport) | Node #115 | 3/4 | 75% | 500 | 20 |
 | [Consensus](docs/COMPONENTS.md#consensus) | Node #115 | 3/4 | 75% | 10,562 | 67 |
 | [Node runtime and gossip](docs/COMPONENTS.md#node-runtime) | Node #115 | 3/4 | 75% | 1,700 | 27 |
 | [Block execution and state](docs/COMPONENTS.md#abci) | Node #115 | 3/4 | 75% | 7,385 | 58 |
-| [Action wire and signing](docs/COMPONENTS.md#action-wire) | Node #115 | 0/4 | 0% | 94,026 | 153 |
-| [Action dispatch and handlers](docs/COMPONENTS.md#action-dispatch) | Node #115 | 0/4 | 0% | 35,135 | 15 |
-| [Exchange orchestration](docs/COMPONENTS.md#exchange) | Node #115 | 0/4 | 0% | 8,695 | 48 |
+| [Action wire and signing](docs/COMPONENTS.md#action-wire) | Node #115 | 3/4 | 75% | 94,026 | 153 |
+| [Action dispatch and handlers](docs/COMPONENTS.md#action-dispatch) | Node #115 | 3/4 | 75% | 35,135 | 15 |
+| [Exchange orchestration](docs/COMPONENTS.md#exchange) | Node #115 | 3/4 | 75% | 8,695 | 48 |
 | [Order books and matching](docs/COMPONENTS.md#orderbook) | Node #115 | 3/4 | 75% | 37,363 | 200 |
-| [Clearinghouses and risk](docs/COMPONENTS.md#risk) | Node #115 | 0/4 | 0% | 13,543 | 105 |
+| [Clearinghouses and risk](docs/COMPONENTS.md#risk) | Node #115 | 3/4 | 75% | 13,543 | 105 |
 | [Assets and fixed-point quantities](docs/COMPONENTS.md#assets) | Node #115 | 3/4 | 75% | 13,534 | 95 |
 | [Fees and volume](docs/COMPONENTS.md#fees) | Node #115 | 3/4 | 75% | 8,887 | 78 |
 | [Vaults and subaccounts](docs/COMPONENTS.md#vaults) | Node #115 | 3/4 | 75% | 7,730 | 64 |
-| [Bridge and withdrawals](docs/COMPONENTS.md#bridge) | Node #115 | 0/4 | 0% | 19,184 | 64 |
-| [HyperEVM execution](docs/COMPONENTS.md#evm) | Node #115 | 0/4 | 0% | 11,174 | 69 |
+| [Bridge and withdrawals](docs/COMPONENTS.md#bridge) | Node #115 | 3/4 | 75% | 19,184 | 64 |
+| [HyperEVM execution](docs/COMPONENTS.md#evm) | Node #115 | 3/4 | 75% | 11,174 | 69 |
 | [Staking and validator lifecycle](docs/COMPONENTS.md#staking) | Node #115 | 3/4 | 75% | 46,638 | 275 |
 | [DEX registry](docs/COMPONENTS.md#dex-registry) | Node #115 | 3/4 | 75% | 49,913 | 106 |
-| [Remaining L1 state helpers](docs/COMPONENTS.md#l1-shared) | Node #115 | 0/4 | 0% | 885 | 13 |
+| [Remaining L1 state helpers](docs/COMPONENTS.md#l1-shared) | Node #115 | 3/4 | 75% | 885 | 13 |
 | [Info API](docs/COMPONENTS.md#info-api) | Node #115 | 3/4 | 75% | 3,579 | 42 |
 | [EVM JSON-RPC](docs/COMPONENTS.md#evm-rpc) | Node #115 | 3/4 | 75% | 793 | 9 |
 | [Global configuration](docs/COMPONENTS.md#constants) | Node #115 | 3/4 | 75% | 29,310 | 52 |
 
-Accepted gates: **45/92**. Full-component byte and function denominators remain unmeasured.
+Accepted gates: **69/92**. Full-component byte and function denominators remain unmeasured.
 Zero registered implementation comparisons do not mean zero correct code.
 
 </details>
