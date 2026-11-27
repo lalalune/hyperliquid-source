@@ -803,3 +803,167 @@ fn fee_trial_referral_claim_and_builder_cap_match_node115() {
         Ok(())
     );
 }
+
+#[test]
+fn fee_tracker_closure_zero_fee_state_referrer_reward_and_code_registration() {
+    use node115_fees::{
+        BaseFeeRates, ERR_REFERRAL_CODE_ALREADY_TAKEN, ERR_REFERRAL_CODE_TOO_LONG,
+        ERR_REFERRAL_INSUFFICIENT_VOLUME, ERR_REFERRER_CODE_ALREADY_REGISTERED, FeeLifecycleError,
+        FeeLifecycleTracker, FeeSchedule, MAX_REFERRAL_CODE_LEN, REFERRER_REWARD_VLM_CAP_RAW,
+        REGISTER_REFERRER_MIN_VLM_RAW, StakeDiscountTier, ZERO_FEE_SYSTEM_ADDRESSES,
+        is_zero_fee_system_address,
+    };
+
+    assert_eq!(REFERRER_REWARD_VLM_CAP_RAW, 100_000_000_000);
+    assert_eq!(REGISTER_REFERRER_MIN_VLM_RAW, 1_000_000);
+    assert_eq!(MAX_REFERRAL_CODE_LEN, 100);
+    for sys in &ZERO_FEE_SYSTEM_ADDRESSES {
+        assert!(is_zero_fee_system_address(sys));
+    }
+    assert!(!is_zero_fee_system_address(&addr(1)));
+
+    let sched = FeeSchedule {
+        rates: BaseFeeRates {
+            perp_cross: 0.00045,
+            perp_add: 0.00015,
+            spot_cross: 0.00070,
+            spot_add: 0.00040,
+        },
+        vip_tiers: vec![],
+        mm_tiers: vec![],
+        referral_discount: 0.04,
+        referrer_keep: 0.10,
+        destination: addr(99),
+        extra_destination_fractions: vec![],
+        stake_discount_tiers: vec![
+            StakeDiscountTier {
+                bps_of_max_supply_staked: 1.0,
+                discount: 0.05,
+            },
+            StakeDiscountTier {
+                bps_of_max_supply_staked: 10.0,
+                discount: 0.25,
+            },
+        ],
+        weigh_spot_volume_double: true,
+    };
+    let mut tracker = FeeLifecycleTracker::new(sched, 3_600_000);
+    let ref_user = addr(10);
+    let trader = addr(11);
+    let other = addr(12);
+
+    // 1. user_fee_state (`0x3c18260`): zero-fee system addresses vs default fallback
+    let sys_ff = tracker.user_fee_state(&[0xff; 20]);
+    assert_eq!(sys_ff.fee_scale, 0.0);
+    assert_eq!(sys_ff.rates.perp_cross, 0.0);
+    let sys_fe = tracker.user_fee_state(&[0xfe; 20]);
+    assert_eq!(sys_fe.fee_scale, 0.0);
+    let default_state = tracker.user_fee_state(&trader);
+    assert_eq!(default_state.fee_scale, 1.0);
+    assert_eq!(default_state.rates.perp_cross, 0.00045);
+
+    // 2. active_staking_discount (`0x3c154d0`) & referrer_reward_fraction (`0x3c15810`)
+    assert_eq!(tracker.active_staking_discount(&[0xff; 20], 100.0), 0.0);
+    assert_eq!(tracker.active_staking_discount(&ref_user, 10.0), 0.25);
+    assert_eq!(tracker.active_staking_discount(&trader, 1.0), 0.05);
+    // Spot returns referrer_keep (0.10) under $1B cap
+    assert_eq!(
+        tracker.referrer_reward_fraction(&ref_user, &trader, 10.0, 1.0, 1.0, true),
+        0.10
+    );
+    // Perp returns max(0.0, fee_scale * (ref_disc - user_disc)) = 1.0 * (0.25 - 0.05) = 0.20
+    assert!(
+        (tracker.referrer_reward_fraction(&ref_user, &trader, 10.0, 1.0, 1.0, false) - 0.20).abs()
+            < 1e-12
+    );
+    // Crossing $1B cumulative RawVlm cap zeroes referrer reward
+    tracker
+        .user_states
+        .entry(trader)
+        .or_default()
+        .token_states
+        .entry(0)
+        .or_default()
+        .cum_raw_vlm += REFERRER_REWARD_VLM_CAP_RAW - 1;
+    assert_eq!(
+        tracker.referrer_reward_fraction(&ref_user, &trader, 10.0, 1.0, 1.0, true),
+        0.10
+    );
+    tracker
+        .user_states
+        .entry(trader)
+        .or_default()
+        .token_states
+        .entry(0)
+        .or_default()
+        .cum_raw_vlm += 1;
+    assert_eq!(
+        tracker.referrer_reward_fraction(&ref_user, &trader, 10.0, 1.0, 1.0, true),
+        0.0
+    );
+
+    // 3. create_referral_code (`0x3c193d0`): $10k min volume (`0xa9`), len <= 100 (`0xa4`),
+    //    user already registered (`0xa8`), duplicate code (`0xa7`), admin override
+    assert_eq!(
+        tracker.create_referral_code(ref_user, "MYCODE", false),
+        Err(FeeLifecycleError::InsufficientVolumeForReferralCode)
+    );
+    assert_eq!(
+        FeeLifecycleError::InsufficientVolumeForReferralCode.status_word(),
+        Some(ERR_REFERRAL_INSUFFICIENT_VOLUME)
+    );
+    tracker
+        .user_states
+        .entry(ref_user)
+        .or_default()
+        .token_states
+        .entry(0)
+        .or_default()
+        .cum_raw_vlm += REGISTER_REFERRER_MIN_VLM_RAW;
+    let long_code = "A".repeat(MAX_REFERRAL_CODE_LEN + 1);
+    assert_eq!(
+        tracker.create_referral_code(ref_user, &long_code, false),
+        Err(FeeLifecycleError::ReferralCodeTooLong)
+    );
+    assert_eq!(
+        FeeLifecycleError::ReferralCodeTooLong.status_word(),
+        Some(ERR_REFERRAL_CODE_TOO_LONG)
+    );
+    assert_eq!(
+        tracker.create_referral_code(ref_user, "MYCODE", false),
+        Ok(())
+    );
+    assert_eq!(
+        tracker.create_referral_code(ref_user, "OTHERCODE", false),
+        Err(FeeLifecycleError::ReferrerAlreadyRegisteredCode)
+    );
+    assert_eq!(
+        FeeLifecycleError::ReferrerAlreadyRegisteredCode.status_word(),
+        Some(ERR_REFERRER_CODE_ALREADY_REGISTERED)
+    );
+    tracker
+        .user_states
+        .entry(other)
+        .or_default()
+        .token_states
+        .entry(0)
+        .or_default()
+        .cum_raw_vlm += REGISTER_REFERRER_MIN_VLM_RAW;
+    assert_eq!(
+        tracker.create_referral_code(other, "MYCODE", false),
+        Err(FeeLifecycleError::ReferralCodeAlreadyTaken)
+    );
+    assert_eq!(
+        FeeLifecycleError::ReferralCodeAlreadyTaken.status_word(),
+        Some(ERR_REFERRAL_CODE_ALREADY_TAKEN)
+    );
+    // Admin bypasses volume check and already-registered check, still enforces <= 100 len
+    assert_eq!(
+        tracker.create_referral_code(addr(20), "ADMINCODE", true),
+        Ok(())
+    );
+    assert_eq!(
+        tracker.create_referral_code(addr(20), &long_code, true),
+        Err(FeeLifecycleError::ReferralCodeTooLong)
+    );
+}

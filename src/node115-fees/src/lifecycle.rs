@@ -19,6 +19,42 @@ use crate::tiers::{BaseFeeRates, BuilderFeeError, BuilderFeeRegistry, FeeSchedul
 pub const REFERRAL_DISCOUNT_VLM_CAP_SHIFTED: u64 = 0x0095_02f8;
 pub const REFERRAL_DISCOUNT_VLM_CAP_RAW: u64 = (REFERRAL_DISCOUNT_VLM_CAP_SHIFTED + 1) << 8;
 
+/// Right-shifted cumulative `RawVlm` cutoff in `0x3c15a11..0x3c15a21`:
+/// `shr r15, 0xb; cmp r15, 0x2e90edc; ja return_zero`.
+/// Equivalently, `cum_raw_vlm < (0x2e90edc + 1) << 11 = 100_000_000_000` (`$1,000,000,000.00` in `$0.01` units).
+pub const REFERRER_REWARD_VLM_CAP_SHIFTED: u64 = 0x02e9_0edc;
+pub const REFERRER_REWARD_VLM_CAP_RAW: u64 = (REFERRER_REWARD_VLM_CAP_SHIFTED + 1) << 11;
+
+/// Minimum cumulative `RawVlm` required for non-admin referral code creation in `0x3c1961a`
+/// (`cmp rbx, 0xf4240` = `1_000_000` = `$10,000.00` in `$0.01` units).
+pub const REGISTER_REFERRER_MIN_VLM_RAW: u64 = 1_000_000;
+
+/// Maximum referral code byte length enforced in `0x3c193fc` & `0x3c19636` (`cmp r12, 0x64` = `100`).
+pub const MAX_REFERRAL_CODE_LEN: usize = 100;
+
+/// Two zero-fee system addresses checked via SIMD `pcmpeqb` in `0x3c154ee`, `0x3c15bf1`, and `0x3c18267`
+/// (`.rodata` `0x453b70` for `[0xff; 20]` and `0x4543c0`/`0x455bb0` for `[0xfe; 20]`).
+pub const ZERO_FEE_SYSTEM_ADDRESSES: [UserAddress; 2] = [[0xff; 20], [0xfe; 20]];
+
+/// Returns `true` when `user` is one of node #115's two zero-fee system addresses.
+#[inline]
+#[must_use]
+pub const fn is_zero_fee_system_address(user: &UserAddress) -> bool {
+    let mut all_ff = true;
+    let mut all_fe = true;
+    let mut i = 0;
+    while i < 20 {
+        if user[i] != 0xff {
+            all_ff = false;
+        }
+        if user[i] != 0xfe {
+            all_fe = false;
+        }
+        i += 1;
+    }
+    all_ff || all_fe
+}
+
 /// Default referrals per refresh bucket in `0x3c17ab9..0x3c17ac4` (`cmp rax, 0x3e9; mov ebx, 0x3e8; cmovae`).
 pub const DEFAULT_REFERRALS_PER_BUCKET: u64 = 1_000;
 
@@ -37,8 +73,12 @@ pub const MAX_APPROVED_BUILDERS: usize = 10;
 /// Exact `UserError` / `Result` `u16` discriminants from master jump table `0x7d8c1c` (`0x46ef710`).
 pub const ERR_SELF_REFER: u16 = 0x00a2;
 pub const ERR_REFERRER_ALREADY_SET: u16 = 0x00a3;
+pub const ERR_REFERRAL_CODE_TOO_LONG: u16 = 0x00a4;
 pub const ERR_NO_MORE_REFERRALS: u16 = 0x00a5;
 pub const ERR_REFERRAL_CODE_NOT_REGISTERED: u16 = 0x00a6;
+pub const ERR_REFERRAL_CODE_ALREADY_TAKEN: u16 = 0x00a7;
+pub const ERR_REFERRER_CODE_ALREADY_REGISTERED: u16 = 0x00a8;
+pub const ERR_REFERRAL_INSUFFICIENT_VOLUME: u16 = 0x00a9;
 pub const ERR_NO_REWARDS_TO_CLAIM: u16 = 0x00aa;
 pub const ERR_REWARD_TOO_SMALL: u16 = 0x00ab;
 pub const ERR_TOO_MANY_BUILDERS: u16 = 0x013c;
@@ -54,8 +94,12 @@ pub const OK_STATUS_WORD: u16 = 0x01a2;
 pub enum FeeLifecycleError {
     CannotSelfRefer,
     ReferrerAlreadySet,
+    ReferralCodeTooLong,
     NoMoreReferralsInBucket,
     ReferralCodeNotRegistered,
+    ReferralCodeAlreadyTaken,
+    ReferrerAlreadyRegisteredCode,
+    InsufficientVolumeForReferralCode,
     NoRewardsToClaim,
     RewardTooSmallToClaim,
     TooManyBuildersApproved,
@@ -74,8 +118,12 @@ impl FeeLifecycleError {
         match self {
             Self::CannotSelfRefer => Some(ERR_SELF_REFER),
             Self::ReferrerAlreadySet => Some(ERR_REFERRER_ALREADY_SET),
+            Self::ReferralCodeTooLong => Some(ERR_REFERRAL_CODE_TOO_LONG),
             Self::NoMoreReferralsInBucket => Some(ERR_NO_MORE_REFERRALS),
             Self::ReferralCodeNotRegistered => Some(ERR_REFERRAL_CODE_NOT_REGISTERED),
+            Self::ReferralCodeAlreadyTaken => Some(ERR_REFERRAL_CODE_ALREADY_TAKEN),
+            Self::ReferrerAlreadyRegisteredCode => Some(ERR_REFERRER_CODE_ALREADY_REGISTERED),
+            Self::InsufficientVolumeForReferralCode => Some(ERR_REFERRAL_INSUFFICIENT_VOLUME),
             Self::NoRewardsToClaim => Some(ERR_NO_REWARDS_TO_CLAIM),
             Self::RewardTooSmallToClaim => Some(ERR_REWARD_TOO_SMALL),
             Self::TooManyBuildersApproved => Some(ERR_TOO_MANY_BUILDERS),
@@ -87,6 +135,14 @@ impl FeeLifecycleError {
             Self::FeeTrialsDisabled => Some(ERR_TRIALS_DISABLED),
         }
     }
+}
+
+/// Snapshot returned by `FeeLifecycleTracker::user_fee_state` (`0x3c18260..0x3c18389`).
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct UserFeeStateSnapshot {
+    pub rates: BaseFeeRates,
+    pub fee_scale: f64,
+    pub active_trial: Option<ActiveFeeTrial>,
 }
 
 /// Per-referrer bucket quota state (`0x3c17a8e..0x3c17aeb`).
@@ -122,6 +178,18 @@ pub struct UserFeeLifecycleState {
     pub token_states: BTreeMap<usize, UserRewardEntry>,
     pub active_trial: Option<ActiveFeeTrial>,
     pub last_trial_end_day: Option<u32>,
+}
+
+impl UserFeeLifecycleState {
+    /// Saturating sum of `cum_raw_vlm` across all token reward entries (`0x3c159a0`, `0x3c174f0`, `0x3c195d0`).
+    #[must_use]
+    pub fn total_cum_raw_vlm(&self) -> u64 {
+        let mut total: u64 = 0;
+        for entry in self.token_states.values() {
+            total = total.saturating_add(entry.cum_raw_vlm);
+        }
+        total
+    }
 }
 
 /// Node #115 `FeeTracker` lifecycle coordinator for referrals, rewards, trials, and builder caps.
@@ -400,6 +468,126 @@ impl FeeLifecycleTracker {
             return true;
         }
         false
+    }
+
+    /// Evaluates `FeeTracker::active_staking_discount` (`0x3c154d0..0x3c15802`).
+    /// Zero-fee system addresses (`[0xff; 20]`, `[0xfe; 20]`) are treated as `staked_bps = 0.0`.
+    #[must_use]
+    pub fn active_staking_discount(&self, user: &UserAddress, staked_bps: f64) -> f64 {
+        let effective_bps = if is_zero_fee_system_address(user) {
+            0.0
+        } else {
+            staked_bps
+        };
+        let mut discount = 0.0_f64;
+        for tier in &self.schedule.stake_discount_tiers {
+            if effective_bps >= tier.bps_of_max_supply_staked {
+                discount = tier.discount;
+            } else {
+                break;
+            }
+        }
+        discount
+    }
+
+    /// Evaluates `FeeTracker::referrer_reward_fraction` (`0x3c15810..0x3c15b93`).
+    /// - Returns `0.0` once `referred_user`'s cumulative `RawVlm` satisfies
+    ///   `(cum >> 11) > 0x2e90edc` (`cum >= 100_000_000_000`, `$1,000,000,000.00`).
+    /// - On spot (`is_spot == true`), returns `self.schedule.referrer_keep`.
+    /// - On perp (`is_spot == false`), returns
+    ///   `max(0.0, user_fee_scale * (referrer_stake_discount - user_stake_discount))`.
+    #[must_use]
+    pub fn referrer_reward_fraction(
+        &self,
+        referrer: &UserAddress,
+        referred_user: &UserAddress,
+        referrer_staked_bps: f64,
+        user_staked_bps: f64,
+        user_fee_scale: f64,
+        is_spot: bool,
+    ) -> f64 {
+        let cum_raw_vlm = self
+            .user_states
+            .get(referred_user)
+            .map(UserFeeLifecycleState::total_cum_raw_vlm)
+            .unwrap_or(0);
+        if (cum_raw_vlm >> 11) > REFERRER_REWARD_VLM_CAP_SHIFTED {
+            return 0.0;
+        }
+        if is_spot {
+            return self.schedule.referrer_keep;
+        }
+        let ref_disc = self.active_staking_discount(referrer, referrer_staked_bps);
+        if ref_disc <= 0.0 {
+            return 0.0;
+        }
+        let user_disc = self.active_staking_discount(referred_user, user_staked_bps);
+        (user_fee_scale * (ref_disc - user_disc)).max(0.0)
+    }
+
+    /// Evaluates `FeeTracker::user_fee_state` (`0x3c18260..0x3c18389`).
+    /// - Zero-fee system addresses (`[0xff; 20]`, `[0xfe; 20]`) return zero rates and `fee_scale = 0.0`.
+    /// - Unknown users return `self.schedule.rates` with `fee_scale = 1.0`.
+    /// - Known users return their active trial effective rates (when present) or schedule base rates
+    ///   with `fee_scale = 1.0`.
+    #[must_use]
+    pub fn user_fee_state(&self, user: &UserAddress) -> UserFeeStateSnapshot {
+        if is_zero_fee_system_address(user) {
+            return UserFeeStateSnapshot {
+                rates: BaseFeeRates {
+                    perp_cross: 0.0,
+                    perp_add: 0.0,
+                    spot_cross: 0.0,
+                    spot_add: 0.0,
+                },
+                fee_scale: 0.0,
+                active_trial: None,
+            };
+        }
+        let active_trial = self.user_states.get(user).and_then(|s| s.active_trial);
+        let rates = active_trial.map_or(self.schedule.rates, |t| t.effective_rates);
+        UserFeeStateSnapshot {
+            rates,
+            fee_scale: 1.0,
+            active_trial,
+        }
+    }
+
+    /// Evaluates `FeeTracker::register_referrer` (`0x3c193d0..0x3c1a24b`).
+    /// - For non-admin callers (`!is_admin`), requires cumulative `RawVlm >= 1_000_000`
+    ///   (`$10,000.00` in `$0.01` units) -> `0xa9`.
+    /// - Enforces `code.len() <= 100` (`0x64`) -> `0xa4`.
+    /// - For non-admin callers, rejects users who already registered a code -> `0xa8`.
+    /// - Rejects codes already registered by another user -> `0xa7`.
+    pub fn create_referral_code(
+        &mut self,
+        user: UserAddress,
+        code: &str,
+        is_admin: bool,
+    ) -> Result<(), FeeLifecycleError> {
+        if !is_admin {
+            let cum_raw_vlm = self
+                .user_states
+                .get(&user)
+                .map(UserFeeLifecycleState::total_cum_raw_vlm)
+                .unwrap_or(0);
+            if cum_raw_vlm < REGISTER_REFERRER_MIN_VLM_RAW {
+                return Err(FeeLifecycleError::InsufficientVolumeForReferralCode);
+            }
+        }
+        if code.len() > MAX_REFERRAL_CODE_LEN {
+            return Err(FeeLifecycleError::ReferralCodeTooLong);
+        }
+        if !is_admin && self.code_to_referrer.values().any(|b| b.referrer == user) {
+            return Err(FeeLifecycleError::ReferrerAlreadyRegisteredCode);
+        }
+        if let Some(existing) = self.code_to_referrer.get(code)
+            && existing.referrer != user
+        {
+            return Err(FeeLifecycleError::ReferralCodeAlreadyTaken);
+        }
+        self.register_referrer_code(code, user, 0);
+        Ok(())
     }
 }
 
