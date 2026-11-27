@@ -31,9 +31,14 @@ pub use node115_spot_scalar_conversions as spot_scalar_conversions;
 pub use node115_three_digit_decimal as three_digit_decimal;
 pub use node115_u256_decimal_scale as u256_decimal_scale;
 
-pub use meta::{MetaError, PerpAssetMeta, PerpMeta, SpotMeta, SpotPairMeta, SpotTokenMeta};
+pub use meta::{
+    DeployerFeeShareError, LEGACY_MAINNET_TOKEN_MAX, MAINNET_CHAIN_TAG,
+    MAX_DEPLOYER_TRADING_FEE_SHARE_E5, MetaError, PerpAssetMeta, PerpMeta, SpotMeta, SpotPairMeta,
+    SpotTokenMeta, update_deployer_trading_fee_share,
+};
 pub use pdi::{PDI_STRIDE, Pdi, PerpAsset, Side, SpotAsset, Token};
 pub use qtys::{
     MAX_PERP_SZ_DECIMALS, MAX_SPOT_SZ_DECIMALS, Ntl, Ntli, NoopOverflowSink, OverflowKind,
     OverflowSink, POW10_F64, Px, RecordingOverflowSink, Sz, Szi, Usdc, UsdcSigned, Wei,
+    scale_nonneg_i64_by_f64_clamped,
 };

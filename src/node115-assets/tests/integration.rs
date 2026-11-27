@@ -200,3 +200,141 @@ fn wire_qty_and_reexported_microcrates_interoperate() {
     let mut limbs2 = [100_u64, 0, 0, 0];
     assert_eq!(u256_decimal_scale::scale_amount(&mut limbs2, -2), Some(10_000));
 }
+
+#[test]
+fn meta_scaling_lookups_deployer_fee_share_and_clamped_f64_match_node115() {
+    use node115_assets::{
+        DeployerFeeShareError, LEGACY_MAINNET_TOKEN_MAX, MAINNET_CHAIN_TAG,
+        MAX_DEPLOYER_TRADING_FEE_SHARE_E5, scale_nonneg_i64_by_f64_clamped,
+        update_deployer_trading_fee_share,
+    };
+
+    // PerpMeta: 0x3d19800 (px_decimals), 0x50bea90 (px_to_f64), 0x50beb30 (sz_to_f64_zero_fast)
+    let pmeta = PerpMeta::new(
+        Pdi(0),
+        vec![PerpAssetMeta {
+            name: "ETH".into(),
+            sz_decimals: 4,
+            max_leverage: 50,
+        }],
+    );
+    assert_eq!(pmeta.px_decimals(PerpAsset(0)), Ok(2));
+    assert_eq!(pmeta.px_to_f64(PerpAsset(0), Px(345_678)), Ok(3456.78));
+    assert_eq!(pmeta.sz_to_f64(PerpAsset(0), 25_000), Ok(2.5));
+    // 0x50beb30 fast-zero path returns 0.0 even without valid asset lookup
+    assert_eq!(pmeta.sz_to_f64_zero_fast(PerpAsset(999), 0), Ok(0.0));
+    assert_eq!(pmeta.sz_to_f64_zero_fast(PerpAsset(0), 25_000), Ok(2.5));
+
+    // SpotMeta: 0x50be9e0, 0x3c47660, 0x3c47ae0, 0x3c49df0, 0x3c49360, 0x3c4b280, 0x3c4b1a0
+    let smeta = SpotMeta::new(
+        vec![
+            SpotPairMeta {
+                base: Token(1),
+                quote: Token(2),
+            },
+            SpotPairMeta {
+                base: Token(1),
+                quote: Token(0),
+            },
+        ],
+        vec![
+            SpotTokenMeta {
+                sz_decimals: 6,
+                wei_decimals: 8,
+            }, // Token(0) USDC
+            SpotTokenMeta {
+                sz_decimals: 2,
+                wei_decimals: 8,
+            }, // Token(1) HYPE-like
+            SpotTokenMeta {
+                sz_decimals: 4,
+                wei_decimals: 8,
+            }, // Token(2) alt quote
+            SpotTokenMeta {
+                sz_decimals: 0,
+                wei_decimals: 20,
+            }, // Token(3) pow10 overflow (>10^19)
+        ],
+    );
+    assert_eq!(smeta.px_to_f64(SpotAsset(1), Px(15_500_000)), Ok(15.5));
+    assert_eq!(smeta.first_spot_for_token(Token(1)), Ok(Some(SpotAsset(0))));
+    assert_eq!(smeta.first_spot_for_token(Token(2)), Ok(None));
+    assert_eq!(
+        smeta.spot_for_token_and_quote(Token(1), Token(0)),
+        Ok(Some(SpotAsset(1)))
+    );
+    assert_eq!(smeta.has_usdc_spot(Token(1)), Ok(true));
+    assert_eq!(smeta.has_usdc_spot(Token(2)), Ok(false));
+    assert_eq!(smeta.usdc_wei_per_base_sz(Token(1)), Ok(1_000_000));
+    assert_eq!(smeta.tokens[1].wei_per_sz(), Ok(1_000_000));
+    assert_eq!(smeta.tokens[3].wei_per_sz(), Err(MetaError::Pow10Overflow(20)));
+    assert_eq!(smeta.checked_sz_to_wei(Token(1), 42), Ok(Some(42_000_000)));
+    assert_eq!(smeta.checked_sz_to_wei(Token(1), u64::MAX), Ok(None));
+
+    // Deployer trading fee share state machine (0x2c58880)
+    assert_eq!(MAX_DEPLOYER_TRADING_FEE_SHARE_E5, 100_000);
+    assert_eq!(LEGACY_MAINNET_TOKEN_MAX, 195);
+    assert_eq!(MAINNET_CHAIN_TAG, 3);
+    assert_eq!(
+        update_deployer_trading_fee_share(10, 0, 100_001, MAINNET_CHAIN_TAG),
+        Err(DeployerFeeShareError::ExceedsMax)
+    );
+    assert_eq!(
+        DeployerFeeShareError::ExceedsMax.as_str(),
+        "deployer trading fee share cannot be more than 100%"
+    );
+    // Legacy Mainnet token (<= 195): one-time init from 0 is allowed
+    assert_eq!(
+        update_deployer_trading_fee_share(195, 0, 50_000, MAINNET_CHAIN_TAG),
+        Ok(50_000)
+    );
+    // Legacy Mainnet token: decreasing to nonzero allowed, resetting to 0 rejected, increasing rejected
+    assert_eq!(
+        update_deployer_trading_fee_share(195, 50_000, 25_000, MAINNET_CHAIN_TAG),
+        Ok(25_000)
+    );
+    assert_eq!(
+        update_deployer_trading_fee_share(195, 25_000, 0, MAINNET_CHAIN_TAG),
+        Err(DeployerFeeShareError::CannotResetLegacy)
+    );
+    assert_eq!(
+        DeployerFeeShareError::CannotResetLegacy.as_str(),
+        "cannot reset legacy token fee share"
+    );
+    assert_eq!(
+        update_deployer_trading_fee_share(195, 25_000, 25_000, MAINNET_CHAIN_TAG),
+        Err(DeployerFeeShareError::CannotIncrease)
+    );
+    assert_eq!(
+        DeployerFeeShareError::CannotIncrease.as_str(),
+        "deployer trading fee share cannot increase"
+    );
+    // Non-legacy token (> 195) or non-Mainnet: strictly decreasing (can go to 0, cannot init from 0)
+    assert_eq!(
+        update_deployer_trading_fee_share(196, 0, 50_000, MAINNET_CHAIN_TAG),
+        Err(DeployerFeeShareError::CannotIncrease)
+    );
+    assert_eq!(
+        update_deployer_trading_fee_share(196, 50_000, 0, MAINNET_CHAIN_TAG),
+        Ok(0)
+    );
+    assert_eq!(
+        update_deployer_trading_fee_share(10, 50_000, 0, 2),
+        Ok(0)
+    );
+
+    // Clamped f64 scaling (0x46a6aa0 / qtys/mod.rs:847)
+    assert_eq!(scale_nonneg_i64_by_f64_clamped(-1, 1.0), None);
+    assert_eq!(scale_nonneg_i64_by_f64_clamped(1_000, 0.25), Some(250));
+    assert_eq!(scale_nonneg_i64_by_f64_clamped(1_000, -0.5), Some(0));
+    assert_eq!(scale_nonneg_i64_by_f64_clamped(1_000, f64::NAN), Some(0));
+    assert_eq!(scale_nonneg_i64_by_f64_clamped(1_000, f64::INFINITY), Some(0));
+    assert_eq!(
+        scale_nonneg_i64_by_f64_clamped(1_000, f64::NEG_INFINITY),
+        Some(0)
+    );
+    assert_eq!(
+        scale_nonneg_i64_by_f64_clamped(i64::MAX, 2.0),
+        Some(i64::MAX as u64)
+    );
+}

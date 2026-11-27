@@ -437,3 +437,36 @@ impl UsdcSigned {
         Self(sat_sub_i64(self.0, rhs.0, sink))
     }
 }
+
+/// Non-negative signed quantity scaling by `f64` with finite/range clamping, matching `#115`
+/// `0x46a6aa0` (`l1/src/qtys/mod.rs:847:1`).
+///
+/// Exact `#115` semantics:
+/// - `raw < 0` returns `None` (node #115 panics via `Result::unwrap()` at `qtys/mod.rs:847:1`),
+/// - computes `prod = (raw as f64) * factor`,
+/// - non-finite (`NaN`, `+inf`, `-inf`) yields `0`,
+/// - finite values are clamped to `[-2^63, 2^63]` (`0xc3e0000000000000`..`0x43e0000000000000`),
+/// - values `> 0x43dfffffffffffff` (`9223372036854774784.0`) saturate to `i64::MAX as u64`,
+/// - values `<= 0.0` (or `NaN`) clamp to `0`,
+/// - otherwise truncates toward zero as `u64`.
+#[inline]
+pub fn scale_nonneg_i64_by_f64_clamped(raw: i64, factor: f64) -> Option<u64> {
+    if raw < 0 {
+        return None;
+    }
+    let prod = (raw as f64) * factor;
+    if !prod.is_finite() {
+        return Some(0);
+    }
+    let lo = f64::from_bits(0xc3e0_0000_0000_0000); // -2^63
+    let hi = f64::from_bits(0x43e0_0000_0000_0000); // +2^63
+    let max_i64_f64 = f64::from_bits(0x43df_ffff_ffff_ffff); // 9223372036854774784.0
+    let clamped = prod.clamp(lo, hi);
+    if clamped.is_nan() || clamped <= 0.0 {
+        Some(0)
+    } else if clamped > max_i64_f64 {
+        Some(i64::MAX as u64)
+    } else {
+        Some((clamped as i64) as u64)
+    }
+}
