@@ -24,11 +24,11 @@ These inventory counts describe available work, not completed components.
 
 | Measure | Completed / scope | Percentage |
 | --- | ---: | ---: |
-| Accepted full-scope gates | 0/92 | 0.00% |
+| Accepted full-scope gates | 3/92 | 3.26% |
 | Complete node components | 0/23 | 0.00% |
-| Components fully mapped | 0/23 | 0.00% |
-| Components fully built | 0/23 | 0.00% |
-| Components with full behavioral validation | 0/23 | 0.00% |
+| Components fully mapped | 1/23 | 4.35% |
+| Components fully built | 1/23 | 4.35% |
+| Components with full behavioral validation | 1/23 | 4.35% |
 | Components with full code/data identity | 0/23 | 0.00% |
 | Target .text bytes compared | 5,640,525/83,719,936 | 6.73737% |
 | Target .text bytes raw-equal | 5,270,305/83,719,936 | 6.29516% |
@@ -54,7 +54,7 @@ Each fragment keeps its own #115 contract; an integrated node executable remains
 <details open>
 <summary><strong>Node #115 component acceptance</strong></summary>
 
-**Node #115 reconstruction: 0.00% (0/92 accepted gates; 0/23 components complete).**
+**Node #115 reconstruction: 3.26% (3/92 accepted gates; 0/23 components complete).**
 
 | Component | Target | Accepted gates | Milestones | Compared implementation bytes | Registered implementation windows |
 | --- | --- | ---: | ---: | ---: | ---: |
@@ -80,9 +80,9 @@ Each fragment keeps its own #115 contract; an integrated node executable remains
 | [Remaining L1 state helpers](docs/COMPONENTS.md#l1-shared) | Node #115 | 0/4 | 0% | 311 | 10 |
 | [Info API](docs/COMPONENTS.md#info-api) | Node #115 | 0/4 | 0% | 3,579 | 42 |
 | [EVM JSON-RPC](docs/COMPONENTS.md#evm-rpc) | Node #115 | 0/4 | 0% | 175 | 7 |
-| [Global configuration](docs/COMPONENTS.md#constants) | Node #115 | 0/4 | 0% | 9,819 | 17 |
+| [Global configuration](docs/COMPONENTS.md#constants) | Node #115 | 3/4 | 75% | 9,819 | 17 |
 
-Accepted gates: **0/92**. Full-component byte and function denominators remain unmeasured.
+Accepted gates: **3/92**. Full-component byte and function denominators remain unmeasured.
 Zero registered implementation comparisons do not mean zero correct code.
 
 </details>

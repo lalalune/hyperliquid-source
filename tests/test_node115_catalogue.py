@@ -24,7 +24,15 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual(len(self.components), 23)
         self.assertEqual({c['artifact'] for c in self.components}, {'node115'})
         catalogue.validate_progress(self.components, self.progress, ROOT)
-        self.assertEqual(catalogue.progress_totals(self.components, self.progress), (0, 92))
+        self.assertEqual(catalogue.progress_totals(self.components, self.progress), (3, 92))
+        constants_gates = self.progress['components']['constants']['gates']
+        self.assertEqual(
+            constants_gates,
+            {'mapped': True, 'built': True, 'behavior': True, 'identity': False},
+        )
+        for comp_id, row in self.progress['components'].items():
+            if comp_id != 'constants':
+                self.assertFalse(any(row['gates'].values()), f'unearned gate on {comp_id}')
 
     def test_completed_gate_requires_evidence(self):
         progress = copy.deepcopy(self.progress)
@@ -40,6 +48,11 @@ class CatalogueTests(unittest.TestCase):
             components[0]['artifact'] = 'node94'
             (root / 'research/components.json').write_text(json.dumps({'components': components}))
             (root / 'research/progress.json').write_text(json.dumps(self.progress))
+            for row in self.progress['components'].values():
+                for ev in row.get('evidence', []):
+                    dest = root / ev
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    dest.write_bytes((ROOT / ev).read_bytes())
             with self.assertRaisesRegex(ValueError, 'Only node115'):
                 catalogue.generate(root)
 
