@@ -18,7 +18,7 @@ use node115_abci_checkpoint_replay_fixture::{
 use node115_digest_reference_handoff::{Digest, Registry, ReplayHandoff, replay_handoff};
 
 use crate::hash_signature_tracker::{HashSignatureTracker, RecordVoteResult};
-use crate::state::AbciState;
+use crate::state::{AbciState, ApplyBlockPreconditionError};
 
 /// Exact retention count passed to `prune_lowest_evm_checkpoints` at `0x4d98d51` (`mov esi, 0x64`).
 pub const PRUNE_KEEP_EVM_CHECKPOINTS: usize = 100;
@@ -197,6 +197,130 @@ impl AbciEngine {
         self.local_raw_history = survivors;
         evicted
     }
+
+    /// Execute the full 7-stage `AbciEngine::apply_block` (`0x5a04e40..0x5a065f8`) pipeline
+    /// in exact binary chronological order:
+    /// 1. `PreGuards` (`0x5a04ec3..0x5a04f59`)
+    /// 2. `BeginBlock` (`0x5a04fe9 -> 0x5483850`)
+    /// 3. `ExecuteActions` (`0x5a05050..0x5a055b0`)
+    /// 4. `EndBlock` (`0x5a055b0 -> 0x54897e0`)
+    /// 5. `UpdateDigestQuorum` (`0x5a0584e -> 0x4de4a60`)
+    /// 6. `VerifyStateRoot` (`0x5a05c5e -> 0x4e3a020`)
+    /// 7. `PruneHistory` (`0x5a05ea1..0x5a05fbd -> 0x4de5ad0`)
+    #[allow(clippy::too_many_arguments)]
+    pub fn apply_block_pipeline<FBegin, FAction, FEnd, FCpuid>(
+        &mut self,
+        input: &ApplyBlockPipelineInput<'_>,
+        support: &SupportContext,
+        registry: &Registry,
+        registry_context: u64,
+        mut on_begin_block: FBegin,
+        mut on_action: FAction,
+        mut on_end_block: FEnd,
+        fallback_cpuid: FCpuid,
+    ) -> Result<ApplyBlockPipelineReport, ApplyBlockPipelineError>
+    where
+        FBegin: FnMut(u64),
+        FAction: FnMut(usize),
+        FEnd: FnMut(u64),
+        FCpuid: FnMut(&mut RootSelectorCell, usize) -> u64,
+    {
+        let mut stages = Vec::with_capacity(7);
+
+        // Stage 1: 6 ordered pre-execution guards (`0x5a04ec3..0x5a04f59`)
+        self.state
+            .validate_apply_preconditions(
+                input.block.prev_round,
+                input.block.new_round,
+                input.state_time,
+                input.block_parent_time,
+                input.header_actions,
+                input.payload_actions,
+                input.feature_version,
+            )
+            .map_err(ApplyBlockPipelineError::Precondition)?;
+        stages.push(ApplyBlockStage::PreGuards);
+
+        // Stage 2: Exchange::begin_block (`0x5a04fe9 -> 0x5483850`)
+        let next_height = self.state.height().saturating_add(1);
+        on_begin_block(next_height);
+        stages.push(ApplyBlockStage::BeginBlock);
+
+        // Stage 3: Action/bundle execution loop (`0x5a05050..0x5a055b0`)
+        for idx in 0..(input.payload_actions as usize) {
+            on_action(idx);
+        }
+        stages.push(ApplyBlockStage::ExecuteActions);
+
+        // Stage 4: Exchange::end_block (`0x5a055b0 -> 0x54897e0`)
+        on_end_block(next_height);
+        stages.push(ApplyBlockStage::EndBlock);
+
+        // Stages 5 & 6: Digest quorum update (`0x5a0584e -> 0x4de4a60`) + state-root verification (`0x5a05c5e -> 0x4e3a020`)
+        let report = self
+            .apply_block(
+                input.block,
+                support,
+                registry,
+                registry_context,
+                fallback_cpuid,
+            )
+            .map_err(ApplyBlockPipelineError::Admission)?;
+        stages.push(ApplyBlockStage::UpdateDigestQuorum);
+        stages.push(ApplyBlockStage::VerifyStateRoot);
+
+        // Stage 7: History cutoff prune (`0x5a05ea1..0x5a05fbd -> 0x4de5ad0`)
+        let evicted = match input.prune_watermark {
+            Some(wm) => self.prune_local_history_through(wm),
+            None => 0,
+        };
+        stages.push(ApplyBlockStage::PruneHistory);
+
+        Ok(ApplyBlockPipelineReport {
+            stages,
+            engine_report: report,
+            pruned_history_entries: evicted,
+        })
+    }
+}
+
+/// Exact chronological execution stages observed in `AbciEngine::apply_block` (`0x5a04e40..0x5a065f8`).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ApplyBlockStage {
+    PreGuards,
+    BeginBlock,
+    ExecuteActions,
+    EndBlock,
+    UpdateDigestQuorum,
+    VerifyStateRoot,
+    PruneHistory,
+}
+
+/// Inputs for `AbciEngine::apply_block_pipeline`.
+#[derive(Clone, Debug)]
+pub struct ApplyBlockPipelineInput<'a> {
+    pub block: &'a EngineBlock,
+    pub state_time: (u64, u64),
+    pub block_parent_time: (u64, u64),
+    pub header_actions: u64,
+    pub payload_actions: u64,
+    pub feature_version: u8,
+    pub prune_watermark: Option<u64>,
+}
+
+/// Error returned by `AbciEngine::apply_block_pipeline`.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum ApplyBlockPipelineError {
+    Precondition(ApplyBlockPreconditionError),
+    Admission(BlockAdmissionError),
+}
+
+/// Structured result returned by `AbciEngine::apply_block_pipeline`.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ApplyBlockPipelineReport {
+    pub stages: Vec<ApplyBlockStage>,
+    pub engine_report: EngineBlockReport,
+    pub pruned_history_entries: usize,
 }
 
 /// Select the lowest checkpoint heights to prune while retaining the newest `keep`

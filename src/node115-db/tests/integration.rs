@@ -264,3 +264,92 @@ fn indexed_block_reader_point_and_range_query_inclusive() {
     );
     assert!(reader.range_query_inclusive(20, 10).is_empty());
 }
+
+#[test]
+fn rocksdb_3_shard_profiles_tcp_ceiling_and_persistent_checkpoint_roundtrip() {
+    use node115_db::rocks_db::{
+        CORE_BLOCK_SIZE, CORE_DEFAULT_CACHE_BYTES, DHS_SUBDIR_PREFIX, DbWriteBatchOp,
+        DbWriteError, EVM_BLOCK_SIZE, EVM_DEFAULT_CACHE_BYTES, EVM_STATE_COLUMN_FAMILIES,
+        PersistentShardKvStore, RocksDbShard, RocksDbTooLargeError, TCP_ROCKSDB_MAX_BYTES,
+        WRITE_BUFFER_BYTES, validate_tcp_rocksdb_size,
+    };
+
+    // Core L1 vs EvmState profile contrast (`0x57c6530` vs `0x4524660`)
+    let ex = RocksDbShard::Exchange.profile();
+    let rpc = RocksDbShard::Rpc.profile();
+    let evm = RocksDbShard::EvmState.profile();
+    assert_eq!(ex.default_cache_bytes, CORE_DEFAULT_CACHE_BYTES);
+    assert_eq!(ex.block_size_bytes, CORE_BLOCK_SIZE);
+    assert_eq!(ex.write_buffer_bytes, WRITE_BUFFER_BYTES);
+    assert!(!ex.multi_column_family);
+    assert_eq!(rpc.default_cache_bytes, CORE_DEFAULT_CACHE_BYTES);
+    assert_eq!(evm.default_cache_bytes, EVM_DEFAULT_CACHE_BYTES);
+    assert_eq!(evm.block_size_bytes, EVM_BLOCK_SIZE);
+    assert_eq!(evm.write_buffer_bytes, WRITE_BUFFER_BYTES);
+    assert!(evm.multi_column_family);
+    assert_eq!(RocksDbShard::EvmState.column_families(), &EVM_STATE_COLUMN_FAMILIES);
+    assert_eq!(DHS_SUBDIR_PREFIX, "dhs/");
+
+    // Exact 100 GB TCP RocksDB size ceiling (`0x5a69415..0x5a6941f`)
+    assert!(validate_tcp_rocksdb_size(TCP_ROCKSDB_MAX_BYTES - 1).is_ok());
+    assert_eq!(
+        validate_tcp_rocksdb_size(TCP_ROCKSDB_MAX_BYTES),
+        Err(RocksDbTooLargeError {
+            size_bytes: TCP_ROCKSDB_MAX_BYTES,
+            limit_bytes: TCP_ROCKSDB_MAX_BYTES,
+        })
+    );
+    assert_ne!(
+        DbWriteError::InvalidMarkerWrite("m".into()),
+        DbWriteError::InvalidDataWrite("m".into())
+    );
+
+    // Persistent on-disk multi-CF EvmState KV store + batch + reload + atomic checkpoint
+    let root = unique_tmp("rocks-kv");
+    let live_home = root.join("live");
+    let ckpt_dir = root.join("checkpoint").join("42000");
+    {
+        let mut store = PersistentShardKvStore::open(&live_home, RocksDbShard::EvmState).unwrap();
+        store
+            .put("EvmStateAccounts", b"0x01".to_vec(), b"bal=100".to_vec())
+            .unwrap();
+        store
+            .write_batch(&[
+                DbWriteBatchOp::Put {
+                    cf: "EvmStateContracts".into(),
+                    key: b"0x02".to_vec(),
+                    value: b"bytecode".to_vec(),
+                },
+                DbWriteBatchOp::Put {
+                    cf: "EvmStateStorage".into(),
+                    key: b"slot0".to_vec(),
+                    value: b"val0".to_vec(),
+                },
+                DbWriteBatchOp::Put {
+                    cf: "EvmStateStorage".into(),
+                    key: b"slot1".to_vec(),
+                    value: b"val1".to_vec(),
+                },
+                DbWriteBatchOp::Delete {
+                    cf: "EvmStateStorage".into(),
+                    key: b"slot0".to_vec(),
+                },
+            ])
+            .unwrap();
+        assert_eq!(store.len_in_cf("EvmStateStorage"), 1);
+        store.create_checkpoint(&ckpt_dir).unwrap();
+    }
+
+    assert!(ckpt_dir.join("CHECKPOINT_COMPLETE").is_file());
+    let reloaded = PersistentShardKvStore::open(&live_home, RocksDbShard::EvmState).unwrap();
+    assert_eq!(reloaded.get("EvmStateAccounts", b"0x01"), Some(b"bal=100".as_slice()));
+    assert_eq!(reloaded.get("EvmStateContracts", b"0x02"), Some(b"bytecode".as_slice()));
+    assert_eq!(reloaded.get("EvmStateStorage", b"slot0"), None);
+    assert_eq!(reloaded.get("EvmStateStorage", b"slot1"), Some(b"val1".as_slice()));
+
+    let from_ckpt = PersistentShardKvStore::open(&ckpt_dir, RocksDbShard::EvmState).unwrap();
+    assert_eq!(from_ckpt.get("EvmStateAccounts", b"0x01"), Some(b"bal=100".as_slice()));
+    assert_eq!(from_ckpt.get("EvmStateStorage", b"slot1"), Some(b"val1".as_slice()));
+
+    let _ = fs::remove_dir_all(&root);
+}

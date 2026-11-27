@@ -8,7 +8,12 @@
 //! - `0x22ed1f0..0x22ed70a` (`state.rs:201`): `assertion failed: freeze_height >= self.locus.context.height()`
 //! - `0x22ec9b0..0x22ed1ec` (`state.rs:460`): action success status `0x1a2` (`0x22ec9c9`)
 
+use std::fmt;
+use std::fs::{self, File};
+use std::io::{self, Write};
 use std::path::Path;
+
+use crate::lt_hash::{LT_HASH_BYTES, LtHash, LtHashes};
 
 pub use node115_abci_checkpoint_replay_fixture::{
     ReplayInitializer, RestoreError, RestoredState, restore_checkpoint,
@@ -118,6 +123,213 @@ pub fn validate_hardfork_version(
         });
     }
     Ok(())
+}
+
+/// Snapshot-load hardfork compatibility error proven in `0x15a20a0..0x15a37fe`
+/// (`0x15a2219..0x15a221d` and `0x15a2ae9..0x15a2aed`: `cmp [r15+0x10], rax; ja`).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct StateHardforkNewerError {
+    pub state_version: u64,
+    pub binary_version: u64,
+}
+
+impl fmt::Display for StateHardforkNewerError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "state hardfork version {} is newer than binary hardfork version {}",
+            self.state_version, self.binary_version
+        )
+    }
+}
+
+/// Enforces `state_version <= binary_version` matching `0x15a2219`/`0x15a2ae9` (`ja` rejects
+/// snapshots produced by a newer hardfork while allowing equal or older upgradeable snapshots).
+pub const fn validate_state_hardfork_not_newer(
+    state_version: u64,
+    binary_version: u64,
+) -> Result<(), StateHardforkNewerError> {
+    if state_version > binary_version {
+        Err(StateHardforkNewerError {
+            state_version,
+            binary_version,
+        })
+    } else {
+        Ok(())
+    }
+}
+
+/// Self-contained persistent ABCI checkpoint bundle stored under `<db_home>/checkpoint/<height>/`
+/// containing state metadata (`abci_state_meta.json`), `lt_hashes.json`, and `CHECKPOINT_COMPLETE`.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AbciCheckpointBundle {
+    pub height: u64,
+    pub round: u64,
+    pub hardfork_version: u64,
+    pub hardfork_height: Option<u64>,
+    pub lt_hashes: LtHashes,
+}
+
+#[derive(Debug)]
+pub enum CheckpointBundleError {
+    Io(io::Error),
+    MissingCompleteMarker,
+    CorruptPayload(&'static str),
+    StateHardforkNewer(StateHardforkNewerError),
+}
+
+impl From<io::Error> for CheckpointBundleError {
+    fn from(err: io::Error) -> Self {
+        Self::Io(err)
+    }
+}
+
+impl AbciCheckpointBundle {
+    /// Atomically persist metadata + `lt_hashes.json` + `CHECKPOINT_COMPLETE` into `checkpoint_dir`.
+    pub fn save_to_checkpoint_dir(&self, checkpoint_dir: &Path) -> io::Result<()> {
+        fs::create_dir_all(checkpoint_dir)?;
+        let hf_height_json = match self.hardfork_height {
+            Some(h) => h.to_string(),
+            None => "null".to_string(),
+        };
+        let meta = format!(
+            "{{\"height\":{},\"round\":{},\"hardfork_version\":{},\"hardfork_height\":{}}}\n",
+            self.height, self.round, self.hardfork_version, hf_height_json
+        );
+        write_atomic(
+            &checkpoint_dir.join("abci_state_meta.json"),
+            meta.as_bytes(),
+        )?;
+        let lt_json = format!(
+            "{{\"accounts_hash\":{},\"contracts_hash\":{},\"storage_hash\":{}}}\n",
+            encode_lt_hash_json(&self.lt_hashes.accounts_hash),
+            encode_lt_hash_json(&self.lt_hashes.contracts_hash),
+            encode_lt_hash_json(&self.lt_hashes.storage_hash),
+        );
+        write_atomic(&checkpoint_dir.join("lt_hashes.json"), lt_json.as_bytes())?;
+        write_atomic(&checkpoint_dir.join("CHECKPOINT_COMPLETE"), b"")?;
+        Ok(())
+    }
+
+    /// Load and validate a checkpoint bundle, enforcing `CHECKPOINT_COMPLETE` and
+    /// `validate_state_hardfork_not_newer(state.hardfork_version, binary_hardfork_version)`.
+    pub fn load_from_checkpoint_dir(
+        checkpoint_dir: &Path,
+        binary_hardfork_version: u64,
+    ) -> Result<Self, CheckpointBundleError> {
+        if !checkpoint_dir.join("CHECKPOINT_COMPLETE").is_file() {
+            return Err(CheckpointBundleError::MissingCompleteMarker);
+        }
+        let meta_str = fs::read_to_string(checkpoint_dir.join("abci_state_meta.json"))?;
+        let height = extract_u64_field(&meta_str, "\"height\":")
+            .ok_or(CheckpointBundleError::CorruptPayload("height"))?;
+        let round = extract_u64_field(&meta_str, "\"round\":")
+            .ok_or(CheckpointBundleError::CorruptPayload("round"))?;
+        let hardfork_version = extract_u64_field(&meta_str, "\"hardfork_version\":")
+            .ok_or(CheckpointBundleError::CorruptPayload("hardfork_version"))?;
+        validate_state_hardfork_not_newer(hardfork_version, binary_hardfork_version)
+            .map_err(CheckpointBundleError::StateHardforkNewer)?;
+        let hardfork_height = extract_opt_u64_field(&meta_str, "\"hardfork_height\":")
+            .ok_or(CheckpointBundleError::CorruptPayload("hardfork_height"))?;
+
+        let lt_str = fs::read_to_string(checkpoint_dir.join("lt_hashes.json"))?;
+        let accounts_hash = parse_lt_hash_section(&lt_str, "\"accounts_hash\":")
+            .ok_or(CheckpointBundleError::CorruptPayload("accounts_hash"))?;
+        let contracts_hash = parse_lt_hash_section(&lt_str, "\"contracts_hash\":")
+            .ok_or(CheckpointBundleError::CorruptPayload("contracts_hash"))?;
+        let storage_hash = parse_lt_hash_section(&lt_str, "\"storage_hash\":")
+            .ok_or(CheckpointBundleError::CorruptPayload("storage_hash"))?;
+
+        Ok(Self {
+            height,
+            round,
+            hardfork_version,
+            hardfork_height,
+            lt_hashes: LtHashes {
+                accounts_hash,
+                contracts_hash,
+                storage_hash,
+            },
+        })
+    }
+}
+
+fn write_atomic(path: &Path, bytes: &[u8]) -> io::Result<()> {
+    let tmp = path.with_extension("tmp");
+    {
+        let mut f = File::create(&tmp)?;
+        f.write_all(bytes)?;
+        f.sync_all()?;
+    }
+    fs::rename(&tmp, path)
+}
+
+fn encode_lt_hash_json(h: &LtHash) -> String {
+    let mut hex = String::with_capacity(LT_HASH_BYTES * 2);
+    for &b in &h.hash {
+        const HEX: &[u8; 16] = b"0123456789abcdef";
+        hex.push(HEX[(b >> 4) as usize] as char);
+        hex.push(HEX[(b & 0x0f) as usize] as char);
+    }
+    format!(
+        "{{\"n_elements\":{},\"n_bytes\":{},\"hash\":\"0x{}\"}}",
+        h.n_elements, h.n_bytes, hex
+    )
+}
+
+fn extract_u64_field(src: &str, key: &str) -> Option<u64> {
+    let rest = src.split_once(key)?.1.trim_start();
+    let end = rest
+        .find(|c: char| !c.is_ascii_digit())
+        .unwrap_or(rest.len());
+    rest[..end].parse::<u64>().ok()
+}
+
+fn extract_opt_u64_field(src: &str, key: &str) -> Option<Option<u64>> {
+    let rest = src.split_once(key)?.1.trim_start();
+    if rest.starts_with("null") {
+        Some(None)
+    } else {
+        let end = rest
+            .find(|c: char| !c.is_ascii_digit())
+            .unwrap_or(rest.len());
+        rest[..end].parse::<u64>().ok().map(Some)
+    }
+}
+
+fn parse_lt_hash_section(src: &str, key: &str) -> Option<LtHash> {
+    let rest = src.split_once(key)?.1;
+    let obj_end = rest.find('}')?;
+    let obj = &rest[..=obj_end];
+    let n_elements = extract_u64_field(obj, "\"n_elements\":")?;
+    let n_bytes = extract_u64_field(obj, "\"n_bytes\":")?;
+    let hex_rest = obj.split_once("\"hash\":\"0x")?.1;
+    let hex_end = hex_rest.find('"')?;
+    let hex_str = &hex_rest[..hex_end];
+    if hex_str.len() != LT_HASH_BYTES * 2 {
+        return None;
+    }
+    let mut hash = [0u8; LT_HASH_BYTES];
+    let bytes = hex_str.as_bytes();
+    for (i, slot) in hash.iter_mut().enumerate() {
+        let hi = decode_hex_nibble(bytes[i * 2])?;
+        let lo = decode_hex_nibble(bytes[i * 2 + 1])?;
+        *slot = (hi << 4) | lo;
+    }
+    Some(LtHash {
+        hash,
+        n_elements,
+        n_bytes,
+    })
+}
+
+fn decode_hex_nibble(b: u8) -> Option<u8> {
+    match b {
+        b'0'..=b'9' => Some(b - b'0'),
+        b'a'..=b'f' => Some(b - b'a' + 10),
+        b'A'..=b'F' => Some(b - b'A' + 10),
+        _ => None,
+    }
 }
 
 /// Enforces the `l1/src/abci/state.rs:201` invariant (`0x22ed1f0`):

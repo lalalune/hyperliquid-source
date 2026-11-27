@@ -498,3 +498,152 @@ fn lthash_big_endian_homomorphic_arithmetic_and_hardfork_version_check() {
         })
     );
 }
+
+#[test]
+fn snapshot_hardfork_compat_bundle_roundtrip_and_7_stage_apply_block_pipeline() {
+    use node115_abci::engine::{
+        ApplyBlockPipelineError, ApplyBlockPipelineInput, ApplyBlockStage,
+    };
+    use node115_abci::lt_hash::LtHashes;
+    use node115_abci::state::{
+        AbciCheckpointBundle, ApplyBlockPreconditionError, CheckpointBundleError,
+        REQUIRED_FEATURE_VERSION, StateHardforkNewerError, validate_state_hardfork_not_newer,
+    };
+
+    // Snapshot-load hardfork guard (`0x15a2219`/`0x15a2ae9` `ja`): <= allowed, > rejected
+    assert!(validate_state_hardfork_not_newer(114, 115).is_ok());
+    assert!(validate_state_hardfork_not_newer(115, 115).is_ok());
+    let err = validate_state_hardfork_not_newer(116, 115).unwrap_err();
+    assert_eq!(
+        err,
+        StateHardforkNewerError {
+            state_version: 116,
+            binary_version: 115,
+        }
+    );
+    assert_eq!(
+        err.to_string(),
+        "state hardfork version 116 is newer than binary hardfork version 115"
+    );
+
+    // Atomic on-disk AbciCheckpointBundle save/load + lt_hashes.json round-trip
+    let dir = unique_tmp("ckpt-bundle");
+    let ckpt_dir = dir.join("checkpoint").join("9999");
+    let mut lt_hashes = LtHashes::new();
+    lt_hashes.accounts_hash.mix_in(b"acct:alice");
+    lt_hashes.contracts_hash.mix_in(b"code:erc20");
+    lt_hashes.storage_hash.mix_in(b"slot:0");
+    let bundle = AbciCheckpointBundle {
+        height: 9_999,
+        round: 500,
+        hardfork_version: 115,
+        hardfork_height: Some(20_000),
+        lt_hashes: lt_hashes.clone(),
+    };
+    bundle.save_to_checkpoint_dir(&ckpt_dir).unwrap();
+    let loaded = AbciCheckpointBundle::load_from_checkpoint_dir(&ckpt_dir, 115).unwrap();
+    assert_eq!(loaded, bundle);
+    // Loading a v115 snapshot under a v114 binary must fail with StateHardforkNewer
+    assert!(matches!(
+        AbciCheckpointBundle::load_from_checkpoint_dir(&ckpt_dir, 114),
+        Err(CheckpointBundleError::StateHardforkNewer(
+            StateHardforkNewerError {
+                state_version: 115,
+                binary_version: 114,
+            }
+        ))
+    ));
+
+    // Full 7-stage AbciEngine::apply_block_pipeline (`0x5a04e40..0x5a065f8`)
+    let restored_dir = dir.join("restore");
+    fs::create_dir_all(restored_dir.join("9999")).unwrap();
+    fs::write(restored_dir.join("9999").join("CHECKPOINT_COMPLETE"), b"").unwrap();
+    let restored = restore_checkpoint(&restored_dir, 9_999, 9_999, 500, 4).unwrap();
+    let mut engine = AbciEngine::new(AbciState::new(restored, 0, Some(20_000)));
+    engine.local_raw_history.insert(9_900, [0x01; 32]);
+    let (support, registry, reg_ctx) = sample_support_and_registry();
+
+    // Bad feature version short-circuits in Stage 1 without invoking begin_block/actions/end_block
+    let blk = EngineBlock {
+        prev_round: 500,
+        new_round: 501,
+        expected_loader_seq: 5,
+        expected_copied_round: 500,
+        external_votes: vec![],
+        timer_eligible_heights: vec![],
+        synthetic_local_root: Some([0x77; 32]),
+    };
+    let trace_events = std::cell::RefCell::new(Vec::new());
+    let bad = engine.apply_block_pipeline(
+        &ApplyBlockPipelineInput {
+            block: &blk,
+            state_time: (10, 20),
+            block_parent_time: (10, 20),
+            header_actions: 2,
+            payload_actions: 2,
+            feature_version: 2,
+            prune_watermark: Some(9_900),
+        },
+        &support,
+        &registry,
+        reg_ctx,
+        |h| trace_events.borrow_mut().push(format!("begin:{h}")),
+        |i| trace_events.borrow_mut().push(format!("act:{i}")),
+        |h| trace_events.borrow_mut().push(format!("end:{h}")),
+        |_, _| 0,
+    );
+    assert_eq!(
+        bad,
+        Err(ApplyBlockPipelineError::Precondition(
+            ApplyBlockPreconditionError::FeatureVersionMismatch {
+                expected: REQUIRED_FEATURE_VERSION,
+                actual: 2,
+            }
+        ))
+    );
+    assert!(trace_events.borrow().is_empty());
+
+    // Valid block runs all 7 stages in exact binary order and prunes history through watermark
+    let rep = engine
+        .apply_block_pipeline(
+            &ApplyBlockPipelineInput {
+                block: &blk,
+                state_time: (10, 20),
+                block_parent_time: (10, 20),
+                header_actions: 2,
+                payload_actions: 2,
+                feature_version: REQUIRED_FEATURE_VERSION,
+                prune_watermark: Some(9_900),
+            },
+            &support,
+            &registry,
+            reg_ctx,
+            |h| trace_events.borrow_mut().push(format!("begin:{h}")),
+            |i| trace_events.borrow_mut().push(format!("act:{i}")),
+            |h| trace_events.borrow_mut().push(format!("end:{h}")),
+            |c, _| c.write_fallback(1u64 << 15, 0, 0),
+        )
+        .unwrap();
+    assert_eq!(
+        rep.stages,
+        vec![
+            ApplyBlockStage::PreGuards,
+            ApplyBlockStage::BeginBlock,
+            ApplyBlockStage::ExecuteActions,
+            ApplyBlockStage::EndBlock,
+            ApplyBlockStage::UpdateDigestQuorum,
+            ApplyBlockStage::VerifyStateRoot,
+            ApplyBlockStage::PruneHistory,
+        ]
+    );
+    assert_eq!(
+        *trace_events.borrow(),
+        vec!["begin:10000", "act:0", "act:1", "end:10000"]
+    );
+    assert_eq!(rep.pruned_history_entries, 1);
+    assert_eq!(rep.engine_report.height, 10_000);
+    assert!(engine.local_raw_history.contains_key(&10_000));
+    assert!(!engine.local_raw_history.contains_key(&9_900));
+
+    let _ = fs::remove_dir_all(&dir);
+}
