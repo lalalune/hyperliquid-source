@@ -5,6 +5,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod admission;
 pub mod router;
 
 pub use action_wire;

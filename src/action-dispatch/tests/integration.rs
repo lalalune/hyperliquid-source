@@ -1,6 +1,14 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use action_dispatch::{
+    admission::{
+        check_timed_router_arm_guard, classify_action_tag, run_prior_key_wrapper,
+        ClassifierAction, PriorKeyWrapperOutcome, TimedRouterGuardOutcome,
+        NO_0X120_HANDLER_INDICES, PRIOR_KEY_CLONE_INDICES, PRIOR_KEY_REJECT_CODE,
+        TIMED_ROUTER_ARM61_OVERFLOW_CODE, TIMED_ROUTER_ARM75_DISABLED_CODE,
+        TIMED_ROUTER_CTX_B9A_REJECT_CODE, TIMED_ROUTER_CTX_B9A_REJECT_VALUE,
+        TIMED_ROUTER_MAX_CWITHDRAW_WORD,
+    },
     builder_approval::{approve, Status as BuilderStatus},
     display_name_state::{set_name, Status as DisplayStatus},
     router::{
@@ -121,4 +129,199 @@ fn handler_micro_crates_compose_under_action_dispatch() {
         BuilderStatus::Accepted
     );
     assert_eq!(approvals[&user][&builder], 50);
+}
+
+#[test]
+fn prior_key_wrapper_enforces_override_alias_btree_and_dual_checks() {
+    assert_eq!(PRIOR_KEY_CLONE_INDICES.len(), 10);
+    assert_eq!(NO_0X120_HANDLER_INDICES, [3, 4, 18, 35]);
+
+    let mut ok_slot = [0u8; 0x70];
+    ok_slot[0..2].copy_from_slice(&0x1a2u16.to_le_bytes());
+    let mut err_slot = [0u8; 0x70];
+    err_slot[0..2].copy_from_slice(&0x00cbu16.to_le_bytes());
+
+    let user = [0x11; 20];
+    let alias = [0x22; 20];
+    let override_addr = [0x33; 20];
+    let aliases = [(user, alias)];
+
+    // Prior-key hit on resolved alias rejects with 0x0f / 0x120 before check1/check2.
+    let prior = BTreeSet::from([alias]);
+    let rej = run_prior_key_wrapper(
+        user,
+        None,
+        &aliases,
+        &prior,
+        |_| panic!("check1 must not run after prior-key rejection"),
+        |_| panic!("check2 must not run after prior-key rejection"),
+        |_| 0u8,
+    );
+    assert_eq!(
+        rej,
+        PriorKeyWrapperOutcome::PriorKeyRejected {
+            tag_byte: 0x0f,
+            code: PRIOR_KEY_REJECT_CODE,
+        }
+    );
+
+    // Override from 0x2a8ab70 bypasses B-tree check and proceeds to check1/check2/sink.
+    let dis = run_prior_key_wrapper(
+        user,
+        Some(override_addr),
+        &aliases,
+        &prior,
+        |k| {
+            assert_eq!(k, override_addr);
+            ok_slot
+        },
+        |k| {
+            assert_eq!(k, override_addr);
+            ok_slot
+        },
+        |orig| orig,
+    );
+    assert_eq!(
+        dis,
+        PriorKeyWrapperOutcome::Dispatched {
+            effective_key: override_addr,
+            output: user,
+        }
+    );
+
+    // First check failure returns FirstCheckFailed without calling check2 or sink.
+    let empty_prior = BTreeSet::new();
+    let f1 = run_prior_key_wrapper(
+        user,
+        None,
+        &aliases,
+        &empty_prior,
+        |_| err_slot,
+        |_| panic!("check2 must not run after check1 failure"),
+        |_| 0u8,
+    );
+    assert_eq!(
+        f1,
+        PriorKeyWrapperOutcome::FirstCheckFailed {
+            tag_byte: 0x0f,
+            error_tag: 0x00cb,
+            payload: err_slot,
+        }
+    );
+
+    // Second check failure returns SecondCheckFailed without calling sink.
+    let f2 = run_prior_key_wrapper(
+        user,
+        None,
+        &aliases,
+        &empty_prior,
+        |_| ok_slot,
+        |_| err_slot,
+        |_| 0u8,
+    );
+    assert_eq!(
+        f2,
+        PriorKeyWrapperOutcome::SecondCheckFailed {
+            tag_byte: 0x0f,
+            error_tag: 0x00cb,
+            payload: err_slot,
+        }
+    );
+}
+
+#[test]
+fn timed_router_guards_and_action_tag_classifier_match_node115() {
+    // Timed router 0x55f99b0 special arms.
+    assert_eq!(
+        check_timed_router_arm_guard(0, 0, 0, 0),
+        TimedRouterGuardOutcome::ImmediateOk { tag_byte: 0x0e }
+    );
+    assert_eq!(
+        check_timed_router_arm_guard(52, 0, 0, 0),
+        TimedRouterGuardOutcome::RecurseMultiSig
+    );
+    assert_eq!(
+        check_timed_router_arm_guard(61, 0, 1, TIMED_ROUTER_MAX_CWITHDRAW_WORD - 1),
+        TimedRouterGuardOutcome::DispatchHandler
+    );
+    assert_eq!(
+        check_timed_router_arm_guard(61, 0, 1, TIMED_ROUTER_MAX_CWITHDRAW_WORD),
+        TimedRouterGuardOutcome::InlineError {
+            tag_byte: 0x0f,
+            code: TIMED_ROUTER_ARM61_OVERFLOW_CODE,
+        }
+    );
+    for arm in [63, 64] {
+        assert_eq!(
+            check_timed_router_arm_guard(arm, TIMED_ROUTER_CTX_B9A_REJECT_VALUE, 1, 0),
+            TimedRouterGuardOutcome::InlineError {
+                tag_byte: 0x0f,
+                code: TIMED_ROUTER_CTX_B9A_REJECT_CODE,
+            }
+        );
+    }
+    assert_eq!(
+        check_timed_router_arm_guard(75, 0, 0, 0),
+        TimedRouterGuardOutcome::InlineError {
+            tag_byte: 0x0f,
+            code: TIMED_ROUTER_ARM75_DISABLED_CODE,
+        }
+    );
+    assert_eq!(
+        check_timed_router_arm_guard(75, 0, 1, 0),
+        TimedRouterGuardOutcome::DispatchHandler
+    );
+
+    // Tag classifier 0x36c30f0 (arms 3, 4, 18, 35 -> true; 14 -> all(); 52 -> recurse; default -> false).
+    for tag in [0x89u64, 0x8a, 0x98, 0xa9] {
+        assert_eq!(
+            classify_action_tag(&ClassifierAction::Leaf {
+                tag,
+                flag_byte: false,
+                order_flags: &[],
+            }),
+            Some(true)
+        );
+    }
+    // Order (tag 0x94, idx 14): empty -> true, all true -> true, any false -> false.
+    assert_eq!(
+        classify_action_tag(&ClassifierAction::Leaf {
+            tag: 0x94,
+            flag_byte: false,
+            order_flags: &[],
+        }),
+        Some(true)
+    );
+    assert_eq!(
+        classify_action_tag(&ClassifierAction::Leaf {
+            tag: 0x94,
+            flag_byte: false,
+            order_flags: &[true, false],
+        }),
+        Some(false)
+    );
+    // MultiSig recursion delegates to inner action.
+    let inner = ClassifierAction::Leaf {
+        tag: 0x89,
+        flag_byte: false,
+        order_flags: &[],
+    };
+    assert_eq!(classify_action_tag(&ClassifierAction::MultiSig(&inner)), Some(true));
+    // Default arm (Noop, tag 0x86) -> false; out-of-range tag 0xe2 -> None.
+    assert_eq!(
+        classify_action_tag(&ClassifierAction::Leaf {
+            tag: 0x86,
+            flag_byte: true,
+            order_flags: &[],
+        }),
+        Some(false)
+    );
+    assert_eq!(
+        classify_action_tag(&ClassifierAction::Leaf {
+            tag: 0xe2,
+            flag_byte: false,
+            order_flags: &[],
+        }),
+        None
+    );
 }
