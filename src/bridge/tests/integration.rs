@@ -206,3 +206,66 @@ fn eth_event_wire_and_mutation_state_join_cleanly() {
     assert_eq!(st.aggregate, 300);
     assert_eq!(BRIDGE2_SERIALIZED_FIELD_COUNT, 15);
 }
+
+#[test]
+fn canonical_arbitrum_contracts_and_bridge2_balance_guard() {
+    use bridge::{
+        canonical_bridge2_address, canonical_usdc2_address, debit_bridge2_balance,
+        embedded_contract_by_key, BRIDGE2_ALL_15_FIELD_NAMES, BRIDGE2_DEPOSIT_RING_STRIDE,
+        BRIDGE2_MAINNET_ADDRESS, BRIDGE2_MAINNET_KEY, BRIDGE2_OK_DISCRIMINANT,
+        BRIDGE2_TESTNET_ADDRESS, BRIDGE2_TESTNET_KEY, BRIDGE2_WITHDRAWAL_BALANCE_BUG_MSG,
+        USDC2_MAINNET_ADDRESS, USDC2_MAINNET_KEY, USDC2_TESTNET_ADDRESS, USDC2_TESTNET_KEY,
+    };
+
+    assert_eq!(
+        canonical_bridge2_address(ChainName::Mainnet),
+        Some(BRIDGE2_MAINNET_ADDRESS)
+    );
+    assert_eq!(
+        canonical_bridge2_address(ChainName::Testnet),
+        Some(BRIDGE2_TESTNET_ADDRESS)
+    );
+    assert_eq!(canonical_bridge2_address(ChainName::Sandbox), None);
+    assert_eq!(canonical_bridge2_address(ChainName::Local), None);
+
+    assert_eq!(
+        canonical_usdc2_address(ChainName::Mainnet),
+        Some(USDC2_MAINNET_ADDRESS)
+    );
+    assert_eq!(
+        canonical_usdc2_address(ChainName::Testnet),
+        Some(USDC2_TESTNET_ADDRESS)
+    );
+    assert_eq!(
+        embedded_contract_by_key(BRIDGE2_MAINNET_KEY),
+        Some(BRIDGE2_MAINNET_ADDRESS)
+    );
+    assert_eq!(
+        embedded_contract_by_key(BRIDGE2_TESTNET_KEY),
+        Some(BRIDGE2_TESTNET_ADDRESS)
+    );
+    assert_eq!(
+        embedded_contract_by_key(USDC2_MAINNET_KEY),
+        Some(USDC2_MAINNET_ADDRESS)
+    );
+    assert_eq!(
+        embedded_contract_by_key(USDC2_TESTNET_KEY),
+        Some(USDC2_TESTNET_ADDRESS)
+    );
+    assert_eq!(embedded_contract_by_key("Bridge2Sandbox"), None);
+
+    assert_eq!(BRIDGE2_ALL_15_FIELD_NAMES.len(), 15);
+    assert_eq!(BRIDGE2_ALL_15_FIELD_NAMES[0], "eth_id_to_deposit_votes");
+    assert_eq!(BRIDGE2_ALL_15_FIELD_NAMES[11], "bal");
+    assert_eq!(BRIDGE2_DEPOSIT_RING_STRIDE, 0x68);
+    assert_eq!(BRIDGE2_OK_DISCRIMINANT, 0x1a2);
+
+    let mut bal = 1_000_000u64;
+    assert_eq!(debit_bridge2_balance(&mut bal, 400_000), Ok(600_000));
+    assert_eq!(bal, 600_000);
+    assert_eq!(
+        debit_bridge2_balance(&mut bal, 600_001),
+        Err(BRIDGE2_WITHDRAWAL_BALANCE_BUG_MSG)
+    );
+    assert_eq!(bal, 600_000);
+}
