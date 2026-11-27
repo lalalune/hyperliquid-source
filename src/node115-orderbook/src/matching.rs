@@ -792,6 +792,23 @@ impl Book {
             ),
         )
     }
+
+    /// Returns `true` iff the book has both a best bid and a best ask with `best_bid >= best_ask`
+    /// (`l1/src/book/book/mod.rs:1153:17` invariant).
+    #[must_use]
+    pub fn is_crossed(&self) -> bool {
+        matches!(self.bbo(), (Some(bid), Some(ask)) if bid.0 >= ask.0)
+    }
+
+    /// Asserts the node #115 book-not-crossed invariant (`l1/src/book/book/mod.rs:1153:17`,
+    /// `.rodata 0x43f061`: `"book is crossed book=..."`).
+    pub fn assert_not_crossed(&self) {
+        let bbo = self.bbo();
+        assert!(
+            !self.is_crossed(),
+            "book is crossed bbo={bbo:?}"
+        );
+    }
 }
 
 impl OrderRelations for Book {

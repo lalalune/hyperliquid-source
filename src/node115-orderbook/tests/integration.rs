@@ -745,3 +745,31 @@ fn impact_walk_l2_aggregation_and_order_price_shape_match_node115() {
         Err(PriceShapeError::PriceBandExceeded { band_pct: 5.0 })
     );
 }
+
+#[test]
+fn book_not_crossed_invariant_and_books_bounds_closure() {
+    let mut books: Books<PerpAsset> = Books::new();
+    let mut risk = UnboundedRiskOracle::default();
+    let mut sink = NoopOverflowSink;
+
+    let b0 = books.entry_or_default(PerpAsset(0));
+    b0.insert_order(order_req(1, user(1), Side::Bid, 99, 10, Tif::Gtc, false), &mut risk, &mut sink)
+        .unwrap();
+    b0.insert_order(order_req(2, user(2), Side::Ask, 101, 10, Tif::Gtc, false), &mut risk, &mut sink)
+        .unwrap();
+    assert!(!b0.is_crossed());
+    b0.assert_not_crossed();
+
+    // Crossing bid sweeps ask and rests at 102 -> still never crossed (`mod.rs:1153:17`).
+    let out = b0
+        .insert_order(order_req(3, user(3), Side::Bid, 102, 15, Tif::Gtc, false), &mut risk, &mut sink)
+        .unwrap();
+    assert_eq!(out.fills.len(), 1);
+    assert_eq!(out.status, OrderStatus::Resting { oid: 3, remaining: Sz(5) });
+    assert!(!b0.is_crossed());
+    b0.assert_not_crossed();
+
+    // Out-of-bounds / unpopulated asset lookup returns None cleanly (`books.rs:14:16`/`19:47`).
+    assert!(books.get(&PerpAsset(2)).is_none());
+    assert!(books.get_mut(&PerpAsset(99)).is_none());
+}
