@@ -1,0 +1,44 @@
+[package]
+name = "thinlto_sv2"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+tikv-jemallocator = "=0.6.0"
+revm = { version = "=40.0.3", features = ["std", "blst", "secp256k1"] }
+alloy-primitives = { version = "=1.5.2", features = ["serde", "rlp", "k256"] }
+alloy-rlp = "=0.3.17"
+p256 = "=0.13.2"
+alloy-consensus = "=1.7.3"
+alloy-rpc-types-eth = "=1.7.3"
+alloy-trie = "=0.9.4"
+alloy-sol-types = "=1.5.2"
+ark-bn254 = "=0.5.0"
+ark-ec = "=0.5.0"
+ark-ff = "=0.5.0"
+hyper = { version = "=0.14.16", features = ["full"] }
+hyper_160 = { package = "hyper", version = "=1.6.0", features = ["full"] }
+h2_04 = { package = "h2", version = "=0.4.11" }
+axum_08 = { package = "axum", version = "=0.8.4", features = ["ws", "macros"] }
+clap4 = { package = "clap", version = "=4.5.42", features = ["derive", "env"] }
+secp256k1_29 = { package = "secp256k1", version = "=0.29.0", features = ["rand-std", "recovery", "global-context", "serde"] }
+secp256k1_30 = { package = "secp256k1", version = "=0.30.0", features = ["rand", "recovery", "global-context", "serde"] }
+tokio = { version = "=1.45.1", features = ["full"] }
+tokio-util = { version = "=0.7.15", features = ["full"] }
+chrono = { version = "=0.4.41", features = ["serde"] }
+bincode1 = { package = "bincode", version = "=1.3.3" }
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.140"
+aurora-engine-modexp = "=1.2.0"
+hashbrown_15 = { package = "hashbrown", version = "=0.15.2" }
+indexmap = "=2.5.0"
+flate2 = "=1.1.0"
+tungstenite = "=0.20.1"
+tokio-tungstenite = "=0.20.1"
+serde_yaml = "=0.9.34"
+regex = "=1.11.1"
+
+[profile.release]
+opt-level = 3
+overflow-checks = true
+lto = "thin"
