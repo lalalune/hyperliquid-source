@@ -15,7 +15,12 @@
 //! - [`delegation`]: delegation/undelegation lifecycle (`0x2c68bb0` / `0x3c34fd0` /
 //!   `0x4221f40` / `0x4221510` / `0x42258d0` / `0x4225a30`), 4-chain lockup table
 //!   (`0x4578a0`), 1-year self-delegation lock (`0x459058`), and epoch-min tracking;
-//! - [`governance`]: staking proposal creation gate (`0x3c348b0`, slot `0x64e5bd0`);
+//! - [`governance`]: staking proposal creation gate (`0x3c348b0`, slot `0x64e5bd0`),
+//!   governance voting with 4x long-term lockup multiplier (`0x3c33f10`), and
+//!   expired-proposal pruning (`0x3c33520`);
+//! - [`stake_requirement`]: 4-category x 4-chain stake-requirement pricing table
+//!   (`0x294ceb0` / `0x235a050` / `0x2c58c70`, `0x602d1c` -> `0x457d00`/`0x457b00`/`0x457f00`)
+//!   and `l1/src/staking.rs:325` saturating validator stake rollup (`0x3dd9480` / `0x4351de0`);
 //! - [`validator_lifecycle`]: validator registration (`0x2c77640` / `0x4225b80`),
 //!   profile/IPv4/commission validation (`0x469b540`), signer/IP cooldowns
 //!   (`0x3c3d480`), and zero-delegation unregister guard (`0x144`);
@@ -37,6 +42,7 @@ pub mod governance;
 pub mod jailing;
 pub mod rewards;
 pub mod snapshot;
+pub mod stake_requirement;
 pub mod validator_lifecycle;
 pub mod withdrawal_queue;
 
@@ -66,13 +72,21 @@ pub use delegation::{
     TAG_UNKNOWN_VALIDATOR, UserDelegation, ValidatorDelegationInfo, add_secs_saturating,
 };
 pub use governance::{
-    MAX_ACTIVE_PROPOSALS_PER_USER, PROPOSAL_DESC_MAX_LEN, PROPOSAL_DESC_MIN_LEN,
-    PROPOSAL_DURATION_MAIN_LONG_BITS, PROPOSAL_DURATION_MAIN_SHORT_BITS,
+    GovVoteOutcome, GovernanceProposal, GovernanceState, LONG_TERM_VOTE_BOOST_OVERFLOW_SHIFT,
+    LONG_TERM_VOTE_BOOST_SHIFT, MAX_ACTIVE_PROPOSALS_PER_USER, PROPOSAL_DESC_MAX_LEN,
+    PROPOSAL_DESC_MIN_LEN, PROPOSAL_DURATION_MAIN_LONG_BITS, PROPOSAL_DURATION_MAIN_SHORT_BITS,
     PROPOSAL_DURATION_TEST_LONG_BITS, PROPOSAL_DURATION_TEST_SHORT_BITS,
-    PROPOSAL_MIN_DELEGATED_STAKE, PROPOSAL_TITLE_MAX_LEN, PROPOSAL_TITLE_MIN_LEN, ProposeError,
-    TAG_INSUFFICIENT_DELEGATIONS_TO_PROPOSE, TAG_PROPOSAL_ALREADY_EXISTS, TAG_PROPOSAL_DESC_LEN,
-    TAG_PROPOSAL_TITLE_LEN, TAG_TOO_MANY_ACTIVE_PROPOSALS, proposal_voting_duration_secs,
-    validate_proposal_creation,
+    PROPOSAL_MIN_DELEGATED_STAKE, PROPOSAL_TITLE_MAX_LEN, PROPOSAL_TITLE_MIN_LEN, ProposalId,
+    ProposeError, RecordedVote, TAG_ALREADY_VOTED, TAG_GOV_OK,
+    TAG_INSUFFICIENT_DELEGATIONS_TO_PROPOSE, TAG_INSUFFICIENT_DELEGATIONS_TO_VOTE,
+    TAG_PROPOSAL_ALREADY_EXISTS, TAG_PROPOSAL_DESC_LEN, TAG_PROPOSAL_DOES_NOT_EXIST,
+    TAG_PROPOSAL_TITLE_LEN, TAG_TOO_MANY_ACTIVE_PROPOSALS, TAG_VOTING_ALREADY_ENDED, VoteError,
+    apply_long_term_vote_boost, proposal_voting_duration_secs, validate_proposal_creation,
+};
+pub use stake_requirement::{
+    STAKE_REQUIREMENT_CATEGORY_COUNT, STAKE_REQUIREMENT_UNIT_TABLE, StakeRequirementCategory,
+    StakeRequirementError, TAG_MUL_RESULT_ERROR, category_required_stake,
+    compute_stake_requirements, rollup_validator_stakes, unit_stake_requirement,
 };
 pub use jailing::{
     Address, JailingAction, JailingError, JailingState, JailingTime, MANUAL_UNJAIL_INTERVAL_SECS,
