@@ -543,3 +543,123 @@ fn end_to_end_vault_creation_handoff_and_reweight_pipeline() {
     assert_eq!(weights[&[0x99; 20]].ratio, 0.5);
     assert_eq!(reweight_value(100_000_000, 100_000_000, 1.0, false), 0.5);
 }
+
+#[test]
+fn vault_distribute_0x44a97b0_enforces_gates_profit_share_and_residual() {
+    use vaults::distribute::{
+        distribute_vault, VaultDistributeOutcome, VaultFollowerDistributeState,
+        TAG_BELOW_MIN_DISTRIBUTE_USD, TAG_CLOSE_BALANCE_MISMATCH, TAG_INSUFFICIENT_VAULT_BALANCE,
+        TAG_INVALID_DISTRIBUTE_AMOUNT, TAG_OK, VAULT_DISTRIBUTE_MIN_USD,
+    };
+
+    let f1 = [0x11; 20];
+    let f2 = [0x22; 20];
+
+    // Below $10 minimum -> 0x13.
+    let mut empty = [];
+    assert_eq!(
+        distribute_vault(
+            Some(VAULT_DISTRIBUTE_MIN_USD - 1),
+            100_000_000,
+            100_000_000,
+            100_000_000,
+            0.10,
+            &mut empty
+        ),
+        VaultDistributeOutcome::Rejected {
+            tag: TAG_BELOW_MIN_DISTRIBUTE_USD
+        }
+    );
+
+    // Above max_distributable -> 0x12.
+    assert_eq!(
+        distribute_vault(
+            Some(50_000_000),
+            100_000_000,
+            20_000_000,
+            100_000_000,
+            0.10,
+            &mut empty
+        ),
+        VaultDistributeOutcome::Rejected {
+            tag: TAG_INVALID_DISTRIBUTE_AMOUNT
+        }
+    );
+
+    // Close-all with vault_equity != withdrawable -> 0x14.
+    assert_eq!(
+        distribute_vault(None, 100_000_000, 100_000_000, 99_000_000, 0.10, &mut empty),
+        VaultDistributeOutcome::Rejected {
+            tag: TAG_CLOSE_BALANCE_MISMATCH
+        }
+    );
+
+    // Insufficient vault withdrawable balance -> 0x34.
+    assert_eq!(
+        distribute_vault(
+            Some(50_000_000),
+            100_000_000,
+            100_000_000,
+            40_000_000,
+            0.10,
+            &mut empty
+        ),
+        VaultDistributeOutcome::Rejected {
+            tag: TAG_INSUFFICIENT_VAULT_BALANCE
+        }
+    );
+
+    // Profitable distribution: vault equity $200M, distribute $100M (fraction 0.5), 10% commission.
+    // f1: 60% weight -> ledger_change = $60M, basis = $80M * 0.5 = $40M, profit = $20M,
+    //     commission = $2M, user_ledger_change = $58M.
+    // f2: 40% weight -> ledger_change = $40M, basis = $100M * 0.5 = $50M, profit = -$10M,
+    //     commission = $0, user_ledger_change = $40M.
+    let mut followers = [
+        VaultFollowerDistributeState {
+            user: f1,
+            weight_fraction: 0.6,
+            vault_entry_usd: 80_000_000,
+            net_deposit: 80_000_000,
+        },
+        VaultFollowerDistributeState {
+            user: f2,
+            weight_fraction: 0.4,
+            vault_entry_usd: 100_000_000,
+            net_deposit: 100_000_000,
+        },
+    ];
+    let res = distribute_vault(
+        Some(100_000_000),
+        200_000_000,
+        200_000_000,
+        200_000_000,
+        0.10,
+        &mut followers,
+    );
+    match res {
+        VaultDistributeOutcome::Ok {
+            tag,
+            distributed_usd,
+            total_follower_ledger_change,
+            total_commission_usd,
+            leader_residual,
+            payouts,
+        } => {
+            assert_eq!(tag, TAG_OK);
+            assert_eq!(distributed_usd, 100_000_000);
+            assert_eq!(total_follower_ledger_change, 100_000_000);
+            assert_eq!(total_commission_usd, 2_000_000);
+            assert_eq!(leader_residual, 0);
+            assert_eq!(payouts[0].commission_usd, 2_000_000);
+            assert_eq!(payouts[0].user_ledger_change, 58_000_000);
+            assert!(!payouts[0].non_positive_warning);
+            assert_eq!(payouts[1].commission_usd, 0);
+            assert_eq!(payouts[1].user_ledger_change, 40_000_000);
+        }
+        other => panic!("expected Ok, got {other:?}"),
+    }
+    assert_eq!(followers[0].vault_entry_usd, 40_000_000);
+    assert_eq!(followers[0].net_deposit, 22_000_000);
+    assert_eq!(followers[1].vault_entry_usd, 50_000_000);
+    assert_eq!(followers[1].net_deposit, 60_000_000);
+}

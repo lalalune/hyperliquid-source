@@ -12,6 +12,7 @@
 
 pub mod amount;
 pub mod deposit;
+pub mod distribute;
 pub mod split;
 pub mod sub_account;
 pub mod withdraw;
