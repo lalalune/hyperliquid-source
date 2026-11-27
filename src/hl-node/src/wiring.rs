@@ -69,6 +69,8 @@ pub fn workspace_health(chain: ChainName) -> WorkspaceHealth {
         Ok(Some(500))
     );
     assert_eq!(evm::LT_HASH_LANES, 1024);
+    assert_eq!(evm_rpc::EVM_RPC_CORE_METHODS.len(), 26);
+    assert_eq!(evm_rpc::EVM_RPC_EXTRA_METHODS.len(), 2);
     const { assert!(bridge::BRIDGE2_SERIALIZED_FIELD_COUNT > 0) };
     let _db_block = node115_db::rocks_db::BLOCK_SIZE;
     assert_eq!(
@@ -113,6 +115,7 @@ pub fn workspace_health(chain: ChainName) -> WorkspaceHealth {
             "l1-shared",
             "bridge",
             "evm",
+            "evm-rpc",
             "node115-cli-validators",
             "node115-startup-output",
         ],

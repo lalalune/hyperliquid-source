@@ -22,6 +22,7 @@ Independently authored, `#![forbid(unsafe_code)]`, zero-external-dependency Carg
 - **L1 shared (`l1/*`)**: `l1-shared`
 - **Bridge (`l1/bridge2`, `l1/bridge_request`)**: `bridge`
 - **HyperEVM (`l1/evm`)**: `evm`
+- **EVM JSON-RPC (`evm_rpc`)**: `evm-rpc`
 - **CLI / Startup**: `node115-cli-validators`, `node115-startup-output`
 
 Target: Linux x86-64 node #115 (`a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`).

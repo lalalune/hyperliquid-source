@@ -60,7 +60,7 @@ Votes, rounds, quorum certificates, validator sets and timers.
 CLI, startup, gossip, stream services and process orchestration.
 
 - Target: node115.
-- Implementation paths: `src/node115-gossip-reload`, `src/node115-startup-output`, `src/node115-bootstrap-range`, `src/node115-bulk-path-tree`, `src/node115-cli-validators`, `src/node115-peer-queue`, `src/node115-peers-response-set`, `src/node115-replica-response-json`, `src/node115-restart-delay`, `src/node115-restart-threshold`, `src/node115-startup-admission`, `src/node115-startup-path-join`, `src/node115-startup-sorted-admission`, `src/node-runtime`.
+- Implementation paths: `src/hl-node`, `src/node-runtime`, `src/node115-bootstrap-range`, `src/node115-bulk-path-tree`, `src/node115-cli-validators`, `src/node115-gossip-reload`, `src/node115-peer-queue`, `src/node115-peers-response-set`, `src/node115-replica-response-json`, `src/node115-restart-delay`, `src/node115-restart-threshold`, `src/node115-startup-admission`, `src/node115-startup-output`, `src/node115-startup-path-join`, `src/node115-startup-sorted-admission`.
 - Observed diagnostic paths: 21.
 - First task: Trace CLI dispatch to service entrypoints and enumerate read/write side effects.
 
@@ -70,7 +70,7 @@ CLI, startup, gossip, stream services and process orchestration.
 Block application, state roots and checkpoint handoff.
 
 - Target: node115.
-- Implementation paths: `src/node115-digest-reference-handoff`, `src/node115-digest-support-gate`, `src/node115-digest-vote-admission`, `src/node115-raw-history-retention`, `src/node115-abci`, `src/node115-abci-checkpoint-replay-fixture`.
+- Implementation paths: `src/node115-abci`, `src/node115-abci-blake3`, `src/node115-abci-checkpoint-replay-fixture`, `src/node115-digest-reference-handoff`, `src/node115-digest-support-gate`, `src/node115-digest-vote-admission`, `src/node115-raw-history-retention`.
 - Observed diagnostic paths: 4.
 - First task: Bind begin/action/end-block call paths and state-root inputs for #115.
 
@@ -100,7 +100,7 @@ Agent-created handler splits and central dispatch.
 Trading orchestration, block hooks, deployment and ledger updates.
 
 - Target: node115.
-- Implementation paths: `src/node115-bole-entry-prefix`, `src/node115-user-admission-prefix`, `src/node115-funding-read-reset`, `src/node115-modify-window-admission`, `src/node115-abstraction-kind-decoder`, `src/node115-bole-record-bound`, `src/node115-exchange-freeze-prelude`, `src/node115-funding-premium`, `src/node115-funding-rate`, `src/node115-funding-settlement-user`, `src/node115-outcome-account-projection`, `src/node115-outcome-fraction-scale`, `src/node115-stake-cursor`, `src/node115-symbol-prefix`.
+- Implementation paths: `src/exchange`, `src/node115-abstraction-kind-decoder`, `src/node115-bole-entry-prefix`, `src/node115-bole-record-bound`, `src/node115-exchange-freeze-prelude`, `src/node115-funding-premium`, `src/node115-funding-rate`, `src/node115-funding-read-reset`, `src/node115-funding-settlement-user`, `src/node115-modify-window-admission`, `src/node115-outcome-account-projection`, `src/node115-outcome-fraction-scale`, `src/node115-stake-cursor`, `src/node115-symbol-prefix`, `src/node115-user-admission-prefix`.
 - Observed diagnostic paths: 15.
 - First task: Trace order placement through risk checks, matching, fees and ledger writes.
 
@@ -120,7 +120,7 @@ Book storage, price/time priority and order lifecycle.
 Positions, margin, oracles, liquidations and spot balances.
 
 - Target: node115.
-- Implementation paths: `src/node115-margin-range`, `src/node115-clearinghouse-ntl-ratio`, `src/node115-margin-row`, `src/node115-outcome-record-msgpack`, `src/node115-oracle-outcome-kind`, `src/node115-borrow-lend-codec`, `src/node115-margin-mode-codec`, `src/node115-outcome-payload`, `src/node115-margin-tree-range`, `src/node115-borrow-lend-content-assembly`, `src/node115-finite-ratio-clamp`, `src/node115-leverage-aggregate`, `src/node115-margin-flat-compose`, `src/node115-margin-mode-identifier`, `src/node115-notional-collector`, `src/node115-open-interest-cap`, `src/node115-oracle-entry-lifecycle`, `src/node115-oracle-nested-keys`, `src/node115-portfolio-split-entries`, `src/node115-position-transition`, `src/node115-price-list-retain`, `src/node115-quantity-notification`, `src/node115-scale-zero-caller`.
+- Implementation paths: `src/clearinghouse`, `src/node115-borrow-lend-codec`, `src/node115-borrow-lend-content-assembly`, `src/node115-clearinghouse-ntl-ratio`, `src/node115-finite-ratio-clamp`, `src/node115-leverage-aggregate`, `src/node115-margin-flat-compose`, `src/node115-margin-mode-codec`, `src/node115-margin-mode-identifier`, `src/node115-margin-range`, `src/node115-margin-row`, `src/node115-margin-tree-range`, `src/node115-notional-collector`, `src/node115-open-interest-cap`, `src/node115-oracle-entry-lifecycle`, `src/node115-oracle-nested-keys`, `src/node115-oracle-outcome-kind`, `src/node115-outcome-payload`, `src/node115-outcome-record-msgpack`, `src/node115-portfolio-split-entries`, `src/node115-position-transition`, `src/node115-price-list-retain`, `src/node115-quantity-notification`, `src/node115-scale-zero-caller`.
 - Observed diagnostic paths: 14.
 - First task: Map margin/liquidation formulas and state mutations; prove sign and unit conventions.
 
@@ -170,7 +170,7 @@ Deposit/withdrawal requests and cross-chain signing.
 EVM state, database adapters, transaction execution and hashing.
 
 - Target: node115.
-- Implementation paths: `src/node115-evm-precompile-outcome-names`, `src/node115-child-reserve-fold`, `src/node115-bole-reserve-reply`, `src/node115-bole-user-reply`, `src/node115-evm-tx-type-names`, `src/node115-read-precompile-result`, `src/node115-sstore-warm`, `src/node115-storage-value-decode`, `src/node115-transient-rollback-branches`.
+- Implementation paths: `src/evm`, `src/node115-bole-reserve-reply`, `src/node115-bole-user-reply`, `src/node115-child-reserve-fold`, `src/node115-evm-precompile-outcome-names`, `src/node115-evm-tx-type-names`, `src/node115-read-precompile-result`, `src/node115-sstore-warm`, `src/node115-storage-value-decode`, `src/node115-transient-rollback-branches`.
 - Observed diagnostic paths: 4.
 - First task: Identify reth/revm private fork boundaries and state transition inputs.
 
@@ -220,7 +220,7 @@ Read-only info requests and position responses.
 JSON-RPC routing, EVM reads and transaction forwarding.
 
 - Target: node115.
-- Implementation paths: `src/node115-storage-key-builder`, `src/node115-block-number-text`, `src/node115-fee-history-reward`, `src/node115-raw-hex-decoder`, `src/node115-raw-response-translation`, `src/node115-rpc-store-fifo`.
+- Implementation paths: `src/evm-rpc`, `src/node115-block-number-text`, `src/node115-fee-history-reward`, `src/node115-raw-hex-decoder`, `src/node115-raw-response-translation`, `src/node115-rpc-store-fifo`, `src/node115-storage-key-builder`.
 - Observed diagnostic paths: 6.
 - First task: Map method dispatch and wire errors against the captured release.
 
