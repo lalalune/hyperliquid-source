@@ -12,6 +12,8 @@
 //! - [`commit`]: HotStuff-2 certified two-chain commit rule (`0x2e157c0`),
 //!   128-bit strict 2/3 stake quorum (`0x4d3e1a0`), and `register_block`
 //!   stale/duplicate guards (`0x2e1da10`);
+//! - [`heartbeat`]: validator heartbeat liveness window (`0x5a71e20` / `0x5a71ee0`,
+//!   180-second lookback `0xb4` and `"validator_latency_ema"` tracking);
 //! - [`proposer`]: deterministic stake-weighted proposer selection (`0x595cb30`);
 //! - [`tc_verify`]: timeout certificate verification (`0x5960390` + `0x564b510`);
 //! - [`timeout_flow`]: first-timer polling selector (`0x2cdca20`) and
@@ -25,10 +27,12 @@
 //! (`a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`).
 //! Cryptographic curve operations, networking, and runtime timers stay behind
 //! explicit trait/value boundaries.
+#![forbid(unsafe_code)]
 
 pub mod admission;
 pub mod block_rules;
 pub mod commit;
+pub mod heartbeat;
 pub mod proposer;
 pub mod round_progression;
 pub mod tc_verify;
@@ -63,6 +67,9 @@ pub use commit::{
     CertifiedBlockNode, REGISTER_TAG_NOT_NEW, REGISTER_TAG_STALE, RegisterBlockOutcome,
     TwoChainCommitOutcome, TwoChainCommitStore, block_round_from_parent_cert,
     has_strict_two_thirds_quorum_u128,
+};
+pub use heartbeat::{
+    HEARTBEAT_WINDOW_SECS, HeartbeatTracker, VALIDATOR_LATENCY_EMA_KEY, ValidatorHeartbeatRecord,
 };
 pub use proposer::{
     PreparedWeights, ProposerError, ProposerScheduleHistory, ScheduleEvent, StakeRow,
