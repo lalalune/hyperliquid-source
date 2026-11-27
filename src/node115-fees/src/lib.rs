@@ -9,6 +9,7 @@
 #![forbid(unsafe_code)]
 
 pub mod credit;
+pub mod lifecycle;
 pub mod schedule;
 pub mod solvency;
 pub mod tiers;
@@ -35,6 +36,16 @@ pub use credit::{
     FeeLedger, FeeScaleError, HIP3_DEFAULT_SCALE_CAP, HIP3_NON_GROWTH_FACTOR,
     HIP3_NON_GROWTH_RAW_SCALE, SecondarySplitRow, compute_fill_fee_triple,
     scale_fill_fee_component, settle_fill_fee,
+};
+pub use lifecycle::{
+    ActiveFeeTrial, CLAIM_REWARD_MIN_USDC_WEI, DEFAULT_REFERRALS_PER_BUCKET,
+    ERR_NO_MORE_REFERRALS, ERR_NO_REWARDS_TO_CLAIM, ERR_REFERRAL_CODE_NOT_REGISTERED,
+    ERR_REFERRER_ALREADY_SET, ERR_REWARD_TOO_SMALL, ERR_SELF_REFER, ERR_TOO_MANY_BUILDERS,
+    ERR_TRIAL_ALREADY_STARTED, ERR_TRIAL_ENDED_TOO_RECENTLY, ERR_TRIAL_RATE_NOT_FOUND,
+    ERR_TRIAL_RATES_ALREADY_MET, ERR_TRIALS_DISABLED, FEE_TRIAL_COOLDOWN_DAYS,
+    FEE_TRIAL_DURATION_DAYS, FeeLifecycleError, FeeLifecycleTracker, MAX_APPROVED_BUILDERS,
+    OK_STATUS_WORD, REFERRAL_DISCOUNT_VLM_CAP_RAW, REFERRAL_DISCOUNT_VLM_CAP_SHIFTED,
+    ReferrerBucketState, UserFeeLifecycleState, UserRewardEntry, approve_builder_fee_capped,
 };
 pub use schedule::is_monotonically_non_increasing;
 pub use solvency::{

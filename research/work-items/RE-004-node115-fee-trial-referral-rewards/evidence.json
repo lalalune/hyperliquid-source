@@ -1,0 +1,200 @@
+{
+  "work_item": "RE-004-node115-fee-trial-referral-rewards",
+  "target_binary": "artifacts/node/115/hl-node",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "total_fde_bytes": 7898,
+  "fdes": [
+    {
+      "name": "FeeTracker::active_referral_discount",
+      "start": "0x3c17390",
+      "end": "0x3c17590",
+      "size": 512,
+      "sha256": "8be743ee86ee3da2fbad319bdb8bdf8c6a13a6243b528887528a0b8d195bd016"
+    },
+    {
+      "name": "FeeTracker::set_referrer",
+      "start": "0x3c17590",
+      "end": "0x3c17fb9",
+      "size": 2601,
+      "sha256": "0f8f19e89488c46ca8c968c2fc38722a6be424b50c3fe055c71e83d9ffdcf428"
+    },
+    {
+      "name": "FeeTracker::claim_rewards",
+      "start": "0x3c17fc0",
+      "end": "0x3c18252",
+      "size": 658,
+      "sha256": "6528d9fb3971ddc349726ba95a7c2c8d430a11bfc1ee401b8e6cd6cca64dc157"
+    },
+    {
+      "name": "FeeTracker::start_fee_trial",
+      "start": "0x3c18390",
+      "end": "0x3c18a7e",
+      "size": 1774,
+      "sha256": "73bc16d825c54afbd1a9f1bfc39514cf3e8425fad769bb511b8ec675c4b83eaa"
+    },
+    {
+      "name": "FeeTracker::approve_builder_fee",
+      "start": "0x3c1a510",
+      "end": "0x3c1ae41",
+      "size": 2353,
+      "sha256": "ee1884bcfcda5483e63fa908460efec1d11994294d2b9ff542920cc8e0abce8e"
+    }
+  ],
+  "instruction_sites": [
+    {
+      "va": "0x3c17560",
+      "len": 11,
+      "hex": "49c1ed084981fdf8029500",
+      "note": "shr r13, 8; cmp r13, 0x9502f8 ($25M referral discount RawVlm cutoff)"
+    },
+    {
+      "va": "0x3c17ab9",
+      "len": 15,
+      "hex": "483de9030000bbe8030000480f43d8",
+      "note": "cmp rax, 0x3e9; mov ebx, 0x3e8; cmovae rbx, rax (max(custom, 1000) bucket quota)"
+    },
+    {
+      "va": "0x3c1811e",
+      "len": 5,
+      "hex": "bf00e1f505",
+      "note": "mov edi, 0x5f5e100 ($1.00 = 100_000_000 wei minimum claim threshold)"
+    },
+    {
+      "va": "0x3c1813d",
+      "len": 5,
+      "hex": "6641bdab00",
+      "note": "mov r13w, 0xab (RewardTooSmallToClaim discriminant)"
+    },
+    {
+      "va": "0x3c1861c",
+      "len": 7,
+      "hex": "8d0c8549010000",
+      "note": "lea ecx, [rax*4+0x149] (0x149 FeeTrialAlreadyStarted / 0x14d FeeTrialsDisabled)"
+    },
+    {
+      "va": "0x3c186bb",
+      "len": 5,
+      "hex": "be5a000000",
+      "note": "mov esi, 0x5a (90-day fee trial cooldown)"
+    },
+    {
+      "va": "0x3c186d4",
+      "len": 5,
+      "hex": "be0e000000",
+      "note": "mov esi, 0xe (14-day fee trial duration)"
+    },
+    {
+      "va": "0x3c1a607",
+      "len": 8,
+      "hex": "66b93c014883f80a",
+      "note": "mov cx, 0x13c; cmp rax, 0xa (10-builder approval cap -> TooManyBuildersApproved)"
+    }
+  ],
+  "user_error_jump_table": {
+    "va": "0x7d8c1c",
+    "discriminants": [
+      {
+        "disc": "0xa2",
+        "name": "CannotSelfRefer",
+        "handler_va": "0x46f1121"
+      },
+      {
+        "disc": "0xa3",
+        "name": "ReferrerAlreadySet",
+        "handler_va": "0x46efa13"
+      },
+      {
+        "disc": "0xa5",
+        "name": "NoMoreReferralsInBucket",
+        "handler_va": "0x46efe2d"
+      },
+      {
+        "disc": "0xa6",
+        "name": "ReferralCodeNotRegistered",
+        "handler_va": "0x46efaa4"
+      },
+      {
+        "disc": "0xaa",
+        "name": "NoRewardsToClaim",
+        "handler_va": "0x46f26cf"
+      },
+      {
+        "disc": "0xab",
+        "name": "RewardTooSmallToClaim",
+        "handler_va": "0x46f0234"
+      },
+      {
+        "disc": "0x13c",
+        "name": "TooManyBuildersApproved",
+        "handler_va": "0x46f204b"
+      },
+      {
+        "disc": "0x149",
+        "name": "FeeTrialAlreadyStarted",
+        "handler_va": "0x46f0a59"
+      },
+      {
+        "disc": "0x14a",
+        "name": "FeeTrialRateNotFound",
+        "handler_va": "0x46f1f9d"
+      },
+      {
+        "disc": "0x14b",
+        "name": "FeeTrialRatesAlreadyMet",
+        "handler_va": "0x46f1a91"
+      },
+      {
+        "disc": "0x14c",
+        "name": "FeeTrialEndedTooRecently",
+        "handler_va": "0x46f1a57"
+      },
+      {
+        "disc": "0x14d",
+        "name": "FeeTrialsDisabled",
+        "handler_va": "0x46f0506"
+      }
+    ]
+  },
+  "rodata_strings": [
+    {
+      "va": "0x7dcbc8",
+      "text": "Cannot self-refer"
+    },
+    {
+      "va": "0x7dcbd9",
+      "text": "Referrer already set"
+    },
+    {
+      "va": "0x7dcc03",
+      "text": "Referral code has no more referrals left until next referral refresh."
+    },
+    {
+      "va": "0x7dccfa",
+      "text": "No rewards to claim"
+    },
+    {
+      "va": "0x7dd9fd",
+      "text": "Too many builders approved."
+    },
+    {
+      "va": "0x7ddc07",
+      "text": "Fee trial has already started."
+    },
+    {
+      "va": "0x7ddc25",
+      "text": "Fee trial rate does not exist."
+    },
+    {
+      "va": "0x457bc0",
+      "text": "Fee trial rates are already met."
+    },
+    {
+      "va": "0x7ddc43",
+      "text": "Fee trial ended too recently."
+    },
+    {
+      "va": "0x7ddc60",
+      "text": "Fee trials are disabled."
+    }
+  ]
+}

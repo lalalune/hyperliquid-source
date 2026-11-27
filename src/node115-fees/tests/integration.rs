@@ -553,3 +553,253 @@ fn protocol_fee_solvency_floor_rate_bounds_and_volume_gates_match_node115() {
     ));
     assert!(sink.events.is_empty());
 }
+
+#[test]
+fn fee_trial_referral_claim_and_builder_cap_match_node115() {
+    use node115_fees::{
+        BaseFeeRates, BuilderFeeRegistry, CLAIM_REWARD_MIN_USDC_WEI, DEFAULT_REFERRALS_PER_BUCKET,
+        ERR_NO_MORE_REFERRALS, ERR_REFERRAL_CODE_NOT_REGISTERED, ERR_REWARD_TOO_SMALL,
+        ERR_SELF_REFER, ERR_TOO_MANY_BUILDERS, FEE_TRIAL_DURATION_DAYS, FeeLifecycleError,
+        FeeLifecycleTracker, FeeSchedule, MAX_APPROVED_BUILDERS, MmFeeTier,
+        REFERRAL_DISCOUNT_VLM_CAP_RAW, StakeDiscountTier, UserRewardEntry, VipFeeTier,
+        approve_builder_fee_capped,
+    };
+    let sched = FeeSchedule {
+        rates: BaseFeeRates {
+            perp_cross: 0.00045,
+            perp_add: 0.00015,
+            spot_cross: 0.00070,
+            spot_add: 0.00040,
+        },
+        vip_tiers: vec![
+            VipFeeTier {
+                ntl_cutoff: 5_000_000,
+                cross: 0.00040,
+                add: 0.00012,
+                spot_cross: 0.00060,
+                spot_add: 0.00030,
+                tail: 1.0,
+            },
+            VipFeeTier {
+                ntl_cutoff: 25_000_000,
+                cross: 0.00035,
+                add: 0.00008,
+                spot_cross: 0.00050,
+                spot_add: 0.00020,
+                tail: 1.0,
+            },
+        ],
+        mm_tiers: vec![MmFeeTier {
+            maker_fraction_cutoff: 0.005,
+            add: -0.00001,
+        }],
+        referral_discount: 0.04,
+        referrer_keep: 0.10,
+        destination: addr(1),
+        extra_destination_fractions: vec![],
+        stake_discount_tiers: vec![StakeDiscountTier {
+            bps_of_max_supply_staked: 1.0,
+            discount: 0.20,
+        }],
+        weigh_spot_volume_double: true,
+    };
+
+    let mut tracker = FeeLifecycleTracker::new(sched, 86_400_000);
+    let referrer = addr(10);
+    let alice = addr(11);
+    let bob = addr(12);
+    let linked = addr(13);
+
+    // 1. Referral registration & set_referrer (`0x3c17590`)
+    assert_eq!(
+        tracker.set_referrer(alice, "MISSING", 100_000),
+        Err(FeeLifecycleError::ReferralCodeNotRegistered)
+    );
+    assert_eq!(
+        FeeLifecycleError::ReferralCodeNotRegistered.status_word(),
+        Some(ERR_REFERRAL_CODE_NOT_REGISTERED)
+    );
+    tracker.register_referrer_code("ALPHA", referrer, 1);
+    assert_eq!(
+        tracker.set_referrer(referrer, "ALPHA", 100_000),
+        Err(FeeLifecycleError::CannotSelfRefer)
+    );
+    assert_eq!(
+        FeeLifecycleError::CannotSelfRefer.status_word(),
+        Some(ERR_SELF_REFER)
+    );
+    assert_eq!(tracker.set_referrer(alice, "ALPHA", 86_400_000), Ok(()));
+    assert_eq!(
+        tracker.set_referrer(alice, "ALPHA", 86_400_000),
+        Err(FeeLifecycleError::ReferrerAlreadySet)
+    );
+    // Bucket refreshes to max(custom_bucket_limit, 1000) (`0x3c17ab9..0x3c17ac4`)
+    assert_eq!(
+        tracker.code_to_referrer["ALPHA"].remaining_in_bucket,
+        DEFAULT_REFERRALS_PER_BUCKET - 1
+    );
+    // Exhaust bucket -> 0xa5, then advance to next bucket -> refreshes to 1000
+    tracker
+        .code_to_referrer
+        .get_mut("ALPHA")
+        .unwrap()
+        .remaining_in_bucket = 0;
+    assert_eq!(
+        tracker.set_referrer(bob, "ALPHA", 86_400_000),
+        Err(FeeLifecycleError::NoMoreReferralsInBucket)
+    );
+    assert_eq!(
+        FeeLifecycleError::NoMoreReferralsInBucket.status_word(),
+        Some(ERR_NO_MORE_REFERRALS)
+    );
+    assert_eq!(tracker.set_referrer(bob, "ALPHA", 2 * 86_400_000), Ok(()));
+
+    // 2. Referral discount $25M cumulative RawVlm cutoff (`0x3c17390..0x3c17590`)
+    assert_eq!(REFERRAL_DISCOUNT_VLM_CAP_RAW, 2_500_000_000);
+    tracker
+        .user_states
+        .get_mut(&alice)
+        .unwrap()
+        .token_states
+        .insert(
+            0,
+            UserRewardEntry {
+                cum_raw_vlm: REFERRAL_DISCOUNT_VLM_CAP_RAW - 1,
+                unclaimed_rewards: 50_000_000, // $0.50 < $1.00
+                claimed_rewards: 0,
+            },
+        );
+    assert_eq!(tracker.active_referral_discount(&alice), 0.04);
+    tracker
+        .user_states
+        .get_mut(&alice)
+        .unwrap()
+        .token_states
+        .get_mut(&0)
+        .unwrap()
+        .cum_raw_vlm = REFERRAL_DISCOUNT_VLM_CAP_RAW;
+    assert_eq!(tracker.active_referral_discount(&alice), 0.0);
+
+    // 3. Claim rewards `$1.00` (`0x5f5e100`) threshold (`0x3c17fc0`: `0xaa` vs `0xab`)
+    assert_eq!(
+        tracker.claim_rewards(&addr(99), |_, min_usdc| Some(min_usdc)),
+        Err(FeeLifecycleError::NoRewardsToClaim)
+    );
+    assert_eq!(
+        tracker.claim_rewards(&alice, |_, min_usdc| Some(min_usdc)),
+        Err(FeeLifecycleError::RewardTooSmallToClaim)
+    );
+    assert_eq!(
+        FeeLifecycleError::RewardTooSmallToClaim.status_word(),
+        Some(ERR_REWARD_TOO_SMALL)
+    );
+    tracker
+        .user_states
+        .get_mut(&alice)
+        .unwrap()
+        .token_states
+        .get_mut(&0)
+        .unwrap()
+        .unclaimed_rewards = CLAIM_REWARD_MIN_USDC_WEI;
+    let claimed = tracker
+        .claim_rewards(&alice, |_, min_usdc| Some(min_usdc))
+        .unwrap();
+    assert_eq!(claimed, vec![(0, CLAIM_REWARD_MIN_USDC_WEI)]);
+    assert_eq!(
+        tracker.user_states[&alice].token_states[&0].claimed_rewards,
+        CLAIM_REWARD_MIN_USDC_WEI
+    );
+
+    // 4. Fee trial lifecycle (`0x3c18390`: disabled/nonexistent/already-met/start/90d cooldown/14d duration)
+    let cur_base = BaseFeeRates {
+        perp_cross: 0.00045,
+        perp_add: 0.00015,
+        spot_cross: 0.00070,
+        spot_add: 0.00040,
+    };
+    let vip1_mm = BaseFeeRates {
+        perp_cross: 0.00040,
+        perp_add: -0.00001,
+        spot_cross: 0.00060,
+        spot_add: -0.00001,
+    };
+    tracker.trials_disabled = true;
+    assert_eq!(
+        tracker.start_fee_trial(alice, vip1_mm, cur_base, 0.0, 20_000, &[]),
+        Err(FeeLifecycleError::FeeTrialsDisabled)
+    );
+    tracker.trials_disabled = false;
+
+    assert_eq!(
+        tracker.start_fee_trial(alice, cur_base, cur_base, 0.0, 20_000, &[]),
+        Err(FeeLifecycleError::FeeTrialRateNotFound)
+    );
+    // Already met when current rates beat requested VIP tier
+    let better_cur = BaseFeeRates {
+        perp_cross: 0.00020,
+        perp_add: -0.00005,
+        spot_cross: 0.00020,
+        spot_add: -0.00005,
+    };
+    assert_eq!(
+        tracker.start_fee_trial(alice, vip1_mm, better_cur, 1.0, 20_000, &[]),
+        Err(FeeLifecycleError::FeeTrialRatesAlreadyMet)
+    );
+
+    // Valid VIP+MM trial with 20% staking discount on positive rates only (negative maker rebate untouched)
+    let trial = tracker
+        .start_fee_trial(alice, vip1_mm, cur_base, 1.0, 20_000, &[linked])
+        .unwrap();
+    assert_eq!(trial.end_day, 20_000 + FEE_TRIAL_DURATION_DAYS);
+    assert!((trial.effective_rates.perp_cross - 0.00032).abs() < 1e-12);
+    assert_eq!(trial.effective_rates.perp_add, -0.00001);
+    assert_eq!(tracker.user_states[&linked].active_trial, Some(trial));
+
+    // Active trial rejects duplicate start (`0x149`)
+    assert_eq!(
+        tracker.start_fee_trial(alice, vip1_mm, cur_base, 1.0, 20_001, &[]),
+        Err(FeeLifecycleError::FeeTrialAlreadyStarted)
+    );
+    // Expire at day 20_014, then test 90-day cooldown (`0x14c`)
+    assert!(tracker.expire_trial_if_due(&alice, 20_014));
+    assert_eq!(
+        tracker.start_fee_trial(alice, vip1_mm, cur_base, 0.0, 20_014 + 89, &[]),
+        Err(FeeLifecycleError::FeeTrialEndedTooRecently)
+    );
+    assert!(
+        tracker
+            .start_fee_trial(alice, vip1_mm, cur_base, 0.0, 20_014 + 90, &[])
+            .is_ok()
+    );
+
+    // 5. 10-builder per-user approval cap (`0x3c1a510`: `0xa` -> `0x13c`)
+    let mut reg = BuilderFeeRegistry::default();
+    for i in 1..=MAX_APPROVED_BUILDERS {
+        assert_eq!(
+            approve_builder_fee_capped(&mut reg, alice, addr(100 + i as u8), 0.0005),
+            Ok(())
+        );
+    }
+    // 11th distinct builder rejected (`0x13c`)
+    assert_eq!(
+        approve_builder_fee_capped(&mut reg, alice, addr(200), 0.0005),
+        Err(FeeLifecycleError::TooManyBuildersApproved)
+    );
+    assert_eq!(
+        FeeLifecycleError::TooManyBuildersApproved.status_word(),
+        Some(ERR_TOO_MANY_BUILDERS)
+    );
+    // Updating existing builder or removing via 0.0 succeeds
+    assert_eq!(
+        approve_builder_fee_capped(&mut reg, alice, addr(101), 0.0002),
+        Ok(())
+    );
+    assert_eq!(
+        approve_builder_fee_capped(&mut reg, alice, addr(101), 0.0),
+        Ok(())
+    );
+    assert_eq!(
+        approve_builder_fee_capped(&mut reg, alice, addr(200), 0.0005),
+        Ok(())
+    );
+}
