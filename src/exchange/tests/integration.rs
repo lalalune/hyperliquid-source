@@ -375,3 +375,100 @@ fn bole_liquidation_0x2c80670_and_begin_block_7_phase_schedule_match_node115() {
     assert_eq!(compute_bole_liquidation_limit_px(10, 0.0), 1);
     assert_eq!(compute_bole_liquidation_limit_px(10, -0.5), 1);
 }
+
+#[test]
+fn bole_reserve_utilization_curve_interest_accrual_and_limits_match_node115() {
+    use exchange::bole_reserve::{
+        check_user_leg_min_wei, shares_to_wei_ceil, shares_to_wei_floor, BoleMathError,
+        BoleReserve, YearlyRateCurve, BOLE_MIN_LEG_NTL, BOLE_SCALE, BOLE_YEAR_MS,
+    };
+
+    assert_eq!(BOLE_SCALE, 100_000_000_000_000);
+    assert_eq!(BOLE_YEAR_MS, 31_557_600_000);
+    assert_eq!(BOLE_MIN_LEG_NTL, 100_000_000);
+
+    // Borrow rounds UP, supply rounds DOWN on fractional index conversion.
+    assert_eq!(shares_to_wei_ceil(1, BOLE_SCALE + 1), Ok(2));
+    assert_eq!(shares_to_wei_floor(1, BOLE_SCALE + 1), Ok(1));
+
+    // Kinked yearly rate curve: 2% base -> 10% at 80% kink -> 90% at 100% util.
+    let curve = YearlyRateCurve {
+        base_rate: 2_000_000_000_000,            // 2%
+        max_rate: 90_000_000_000_000,            // 90%
+        kink_rate: 10_000_000_000_000,           // 10%
+        optimal_utilization: 80_000_000_000_000, // 80%
+    };
+    assert_eq!(curve.evaluate_scaled(0), 2_000_000_000_000);
+    assert_eq!(curve.evaluate_scaled(40_000_000_000_000), 6_000_000_000_000); // 6%
+    assert_eq!(curve.evaluate_scaled(80_000_000_000_000), 10_000_000_000_000); // 10%
+    assert_eq!(curve.evaluate_scaled(90_000_000_000_000), 50_000_000_000_000); // 50%
+    assert_eq!(curve.evaluate_scaled(BOLE_SCALE), 90_000_000_000_000); // 90%
+
+    let mut reserve = BoleReserve {
+        oracle_px: 1_000_000,
+        pool_cash_wei: 500_000,
+        realized_protocol_fee_wei: 1_000,
+        pending_protocol_fee_wei: 0,
+        total_borrow_shares: 500_000,
+        borrow_index: BOLE_SCALE,
+        total_supply_shares: 1_000_000,
+        supply_index: BOLE_SCALE,
+        rate_curve: curve,
+        last_accrual_ms: 1_700_000_000_000,
+    };
+
+    // 50% utilization across all three views (0x369ff10 / 0x36a08b0 / 0x36a09f0).
+    assert_eq!(reserve.utilization_scaled(), Ok(50_000_000_000_000));
+    assert_eq!(reserve.utilization_bps(), Ok(5_000));
+    assert!((reserve.utilization_f64().unwrap() - 0.5).abs() < 1e-12);
+    // At 50% util, rate = 2% + (50/80)*8% = 7% = 700 bps (0x36a0b30 / 0x36a0d80).
+    assert_eq!(reserve.yearly_borrow_rate_bps(), 700);
+    assert!((reserve.yearly_borrow_rate_f64() - 0.07).abs() < 1e-12);
+
+    // Solvency check passes with 1_000 total equity (0x36a0040).
+    assert_eq!(reserve.protocol_equity_and_solvency_check(), Ok(1_000));
+
+    // Max borrowable to reach 80% util = 300_000; max withdrawable at 80% util = 375_000 (0x36a0fe0).
+    assert_eq!(
+        reserve.max_delta_wei_for_target_utilization(true, 80_000_000_000_000),
+        Ok(300_000)
+    );
+    assert_eq!(
+        reserve.max_delta_wei_for_target_utilization(false, 80_000_000_000_000),
+        Ok(375_000)
+    );
+    assert_eq!(
+        reserve.max_delta_wei_for_target_utilization(false, 0),
+        Err(BoleMathError::DivisionByZero)
+    );
+
+    // Accrue 1 full Julian year (31_557_600_000 ms) with 10% protocol fee (0x36a0200).
+    let protocol_fee_rate = 10_000_000_000_000; // 10%
+    assert!(reserve.accrue_interest(reserve.last_accrual_ms + BOLE_YEAR_MS, protocol_fee_rate));
+    // Borrow index increases by +7% -> 1.07 * 1e14.
+    assert_eq!(reserve.borrow_index, 107_000_000_000_000);
+    // Gross supply index delta = 7% * 0.5 = 3.5%, 10% protocol fee = 0.35%, net supply delta = 3.15%.
+    assert_eq!(reserve.supply_index, 103_150_000_000_000);
+    // Protocol fee wei = 0.35% * 1_000_000 = 3_500, swept immediately from pool_cash into realized_protocol_fee_wei.
+    assert_eq!(reserve.pending_protocol_fee_wei, 0);
+    assert_eq!(reserve.pool_cash_wei, 500_000 - 3_500);
+    assert_eq!(reserve.realized_protocol_fee_wei, 1_000 + 3_500);
+    // Assets (496_500 + 535_000 = 1_031_500) == Liabilities (1_031_500), equity = 4_500.
+    assert_eq!(reserve.protocol_equity_and_solvency_check(), Ok(4_500));
+
+    // Rejects elapsed time > 1 Julian year and detects insolvency (tag 0x10).
+    assert!(!reserve.accrue_interest(reserve.last_accrual_ms + BOLE_YEAR_MS + 1, protocol_fee_rate));
+    reserve.pool_cash_wei = 0;
+    assert_eq!(
+        reserve.protocol_equity_and_solvency_check(),
+        Err(BoleMathError::Insolvency)
+    );
+
+    // User leg minimum-notional dust check (0x36939f0): 0 allowed, non-zero < min rejected (0x07).
+    assert_eq!(check_user_leg_min_wei(0, BOLE_SCALE, true, 100), Ok(()));
+    assert_eq!(
+        check_user_leg_min_wei(99, BOLE_SCALE, false, 100),
+        Err(BoleMathError::BelowMinNotional)
+    );
+    assert_eq!(check_user_leg_min_wei(100, BOLE_SCALE, true, 100), Ok(()));
+}
