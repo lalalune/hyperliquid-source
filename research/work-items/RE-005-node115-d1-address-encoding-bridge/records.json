@@ -1,0 +1,85 @@
+{
+  "target": {
+    "release": 115,
+    "size": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "coordinate": "ELF virtual address"
+  },
+  "scope": "field identity for the unresolved d1 action-method callback at payload+0x60",
+  "fdes": [
+    {
+      "start": "0x240eef0",
+      "end": "0x240f26a",
+      "bytes": 890
+    },
+    {
+      "start": "0x24580c0",
+      "end": "0x245812b",
+      "bytes": 107
+    },
+    {
+      "start": "0x442d000",
+      "end": "0x442d480",
+      "bytes": 1152
+    }
+  ],
+  "observations": [
+    {
+      "address": "0x240f185",
+      "fact": "payload serializer passes name bytes at 0x5ed61a with length 20 and value words from payload+0x50/+0x58; the bytes spell destinationRecipient"
+    },
+    {
+      "address": "0x240f20b",
+      "fact": "the immediately following serializer call passes payload+0x60 to 0x24580c0; the adjacent 15 target bytes at 0x5ed61a+20 spell addressEncoding"
+    },
+    {
+      "address": "0x2bced39",
+      "fact": "the action enum record at 0x2bce570 binds variant index 75 / SendToEvmWithData to payload serializer 0x240eef0"
+    },
+    {
+      "address": "0x24580c0",
+      "fact": "the selected enum serializer branch passes the 11-byte variant label UnvalidatedBridgeEpoch to its serializer helper"
+    },
+    {
+      "address": "0x442d192",
+      "fact": "the d1 signing method invokes the first function pointer stored at payload+0x60, passing payload+0x78 and qwords at +0x68/+0x70; it copies 32 returned bytes into its local typed-data record"
+    },
+    {
+      "address": "0x44290c0",
+      "fact": "the existing target-bound EIP-712 builder schema orders address_encoding:string immediately after destination_recipient:string and before destination_chain_id:uint32"
+    }
+  ],
+  "inference": [
+    "The serializer call order, contiguous field-name bytes, enum variant serializer, and EIP-712 field order identify the payload+0x60 value as the addressEncoding/address_encoding field.",
+    "The callback in the signing method is associated with that field. The schema type string makes a 32-byte string-hash interpretation plausible, but the concrete callback target and output meaning are not established here."
+  ],
+  "unresolved": [
+    "concrete callback/vtable target and the producer that populates payload+0x60",
+    "whether the callback output equals the EIP-712 string hash of the selected variant",
+    "runtime enum values, production digest, signature verification, replay checks, and error ordering"
+  ],
+  "instruction_witnesses": {
+    "0x240f185": "4d8b4424504d8b4c2458488d1584e41dfe488d7c2408b9140000004c89f6e868a00400",
+    "0x240f20b": "498d542460488d7c24084c89f6e8a38e0400",
+    "0x24580c0": "41574156534889d3807e0b007429488d05832000feba040000004989fe4889f74989f74889c6e8650619004c89fe4c89f74883f8027519488d154f9619feb90b0000004989d85b415e415fe9a035e1ff48b9000000000000008048890f48894708488957105b415e415fc3",
+    "0x442d179": "498b442460498b542468498d742478498b4c2470488d7c2450ff10",
+    "0x442d194": "0f104424500f104c24600f118c24280100000f11842418010000"
+  },
+  "literal_witnesses": {
+    "0x5ed61a": "destinationRecipientaddressEncoding",
+    "0x5f174d": "UnvalidatedBridgeEpoch"
+  },
+  "typed_data_schema": "HyperliquidTransaction:SendToEvmWithData(string hyperliquidChain,address payload_multi_sig_user,address outer_signer,string token,string amount,string source_dex,string destination_recipient,string address_encoding,uint32 destination_chain_id,uint64 gas_limit,bytes data,uint64 nonce)",
+  "serializer_binding": {
+    "enum_fde": "0x2bce570",
+    "variant_index": 75,
+    "variant": "SendToEvmWithData",
+    "serializer": "0x240eef0",
+    "evidence": "RE-010-action-serialize-tag-dispatch-115/arms.tsv"
+  },
+  "limitations": [
+    "FDE extents are unwind ranges, not source-level function boundaries.",
+    "The executable was read statically and was not run or emulated.",
+    "The relationship from serializer order to the named field is an explicit inference; no production callback result is claimed."
+  ]
+}
