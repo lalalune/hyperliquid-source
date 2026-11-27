@@ -24,11 +24,11 @@ These inventory counts describe available work, not completed components.
 
 | Measure | Completed / scope | Percentage |
 | --- | ---: | ---: |
-| Accepted full-scope gates | 3/92 | 3.26% |
+| Accepted full-scope gates | 12/92 | 13.04% |
 | Complete node components | 0/23 | 0.00% |
-| Components fully mapped | 1/23 | 4.35% |
-| Components fully built | 1/23 | 4.35% |
-| Components with full behavioral validation | 1/23 | 4.35% |
+| Components fully mapped | 4/23 | 17.39% |
+| Components fully built | 4/23 | 17.39% |
+| Components with full behavioral validation | 4/23 | 17.39% |
 | Components with full code/data identity | 0/23 | 0.00% |
 | Target .text bytes compared | 6,176,541/83,719,936 | 7.37762% |
 | Target .text bytes raw-equal | 5,770,888/83,719,936 | 6.89309% |
@@ -54,17 +54,17 @@ Each fragment keeps its own #115 contract; an integrated node executable remains
 <details open>
 <summary><strong>Node #115 component acceptance</strong></summary>
 
-**Node #115 reconstruction: 3.26% (3/92 accepted gates; 0/23 components complete).**
+**Node #115 reconstruction: 13.04% (12/92 accepted gates; 0/23 components complete).**
 
 | Component | Target | Accepted gates | Milestones | Compared implementation bytes | Registered implementation windows |
 | --- | --- | ---: | ---: | ---: | ---: |
 | [Foundation utilities](docs/COMPONENTS.md#foundation) | Node #115 | 0/4 | 0% | 197 | 2 |
-| [Serialization fork](docs/COMPONENTS.md#serialization) | Node #115 | 0/4 | 0% | 250 | 10 |
-| [Storage and snapshots](docs/COMPONENTS.md#storage) | Node #115 | 0/4 | 0% | 886 | 14 |
+| [Serialization fork](docs/COMPONENTS.md#serialization) | Node #115 | 3/4 | 75% | 250 | 10 |
+| [Storage and snapshots](docs/COMPONENTS.md#storage) | Node #115 | 3/4 | 75% | 886 | 14 |
 | [Network transport](docs/COMPONENTS.md#transport) | Node #115 | 0/4 | 0% | 425 | 17 |
 | [Consensus](docs/COMPONENTS.md#consensus) | Node #115 | 0/4 | 0% | 1,403 | 8 |
 | [Node runtime and gossip](docs/COMPONENTS.md#node-runtime) | Node #115 | 0/4 | 0% | 527 | 11 |
-| [Block execution and state](docs/COMPONENTS.md#abci) | Node #115 | 0/4 | 0% | 1,017 | 36 |
+| [Block execution and state](docs/COMPONENTS.md#abci) | Node #115 | 3/4 | 75% | 1,017 | 36 |
 | [Action wire and signing](docs/COMPONENTS.md#action-wire) | Node #115 | 0/4 | 0% | 17,291 | 115 |
 | [Action dispatch and handlers](docs/COMPONENTS.md#action-dispatch) | Node #115 | 0/4 | 0% | 35,135 | 15 |
 | [Exchange orchestration](docs/COMPONENTS.md#exchange) | Node #115 | 0/4 | 0% | 3,270 | 34 |
@@ -82,7 +82,7 @@ Each fragment keeps its own #115 contract; an integrated node executable remains
 | [EVM JSON-RPC](docs/COMPONENTS.md#evm-rpc) | Node #115 | 0/4 | 0% | 175 | 7 |
 | [Global configuration](docs/COMPONENTS.md#constants) | Node #115 | 3/4 | 75% | 9,819 | 17 |
 
-Accepted gates: **3/92**. Full-component byte and function denominators remain unmeasured.
+Accepted gates: **12/92**. Full-component byte and function denominators remain unmeasured.
 Zero registered implementation comparisons do not mean zero correct code.
 
 </details>

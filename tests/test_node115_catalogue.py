@@ -24,14 +24,16 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual(len(self.components), 23)
         self.assertEqual({c['artifact'] for c in self.components}, {'node115'})
         catalogue.validate_progress(self.components, self.progress, ROOT)
-        self.assertEqual(catalogue.progress_totals(self.components, self.progress), (3, 92))
-        constants_gates = self.progress['components']['constants']['gates']
-        self.assertEqual(
-            constants_gates,
-            {'mapped': True, 'built': True, 'behavior': True, 'identity': False},
-        )
+        self.assertEqual(catalogue.progress_totals(self.components, self.progress), (12, 92))
+        accepted_three_of_four = {'constants', 'serialization', 'storage', 'abci'}
         for comp_id, row in self.progress['components'].items():
-            if comp_id != 'constants':
+            if comp_id in accepted_three_of_four:
+                self.assertEqual(
+                    row['gates'],
+                    {'mapped': True, 'built': True, 'behavior': True, 'identity': False},
+                    f'unexpected gates on {comp_id}',
+                )
+            else:
                 self.assertFalse(any(row['gates'].values()), f'unearned gate on {comp_id}')
 
     def test_completed_gate_requires_evidence(self):
