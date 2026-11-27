@@ -346,3 +346,81 @@ fn tracker_wire_schema_checkpoint_format_and_straggler_filter() {
     );
     let _ = fs::remove_dir_all(&dir);
 }
+
+#[test]
+fn apply_block_six_ordered_guards_and_history_split_off_cutoff() {
+    use node115_abci::state::{ApplyBlockPreconditionError, REQUIRED_FEATURE_VERSION};
+
+    let dir = unique_tmp("guards");
+    fs::create_dir_all(dir.join("100")).unwrap();
+    fs::write(dir.join("100").join("CHECKPOINT_COMPLETE"), b"").unwrap();
+    let restored = restore_checkpoint(&dir, 100, 100, 50, 1).unwrap();
+    let _ = fs::remove_dir_all(&dir);
+
+    // 1. Frozen state (hardfork_height == current_height)
+    let frozen = AbciState::new(restored.clone(), 0, Some(100));
+    assert!(frozen.is_frozen());
+    assert_eq!(
+        frozen.validate_apply_preconditions(50, 51, (1, 2), (1, 2), 4, 4, REQUIRED_FEATURE_VERSION),
+        Err(ApplyBlockPreconditionError::StateFrozen { height: 100 })
+    );
+
+    // 2. Hardfork height below current height
+    let past_hf = AbciState::new(restored.clone(), 0, Some(99));
+    assert_eq!(
+        past_hf.validate_apply_preconditions(50, 51, (1, 2), (1, 2), 4, 4, REQUIRED_FEATURE_VERSION),
+        Err(ApplyBlockPreconditionError::HardforkHeightBelowCurrent {
+            hardfork_height: 99,
+            current_height: 100,
+        })
+    );
+
+    // 3..6. Ordered round, parent_round, parent_time, action_count, feature_version guards
+    let active = AbciState::new(restored, 0, Some(200));
+    assert!(!active.is_frozen());
+    assert_eq!(
+        active.validate_apply_preconditions(50, 50, (1, 2), (1, 2), 4, 4, 3),
+        Err(ApplyBlockPreconditionError::NonAdvancingRound {
+            parent_round: 50,
+            round: 50,
+        })
+    );
+    assert_eq!(
+        active.validate_apply_preconditions(49, 51, (1, 2), (1, 2), 4, 4, 3),
+        Err(ApplyBlockPreconditionError::ParentRoundMismatch {
+            state_round: 50,
+            block_parent_round: 49,
+        })
+    );
+    assert_eq!(
+        active.validate_apply_preconditions(50, 51, (1, 2), (1, 3), 4, 4, 3),
+        Err(ApplyBlockPreconditionError::ParentTimeMismatch {
+            state_time: (1, 2),
+            block_parent_time: (1, 3),
+        })
+    );
+    assert_eq!(
+        active.validate_apply_preconditions(50, 51, (1, 2), (1, 2), 4, 5, 3),
+        Err(ApplyBlockPreconditionError::ActionCountMismatch {
+            header_actions: 4,
+            payload_actions: 5,
+        })
+    );
+    assert_eq!(
+        active.validate_apply_preconditions(50, 51, (1, 2), (1, 2), 4, 4, 2),
+        Err(ApplyBlockPreconditionError::FeatureVersionMismatch {
+            expected: 3,
+            actual: 2,
+        })
+    );
+    assert!(active.validate_apply_preconditions(50, 51, (1, 2), (1, 2), 4, 4, 3).is_ok());
+
+    // Local raw-root history split_off(&(watermark.saturating_add(1))) (`0x5a05ea1..0x5a05fbd`)
+    let mut engine = AbciEngine::new(active);
+    engine.local_raw_history.insert(100, [0x10; 32]);
+    engine.local_raw_history.insert(200, [0x20; 32]);
+    engine.local_raw_history.insert(201, [0x21; 32]);
+    assert_eq!(engine.prune_local_history_through(200), 2);
+    assert_eq!(engine.local_raw_history.len(), 1);
+    assert!(engine.local_raw_history.contains_key(&201));
+}

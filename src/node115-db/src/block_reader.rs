@@ -1,10 +1,12 @@
 //! Node #115 `db/src/block_reader.rs` offline SSTable block-handle slicing and
 //! indexed artifact variant recognition.
 //!
-//! Binary anchors (`RE-009-node115-db-crate-map`):
-//! - `0x2a191e0..0x2a195a7` (`block_reader.rs:27:70`)
+//! Binary anchors (`RE-009-node115-db-crate-map`, `RE-009-node115-abci-apply-block-guards-and-history-prune`):
+//! - `0x2a191e0..0x2a195a7` (`block_reader.rs:27:70`, `BlockReader::block` at `0x43f132`)
 //! - `0x2b2be60..0x2b2c4f1` (`block_reader.rs:29:26`)
-//! - `0x2a0acc0..0x2a0b327` (`block_reader.rs:45:114`)
+//! - `0x2a0acc0..0x2a0b327` (`block_reader.rs:45:114`, `BlockReader::range_query_inclusive` at `0x449de1`)
+
+use std::collections::BTreeMap;
 
 pub use node115_indexed_artifact_variant::IndexedArtifactVariant;
 
@@ -78,5 +80,38 @@ impl<'a> OfflineBlockReader<'a> {
                 size: handle.size,
                 backing_len: self.backing.len(),
             })
+    }
+}
+
+/// Offline height-indexed block store modeling `BlockReader::block` (`0x2a191e0`)
+/// and `BlockReader::range_query_inclusive` (`0x2a0acc0`).
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct IndexedBlockReader {
+    blocks: BTreeMap<u64, Vec<u8>>,
+}
+
+impl IndexedBlockReader {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn insert_block(&mut self, height: u64, payload: Vec<u8>) {
+        self.blocks.insert(height, payload);
+    }
+
+    /// Point lookup matching `BlockReader::block` (`0x2a191e0`).
+    pub fn block(&self, height: u64) -> Option<&[u8]> {
+        self.blocks.get(&height).map(Vec::as_slice)
+    }
+
+    /// Inclusive height-range query matching `BlockReader::range_query_inclusive` (`0x2a0acc0`).
+    pub fn range_query_inclusive(&self, start: u64, end: u64) -> Vec<(u64, &[u8])> {
+        if start > end {
+            return Vec::new();
+        }
+        self.blocks
+            .range(start..=end)
+            .map(|(&h, v)| (h, v.as_slice()))
+            .collect()
     }
 }

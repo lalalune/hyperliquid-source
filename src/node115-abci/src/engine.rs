@@ -185,6 +185,18 @@ impl AbciEngine {
             local_root,
         })
     }
+
+    /// Prune `local_raw_history` (`ctx + 0x400`) via `BTreeMap::split_off(&watermark.saturating_add(1))`
+    /// matching `0x5a05ea1..0x5a05fbd` (`0x4de5ad0`) before `end_root_selector` (`0x5a07ec0`).
+    /// Returns the number of entries evicted.
+    pub fn prune_local_history_through(&mut self, verified_watermark: u64) -> usize {
+        let cutoff = verified_watermark.saturating_add(1);
+        let before = self.local_raw_history.len();
+        let survivors = self.local_raw_history.split_off(&cutoff);
+        let evicted = before - survivors.len();
+        self.local_raw_history = survivors;
+        evicted
+    }
 }
 
 /// Select the lowest checkpoint heights to prune while retaining the newest `keep`

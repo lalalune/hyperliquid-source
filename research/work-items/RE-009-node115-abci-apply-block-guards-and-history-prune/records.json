@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "work_item": "RE-009-node115-abci-apply-block-guards-and-history-prune",
+  "target_binary": {
+    "path": "artifacts/node/115/hl-node",
+    "size": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "apply_block_invariants": {
+    "required_feature_version": 3,
+    "feature_version_offset": "0xb9a",
+    "hardfork_tag_offset": "0x10e8",
+    "hardfork_height_offset": "0x10f0",
+    "state_time_offset": "0x18",
+    "state_height_offset": "0x28",
+    "state_round_offset": "0x30",
+    "history_prune_cutoff_rule": "watermark.saturating_add(1)"
+  },
+  "fdes": [
+    {
+      "label": "abci_engine_apply_block",
+      "start_va": "0x5a04e40",
+      "end_va": "0x5a065f8",
+      "size": 6072,
+      "sha256": "0b02c1aa991621342fe2b8142673bcc4df5b8f4bc7e692779b2802870b114388"
+    },
+    {
+      "label": "abci_history_split_off",
+      "start_va": "0x4de5ad0",
+      "end_va": "0x4de603e",
+      "size": 1390,
+      "sha256": "a6245c8e12421ff9580e301b5d330bceebfc93e883d61436d2df108a8093a0fa"
+    },
+    {
+      "label": "block_reader_block",
+      "start_va": "0x2a191e0",
+      "end_va": "0x2a195a7",
+      "size": 967,
+      "sha256": "def706aa2a29318d8e362a9a33e05376febc3294fe2b134608ddab8840f3f9bc"
+    },
+    {
+      "label": "block_reader_range_query_inclusive",
+      "start_va": "0x2a0acc0",
+      "end_va": "0x2a0b327",
+      "size": 1639,
+      "sha256": "cf4165f77522c92ea1b418021113f4cfcb9b6697aff707d13e71df268bd00b51"
+    }
+  ],
+  "anchors": [
+    {
+      "label": "abci_hardfork_freeze_check",
+      "va": "0x5a04ec3",
+      "bytes_hex": "4c8b89e81000004c8b91f01000004983f90175134c8b41284d39c20f82f01300000f844b130000"
+    },
+    {
+      "label": "abci_round_monotonic_check",
+      "va": "0x5a04eea",
+      "bytes_hex": "4939fd0f862a130000"
+    },
+    {
+      "label": "abci_parent_round_eq_check",
+      "va": "0x5a04ef3",
+      "bytes_hex": "4c8b41304c894424104939f80f8545130000"
+    },
+    {
+      "label": "abci_parent_time_eq_check",
+      "va": "0x5a04f05",
+      "bytes_hex": "4c8b4118488b79204c8944241048897c24184939f00f854d1300004839d70f8544130000"
+    },
+    {
+      "label": "abci_features_v3_check",
+      "va": "0x5a04f52",
+      "bytes_hex": "80b99a0b0000030f8557130000"
+    },
+    {
+      "label": "abci_history_split_cutoff",
+      "va": "0x5a05ea1",
+      "bytes_hex": "41807c2410000f8414010000498b44241848ffc048c7c1ffffffff480f45c848898c24d8000000498d9c2400040000488dbc2498000000488d9424d80000004889dee8e8fb3dff"
+    },
+    {
+      "label": "abci_panic_round_gt_parent",
+      "va": "0x5a0621d",
+      "bytes_hex": "488d15bc1cab00be26000000488d3deb43f3fae994"
+    },
+    {
+      "label": "abci_panic_not_frozen",
+      "va": "0x5a06235",
+      "bytes_hex": "488d151c1dab00be29000000488d3d1644f3faeb7f"
+    },
+    {
+      "label": "abci_panic_features_ok",
+      "va": "0x5a062b6",
+      "bytes_hex": "488d15831cab00be1d000000488d3d7843f3fa"
+    },
+    {
+      "label": "block_reader_block_lea",
+      "va": "0x2a19258",
+      "bytes_hex": "488d35d05ea2fd"
+    },
+    {
+      "label": "block_reader_range_lea",
+      "va": "0x2a0aeeb",
+      "bytes_hex": "488d35eceea3fd"
+    }
+  ],
+  "literals": [
+    {
+      "label": "assert_round_gt_parent",
+      "va": "0x93a61b",
+      "text": "assertion failed: round > parent_round"
+    },
+    {
+      "label": "assert_features_ok",
+      "va": "0x93a641",
+      "text": "assertion failed: features_ok"
+    },
+    {
+      "label": "assert_not_frozen",
+      "va": "0x93a65e",
+      "text": "assertion failed: !self.state.is_frozen()"
+    },
+    {
+      "label": "computed_abci_digest_tpl",
+      "va": "0x44c994",
+      "text": "computed abci digest at height="
+    },
+    {
+      "label": "block_reader_block_name",
+      "va": "0x43f132",
+      "text": "BlockReader::block"
+    },
+    {
+      "label": "block_reader_range_name",
+      "va": "0x449de1",
+      "text": "BlockReader::range_query_inclusive"
+    }
+  ]
+}

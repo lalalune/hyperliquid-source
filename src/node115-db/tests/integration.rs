@@ -246,3 +246,21 @@ fn db_hub_29_kind_prefix_table_and_3_shard_routing() {
     assert_eq!(hub.get_kind(DbKind::EvmStateStorage, b"slot7"), Some(b"val".as_slice()));
     assert_eq!(hub.get(2, b"Esslot7"), Some(b"val".as_slice()));
 }
+
+#[test]
+fn indexed_block_reader_point_and_range_query_inclusive() {
+    use node115_db::block_reader::IndexedBlockReader;
+
+    let mut reader = IndexedBlockReader::new();
+    reader.insert_block(10, b"b10".to_vec());
+    reader.insert_block(12, b"b12".to_vec());
+    reader.insert_block(15, b"b15".to_vec());
+
+    assert_eq!(reader.block(10), Some(b"b10".as_slice()));
+    assert_eq!(reader.block(11), None);
+    assert_eq!(
+        reader.range_query_inclusive(10, 12),
+        vec![(10, b"b10".as_slice()), (12, b"b12".as_slice())]
+    );
+    assert!(reader.range_query_inclusive(20, 10).is_empty());
+}
