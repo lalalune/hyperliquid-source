@@ -1,8 +1,10 @@
 #![forbid(unsafe_code)]
 
+use std::path::Path;
 use std::process::ExitCode;
 
 use hl_node::cli::{CliAction, Subcommand, help_text, parse_args, replica_style_label};
+use hl_node::engine::NodeEngine;
 use hl_node::wiring::workspace_health;
 
 fn main() -> ExitCode {
@@ -20,6 +22,29 @@ fn main() -> ExitCode {
             let health = workspace_health(cmd.chain);
             if cmd.subcommand.uses_common_run_options() && cmd.flags.contains("dry-run") {
                 let settings = cmd.output_settings.as_ref().expect("run output settings");
+                if let Some(dir) = cmd.values.get("data-dir") {
+                    match NodeEngine::open_or_restore(cmd.chain, Path::new(dir)) {
+                        Ok(eng) => {
+                            println!(
+                                "hl-node {} dry-run ok: chain={} subcommand={} replica_style={} serve_evm_rpc={} serve_info={} subsystems={} height={} abci_root={}",
+                                hl_node::cli::VERSION,
+                                health.chain,
+                                cmd.subcommand.as_str(),
+                                replica_style_label(&settings.replica_style),
+                                settings.serve_evm_rpc,
+                                settings.serve_info,
+                                health.linked_subsystems.len(),
+                                eng.latest_height(),
+                                eng.abci_state_root_hex(),
+                            );
+                            return ExitCode::SUCCESS;
+                        }
+                        Err(err) => {
+                            eprintln!("error: checkpoint restore failed: {err}");
+                            return ExitCode::from(4);
+                        }
+                    }
+                }
                 println!(
                     "hl-node {} dry-run ok: chain={} subcommand={} replica_style={} serve_evm_rpc={} serve_info={} subsystems={}",
                     hl_node::cli::VERSION,

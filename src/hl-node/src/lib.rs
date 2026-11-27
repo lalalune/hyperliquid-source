@@ -2,6 +2,9 @@
 //! Unified node #115 workspace library exports and CLI frontend.
 
 pub mod cli;
+pub mod engine;
+pub mod http_server;
+pub mod peer_loopback;
 pub mod wiring;
 
 pub use action_dispatch;
@@ -11,8 +14,10 @@ pub use bridge;
 pub use clearinghouse;
 pub use dex_registry;
 pub use evm;
+pub use evm_rpc;
 pub use exchange;
 pub use global_constants;
+pub use info_api;
 pub use l1_shared;
 pub use net_utils;
 pub use node_runtime;

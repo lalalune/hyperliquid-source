@@ -167,6 +167,8 @@ const COMMON_FLAGS: &[&str] = &[
 const COMMON_VALUES: &[&str] = &[
     "write-user-clearinghouse-states",
     "replica-cmds-style",
+    "data-dir",
+    "http-bind",
 ];
 
 fn parse_chain(s: &str) -> Option<ChainName> {
