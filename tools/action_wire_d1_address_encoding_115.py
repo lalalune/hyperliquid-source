@@ -26,8 +26,13 @@ TEXT_WITNESSES = {
     # The SendToEvmWithData payload serializer emits the field before the
     # address-encoding enum using its explicit camel-case name and length 20.
     0x240f185: '4d8b4424504d8b4c2458488d1584e41dfe488d7c2408b9140000004c89f6e868a00400',
-    # Its next value serializer receives &payload+0x60 and is 0x24580c0.
+    # Its next value serializer receives a field-context pointer at context+0x60.
     0x240f20b: '498d542460488d7c24084c89f6e8a38e0400',
+    # Both dispatch arms remove the 8-byte Action tag; serializer arm then calls 0x240eef0.
+    0x2bced39: '4883c608',
+    0x2bced9e: 'e84d0184ff',
+    # The d1 method arm removes the same tag before calling its method slot.
+    0x36c3696: '4883c6084c8934240fb6d2488d7c24204989cd4d89c44d89cfff159357e202',
     # The field serializer handles the UnvalidatedBridgeEpoch enum spelling.
     0x24580c0: '41574156534889d3807e0b007429488d05832000feba040000004989fe4889f74989f74889c6e8650619004c89fe4c89f74883f8027519488d154f9619feb90b0000004989d85b415e415fe9a035e1ff48b9000000000000008048890f48894708488957105b415e415fc3',
     # The signing method calls the object stored at +0x60 and passes the
@@ -105,15 +110,16 @@ def extract(data, *, expected_digest=TARGET_SHA256):
     return {
         'target': {'release': 115, 'size': len(data), 'sha256': digest,
                    'coordinate': 'ELF virtual address'},
-        'scope': 'field identity and typed-data handoff for the unresolved d1 action-method callback at payload+0x60',
+        'scope': 'field identity and typed-data handoff for the unresolved d1 action-method callback at variant-input+0x60',
         'fdes': [{'start': hex(a), 'end': hex(b), 'bytes': b - a}
                  for a, b in sorted(EXPECTED_FDES.items())],
         'observations': [
-            {'address': '0x240f185', 'fact': 'payload serializer passes name bytes at 0x5ed61a with length 20 and value words from payload+0x50/+0x58; the bytes spell destinationRecipient'},
-            {'address': '0x240f20b', 'fact': 'the immediately following serializer call passes payload+0x60 to 0x24580c0; the adjacent 15 target bytes at 0x5ed61a+20 spell addressEncoding'},
-            {'address': '0x2bced39', 'fact': 'the action enum record at 0x2bce570 binds variant index 75 / SendToEvmWithData to payload serializer 0x240eef0'},
+            {'address': '0x240f185', 'fact': 'the serializer context supplies the next field call with 20-byte name at 0x5ed61a and value words from context+0x50/+0x58; the bytes spell destinationRecipient'},
+            {'address': '0x240f20b', 'fact': 'the next field-value call passes the serializer-context pointer context+0x60 to 0x24580c0; the adjacent 15 target bytes at 0x5ed61a+20 spell addressEncoding'},
+            {'address': '0x2bced39', 'fact': 'the index-75 SendToEvmWithData serializer arm advances RSI by 8 bytes to the variant payload and calls 0x240eef0'},
+            {'address': '0x36c3696', 'fact': 'the index-75 d1 method arm also advances RSI by 8 bytes before calling the method slot relocated to 0x442d000'},
             {'address': '0x24580c0', 'fact': 'the selected enum serializer branch passes the 11-byte variant label UnvalidatedBridgeEpoch to its serializer helper'},
-            {'address': '0x442d192', 'fact': 'the d1 signing method invokes the first function pointer stored at payload+0x60, passing payload+0x78 and qwords at +0x68/+0x70; it copies 32 returned bytes into its local typed-data record'},
+            {'address': '0x442d192', 'fact': 'after the d1 arm advances the enum pointer by 8 bytes, the signing method invokes the first function pointer at variant-input+0x60, passing variant-input+0x78 and qwords at +0x68/+0x70; it copies 32 returned bytes into its local typed-data record'},
             {'address': '0x442d30a', 'fact': 'the method passes a local record based at rsp+0xb8 to 0x46e6d30; the 32-byte callback return stored at rsp+0x118 is record+0x60'},
             {'address': '0x46e6d44', 'fact': 'the bridge wrapper passes that record pointer to 0x4433f90'},
             {'address': '0x44340f2', 'fact': '0x4433f90 forwards the unchanged record pointer through relocation slot 0x64ea978 to typed-data hash helper 0x4428520'},
@@ -121,11 +127,11 @@ def extract(data, *, expected_digest=TARGET_SHA256):
             {'address': '0x44290c0', 'fact': 'the existing target-bound EIP-712 builder schema orders address_encoding:string immediately after destination_recipient:string and before destination_chain_id:uint32'},
         ],
         'inference': [
-            'The serializer call order, contiguous field-name bytes, enum variant serializer, and EIP-712 field order identify the payload+0x60 value as the addressEncoding/address_encoding field.',
+            'The serializer and d1 method dispatch tables both bind index 75 to SendToEvmWithData and each arm advances the enum pointer by 8 bytes. Serializer field-name/order evidence places addressEncoding immediately after destinationRecipient; the existing EIP-712 schema places address_encoding in the same relative order. Together these support identifying variant-input+0x60 as the addressEncoding/address_encoding callback field. This is an explicit crosswalk inference: the serializer context pointer at its own +0x60 is not asserted to be the same memory address as the method input.',
             'The 32-byte return from the d1 method callback occupies the address_encoding field slot in the typed-data record and is later consumed as a callable field object by the hash helper. It is not established as a final string hash; the concrete callable target and its output semantics remain unknown.',
         ],
         'unresolved': [
-            'concrete callback/vtable target and the producer that populates payload+0x60',
+            'concrete callback/vtable target and the producer that populates variant-input+0x60',
             'the concrete function pointer and behavior of the field object returned by the d1 callback',
             'runtime enum values, production digest, signature verification, replay checks, and error ordering',
         ],
@@ -138,7 +144,7 @@ def extract(data, *, expected_digest=TARGET_SHA256):
         'limitations': [
             'FDE extents are unwind ranges, not source-level function boundaries.',
             'The executable was read statically and was not run or emulated.',
-            'The relationship from serializer order to the named field is an explicit inference; no production callback result is claimed.',
+            'The relationship from serializer field order and typed-data field order to the method variant-input offset is an explicit crosswalk inference; serializer-context offsets are a separate base, and no production callback result is claimed.',
         ],
     }
 

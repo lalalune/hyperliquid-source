@@ -31,6 +31,24 @@ class D1AddressEncodingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'instruction witness mismatch at 0x240f20b'):
             subject.extract(bytes(changed), expected_digest=None)
 
+    def test_serializer_variant_pointer_adjustment_corruption_rejects(self):
+        changed = bytearray(self.original)
+        changed[0x2bced39 - 0x1000] ^= 1
+        with self.assertRaisesRegex(ValueError, 'instruction witness mismatch at 0x2bced39'):
+            subject.extract(bytes(changed), expected_digest=None)
+
+    def test_serializer_variant_call_corruption_rejects(self):
+        changed = bytearray(self.original)
+        changed[0x2bced9e - 0x1000] ^= 1
+        with self.assertRaisesRegex(ValueError, 'instruction witness mismatch at 0x2bced9e'):
+            subject.extract(bytes(changed), expected_digest=None)
+
+    def test_method_variant_pointer_adjustment_corruption_rejects(self):
+        changed = bytearray(self.original)
+        changed[0x36c3696 - 0x1000] ^= 1
+        with self.assertRaisesRegex(ValueError, 'instruction witness mismatch at 0x36c3696'):
+            subject.extract(bytes(changed), expected_digest=None)
+
     def test_enum_variant_literal_corruption_rejects(self):
         changed = bytearray(self.original)
         rodata = next(s for s in sections(changed) if s['name'] == '.rodata')
