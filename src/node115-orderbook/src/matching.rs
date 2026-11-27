@@ -142,6 +142,14 @@ pub struct InsertOrderRequest {
     pub cloid: Option<[u8; 16]>,
 }
 
+/// Market kind distinguishing Perpetual vs Spot books (`Book::kind`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub enum BookKind {
+    #[default]
+    Perp,
+    Spot,
+}
+
 /// Rejection reasons returned by `Book::insert_order`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum InsertError {
@@ -149,9 +157,11 @@ pub enum InsertError {
     ZeroPrice,
     ExceedsMaxCap,
     DuplicateOid(u64),
+    DuplicateCloid([u8; 16]),
     BadAloPx { bbo: (Option<Px>, Option<Px>) },
     IocCancel,
     TooManyOpenOrders,
+    OpenInterestCapExceeded,
     Slab(SlabError),
 }
 
@@ -203,22 +213,58 @@ pub enum ModifyError {
 
 /// Single-asset central limit order book (`l1/src/book/book/mod.rs`).
 ///
-/// Uses `#115`'s signed price key convention (`Side::signed_price_key`):
+/// Mirrors `#115`'s 8-field `struct Book` (`0x44bae3` / `0x5c9bf8`: `halfs`, `oid_to_key`,
+/// `cloid_tracker`, `book_orders`, `asset`, `user_states`, `last_trade_px`, `total_sz`),
+/// using `#115`'s signed price key convention (`Side::signed_price_key`):
 /// - `bids` keyed by `-(px as i64)` so `BTreeMap` ascending iteration yields highest bid first!
 /// - `asks` keyed by `+(px as i64)` so `BTreeMap` ascending iteration yields lowest ask first!
 #[derive(Clone, Debug, Default)]
 pub struct Book {
+    kind: BookKind,
     slab: OrderSlab,
     bids: BTreeMap<i64, Level>,
     asks: BTreeMap<i64, Level>,
     oid_to_slot: HashMap<u64, SlabIndex>,
+    cloid_tracker: HashMap<(UserAddress, [u8; 16]), u64>,
     user_open_counts: HashMap<UserAddress, u64>,
+    last_trade_px: Option<Px>,
     total_book_sz: Sz,
+    /// Optional open-interest cap (`Perp` books; enforced via `open_interest_cap` guard).
+    max_open_interest: Option<Sz>,
+    current_open_interest: Sz,
 }
 
 impl Book {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn new_with_kind(kind: BookKind) -> Self {
+        Self {
+            kind,
+            ..Self::default()
+        }
+    }
+
+    #[inline]
+    pub const fn kind(&self) -> BookKind {
+        self.kind
+    }
+
+    #[inline]
+    pub const fn last_trade_px(&self) -> Option<Px> {
+        self.last_trade_px
+    }
+
+    #[inline]
+    pub fn set_open_interest_cap(&mut self, cap: Option<Sz>, current_oi: Sz) {
+        self.max_open_interest = cap;
+        self.current_open_interest = current_oi;
+    }
+
+    #[inline]
+    pub const fn open_interest(&self) -> Sz {
+        self.current_open_interest
     }
 
     #[inline]
@@ -241,6 +287,13 @@ impl Book {
     pub fn get_order(&self, oid: u64) -> Option<&OrderRecord> {
         let &slot = self.oid_to_slot.get(&oid)?;
         self.slab.get(slot)
+    }
+
+    /// Lookup resting order by `(user, cloid)` via `cloid_tracker`.
+    #[inline]
+    pub fn get_order_by_cloid(&self, user: &UserAddress, cloid: [u8; 16]) -> Option<&OrderRecord> {
+        let &oid = self.cloid_tracker.get(&(*user, cloid))?;
+        self.get_order(oid)
     }
 
     #[inline]
@@ -330,6 +383,18 @@ impl Book {
         }
         if self.oid_to_slot.contains_key(&req.oid) {
             return Err(InsertError::DuplicateOid(req.oid));
+        }
+        if let Some(cloid) = req.cloid
+            && self.cloid_tracker.contains_key(&(req.user, cloid))
+        {
+            return Err(InsertError::DuplicateCloid(cloid));
+        }
+        if self.kind == BookKind::Perp
+            && !req.reduce_only
+            && let Some(oi_cap) = self.max_open_interest
+            && self.current_open_interest.raw() >= oi_cap.raw()
+        {
+            return Err(InsertError::OpenInterestCapExceeded);
         }
 
         let opp_side = req.side.opposite();
@@ -442,6 +507,7 @@ impl Book {
             }
 
             // Execute fill at resting order's limit price (`best_px`).
+            self.last_trade_px = Some(best_px);
             fills.push(FillEvent {
                 taker: req.user,
                 maker: resting.user,
@@ -524,6 +590,9 @@ impl Book {
         };
         self.total_book_sz = total;
         self.oid_to_slot.insert(req.oid, slot);
+        if let Some(cloid) = req.cloid {
+            self.cloid_tracker.insert((req.user, cloid), req.oid);
+        }
         *self.user_open_counts.entry(req.user).or_insert(0) += 1;
 
         Ok(InsertOutcome {
@@ -561,6 +630,9 @@ impl Book {
             self.half_mut(side).remove(&key);
         }
         self.oid_to_slot.remove(&resting.oid);
+        if let Some(cloid) = resting.cloid {
+            self.cloid_tracker.remove(&(resting.user, cloid));
+        }
         if let Some(cnt) = self.user_open_counts.get_mut(&resting.user) {
             *cnt = cnt.saturating_sub(1);
             if *cnt == 0 {
@@ -586,6 +658,42 @@ impl Book {
         self.unlink_resting_slot(resting.side, key, slot, &resting, sink)
             .map_err(CancelError::Slab)?;
         Ok(resting)
+    }
+
+    /// Cancel an order by `(user, cloid)` (`struct CancelByCloid`, `#115` `0x5e6493`).
+    pub fn cancel_by_cloid(
+        &mut self,
+        user: &UserAddress,
+        cloid: [u8; 16],
+        sink: &mut impl OverflowSink,
+    ) -> Result<OrderRecord, CancelError> {
+        let &oid = self
+            .cloid_tracker
+            .get(&(*user, cloid))
+            .ok_or(CancelError::NotFound)?;
+        self.cancel_order(user, oid, sink)
+    }
+
+    /// Cancel all resting orders belonging to `user` in deterministic OID order.
+    pub fn cancel_all_for_user(
+        &mut self,
+        user: &UserAddress,
+        sink: &mut impl OverflowSink,
+    ) -> Vec<OrderRecord> {
+        let mut oids: Vec<u64> = self
+            .oid_to_slot
+            .iter()
+            .filter_map(|(&oid, &slot)| {
+                self.slab
+                    .get(slot)
+                    .filter(|r| &r.user == user)
+                    .map(|_| oid)
+            })
+            .collect();
+        oids.sort_unstable();
+        oids.into_iter()
+            .filter_map(|oid| self.cancel_order(user, oid, sink).ok())
+            .collect()
     }
 
     /// Modify an existing resting order (cancels `old_oid` after owner check, then inserts `new_oid`).

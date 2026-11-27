@@ -74,6 +74,19 @@ impl<A: Ord> Books<A> {
             .cancel_order(user, oid, sink)
     }
 
+    pub fn cancel_by_cloid(
+        &mut self,
+        asset: &A,
+        user: &UserAddress,
+        cloid: [u8; 16],
+        sink: &mut impl OverflowSink,
+    ) -> Result<OrderRecord, CancelError> {
+        self.books
+            .get_mut(asset)
+            .ok_or(CancelError::NotFound)?
+            .cancel_by_cloid(user, cloid, sink)
+    }
+
     pub fn modify_order(
         &mut self,
         asset: &A,

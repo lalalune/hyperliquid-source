@@ -312,3 +312,158 @@ fn slab_recycling_peer_links_cancel_modify_and_books() {
         Some(103_000)
     );
 }
+
+#[test]
+fn cloid_spot_oi_cap_trigger_oco_twap_and_schedule_cancel() {
+    use node115_orderbook::{
+        ActiveTwap, BookKind, OrderDescription, ScheduleCancelEngine, Tpsl, TriggerBook,
+        TriggerCondition, TriggerOrder, TwapEngine, schedule_cancel, twap_advance,
+    };
+
+    let mut sink = NoopOverflowSink;
+    let mut risk = UnboundedRiskOracle::default();
+
+    // 1. Perp OI cap + CLOID cancel + last_trade_px
+    let mut perp = Book::new_with_kind(BookKind::Perp);
+    perp.set_open_interest_cap(Some(Sz(1_000)), Sz(1_000));
+    let cloid_a = [0xAB; 16];
+    // Non-reduce-only blocked at OI cap
+    assert_eq!(
+        perp.insert_order(
+            InsertOrderRequest {
+                cloid: Some(cloid_a),
+                ..order_req(200, user(1), Side::Bid, 100, 10, Tif::Gtc, false)
+            },
+            &mut risk,
+            &mut sink,
+        ),
+        Err(InsertError::OpenInterestCapExceeded)
+    );
+    // Reduce-only is STILL allowed at OI cap
+    perp.insert_order(
+        InsertOrderRequest {
+            cloid: Some(cloid_a),
+            ..order_req(201, user(1), Side::Bid, 100, 10, Tif::Gtc, true)
+        },
+        &mut risk,
+        &mut sink,
+    )
+    .unwrap();
+    assert_eq!(perp.get_order_by_cloid(&user(1), cloid_a).unwrap().oid, 201);
+    // Duplicate CLOID for same user rejected
+    assert_eq!(
+        perp.insert_order(
+            InsertOrderRequest {
+                cloid: Some(cloid_a),
+                ..order_req(202, user(1), Side::Bid, 101, 5, Tif::Gtc, true)
+            },
+            &mut risk,
+            &mut sink,
+        ),
+        Err(InsertError::DuplicateCloid(cloid_a))
+    );
+    // Cancel by CLOID clears cloid_tracker
+    assert_eq!(perp.cancel_by_cloid(&user(1), cloid_a, &mut sink).unwrap().oid, 201);
+    assert!(perp.get_order_by_cloid(&user(1), cloid_a).is_none());
+
+    // 2. Spot book ignores Perp OI cap and tracks last_trade_px
+    let mut spot = Book::new_with_kind(BookKind::Spot);
+    spot.set_open_interest_cap(Some(Sz(0)), Sz(0));
+    spot.insert_order(order_req(300, user(2), Side::Ask, 10_000, 50, Tif::Gtc, false), &mut risk, &mut sink)
+        .unwrap();
+    spot.insert_order(order_req(301, user(1), Side::Bid, 9_800, 50, Tif::Gtc, false), &mut risk, &mut sink)
+        .unwrap();
+    assert_eq!(spot.last_trade_px(), None);
+
+    // 3. Trigger / TP-SL with OCO peer cancel
+    let mut triggers = TriggerBook::new();
+    let tp_cond = TriggerCondition {
+        is_market: true,
+        trigger_px: Px(10_500),
+        tpsl: Tpsl::Tp,
+    };
+    let sl_cond = TriggerCondition {
+        is_market: false,
+        trigger_px: Px(9_500),
+        tpsl: Tpsl::Sl,
+    };
+    assert_eq!(tp_cond.description(), OrderDescription::TakeProfitMarket);
+    assert_eq!(sl_cond.description(), OrderDescription::StopLimit);
+    triggers.insert(TriggerOrder {
+        oid: 400,
+        user: user(3),
+        side: Side::Ask,
+        limit_px: Px(9_000),
+        sz: Sz(10),
+        reduce_only: false,
+        is_position_tpsl: true,
+        trigger: tp_cond,
+        timestamp: 1,
+        cloid: None,
+        peer_oid: None,
+    });
+    triggers.insert(TriggerOrder {
+        oid: 401,
+        user: user(3),
+        side: Side::Ask,
+        limit_px: Px(9_400),
+        sz: Sz(10),
+        reduce_only: false,
+        is_position_tpsl: true,
+        trigger: sl_cond,
+        timestamp: 1,
+        cloid: None,
+        peer_oid: None,
+    });
+    triggers.link_oco_peers(&user(3), 400, 401);
+    // Mark 10_000 triggers neither
+    assert!(triggers.trigger_on_mark(Px(10_000), 2, &mut spot, &mut risk, &mut sink).is_empty());
+    // Mark 10_500 triggers TP (400), cancels OCO peer SL (401), and fills against resting bid 301 at 9_800!
+    let fired = triggers.trigger_on_mark(Px(10_500), 3, &mut spot, &mut risk, &mut sink);
+    assert_eq!(fired.len(), 1);
+    assert_eq!(fired[0].oid, 400);
+    assert_eq!(fired[0].cancelled_peer_oid, Some(401));
+    assert!(triggers.is_empty());
+    assert_eq!(spot.last_trade_px(), Some(Px(9_800)));
+
+    // 4. Live TwapEngine executing a slice against the book
+    let mut twap = TwapEngine::new();
+    let now = twap_advance::Moment::new(739_000, 100, 0).unwrap();
+    twap.add_twap(
+        ActiveTwap {
+            twap_id: 500,
+            user: user(4),
+            side: Side::Bid,
+            reduce_only: false,
+            randomize: false,
+            tick: 10,
+        },
+        Sz(20),
+        60.0,
+        now,
+    );
+    let exec = twap
+        .execute_slice(user(4), 500, 501, now, 1_700_000_000_000, Some(Px(9_900)), &mut spot, &mut risk, &mut sink)
+        .unwrap();
+    assert!(exec.slice_sz.raw() > 0);
+    assert!(exec.filled_sz.raw() > 0);
+    assert_eq!(spot.last_trade_px(), Some(Px(10_000)));
+
+    // 5. ScheduleCancelEngine dead-man's-switch cancels all resting orders for user(1)
+    let mut sc_engine = ScheduleCancelEngine::new();
+    let sc_now = schedule_cancel::Moment::from_unix_millis(1_700_000_000_000).unwrap();
+    let mut vols = schedule_cancel::Volumes::default();
+    vols.spot.insert(
+        user(1),
+        schedule_cancel::Volume {
+            scaled: 2_000_000_000_000,
+            raw: 2_000_000_000_000,
+        },
+    );
+    let _ = sc_engine.request(user(1), sc_now, Some(1_700_000_010_000), &vols);
+    let sc_later = schedule_cancel::Moment::from_unix_millis(1_700_000_020_000).unwrap();
+    let swept = sc_engine.fire_due(sc_later, &mut [&mut spot], &mut sink);
+    assert_eq!(swept.len(), 1);
+    assert_eq!(swept[0].0, user(1));
+    assert_eq!(spot.open_order_count(&user(1)), 0);
+}

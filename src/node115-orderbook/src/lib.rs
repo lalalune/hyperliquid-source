@@ -14,7 +14,10 @@
 pub mod books;
 pub mod matching;
 pub mod relations;
+pub mod schedule_cancel_book;
 pub mod slab;
+pub mod trigger;
+pub mod twap;
 
 /// Verified node #115 target binary SHA-256.
 pub const TARGET_SHA256: &str =
@@ -43,9 +46,13 @@ pub use node115_twap_tag4_cleanup as twap_tag4_cleanup;
 
 pub use books::Books;
 pub use matching::{
-    BAD_ALO_HEAD, Book, BookRiskOracle, CancelError, FillEvent, IOC_CANCEL_HEAD, InsertError,
-    InsertOrderRequest, InsertOutcome, L2Level, MAX_ORDER_CAP, ModifyError, ModifyOrderRequest,
-    OrderStatus, RestingCancelReason, UnboundedRiskOracle, cancel_oid_hash, would_cross,
+    BAD_ALO_HEAD, Book, BookKind, BookRiskOracle, CancelError, FillEvent, IOC_CANCEL_HEAD,
+    InsertError, InsertOrderRequest, InsertOutcome, L2Level, MAX_ORDER_CAP, ModifyError,
+    ModifyOrderRequest, OrderStatus, RestingCancelReason, UnboundedRiskOracle, cancel_oid_hash,
+    would_cross,
 };
 pub use relations::{OrderRelations, detach_from_parent, link_peers};
+pub use schedule_cancel_book::ScheduleCancelEngine;
 pub use slab::{Level, OrderRecord, OrderSlab, SlabError, SlabIndex, UnlinkResult};
+pub use trigger::{OrderDescription, Tpsl, TriggerBook, TriggerCondition, TriggerFireResult, TriggerOrder};
+pub use twap::{ActiveTwap, TwapEngine, TwapSliceExecution};
