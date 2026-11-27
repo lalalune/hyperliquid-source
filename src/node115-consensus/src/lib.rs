@@ -9,9 +9,12 @@
 //! - [`admission`]: signed block (`0x57e8970` / `0x2786870`) and timeout
 //!   message (`0x2786a20`) admission front ends;
 //! - [`block_rules`]: block validation rules (`0x59d6b80`, `signed.rs:194`);
+//! - [`proposer`]: deterministic stake-weighted proposer selection (`0x595cb30`);
 //! - [`tc_verify`]: timeout certificate verification (`0x5960390` + `0x564b510`);
 //! - [`timeout_flow`]: first-timer polling selector (`0x2cdca20`) and
-//!   saturating timeout counter (`0x2e098e0` arm `0x8000000000000006`).
+//!   saturating timeout counter (`0x2e098e0` arm `0x8000000000000006`);
+//! - [`wire_codec`]: 5-variant bincode signing payload serializer (`0x5823db0`)
+//!   and `try_propose` pre-proposal guards (`0x2e13ea0`).
 //!
 //! All semantics are bound to Linux x86-64 node #115
 //! (`a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`).
@@ -20,9 +23,11 @@
 
 pub mod admission;
 pub mod block_rules;
+pub mod proposer;
 pub mod round_progression;
 pub mod tc_verify;
 pub mod timeout_flow;
+pub mod wire_codec;
 
 // Re-export integrated node #115 consensus micro-crates for downstream
 // `node-runtime` and `storage-abci` callers.
@@ -47,8 +52,20 @@ pub use block_rules::{
     BlockJustification, BlockProposerProvider, BlockRuleError, ConsensusBlock, MAX_BLOCK_TX_HASHES,
     verify_block_rules,
 };
+pub use proposer::{
+    PreparedWeights, ProposerError, ProposerScheduleHistory, ScheduleEvent, StakeRow,
+    TAG_PROPOSER_EMPTY_SCHEDULE, TAG_PROPOSER_MISSING_HISTORY, TAG_PROPOSER_SELECTED,
+    build_schedule, event_order, event_point_bits, history_query, history_warning_limit,
+    prepare_weights, select_proposer,
+};
 pub use tc_verify::{
     TcSignatureEntry, TcVerifyError, VerifiableTimeoutCertificate, verify_timeout_certificate,
+};
+pub use wire_codec::{
+    PeerMsgSigningPayload, SIGNING_TAG_BLOCK, SIGNING_TAG_PEER_MSG, SIGNING_TAG_STATUS,
+    SIGNING_TAG_TIMEOUT, SIGNING_TAG_VOTE, TimeoutSigningPayload, TryProposeDecision,
+    VoteSigningPayload, encode_block_signing_payload, evaluate_try_propose_guards,
+    write_varint_u32, zigzag_encode_i64,
 };
 pub use nested_certificate::{
     Certificate, Context, Output as CertificateDecisionOutput, Rejection as CertificateRejection,
