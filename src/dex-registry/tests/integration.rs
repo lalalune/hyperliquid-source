@@ -221,4 +221,28 @@ fn registry_pdi_lookup_name_index_and_deployer_authorization() {
     // Cross-DEX scan finds clearinghouse 200.
     assert!(reg.any_slot(|s| s.clearinghouse == 200));
     assert!(!reg.any_slot(|s| s.clearinghouse == 999));
+
+    // disableDex authorization (selector 0x13, 0x469e170) & disabled-state transition.
+    assert_eq!(
+        reg.set_disabled_state(pdi1, &oracle_sub, DisabledState::UserDisabled, false),
+        Err(RegistryError::UnauthorizedDeployer)
+    );
+    assert_eq!(
+        reg.set_disabled_state(pdi1, &deployer, DisabledState::UserDisabled, false),
+        Ok(DisabledState::Na)
+    );
+    // Once UserDisabled, regular actions like SetOracle are rejected with DexDisabled,
+    // while DisableDex itself remains reachable for the authorized caller.
+    assert_eq!(
+        reg.authorize_hip3_action(pdi1, Hip3DeployAction::SetOracle, &oracle_sub),
+        Err(RegistryError::DexDisabled(DisabledState::UserDisabled))
+    );
+    assert!(reg
+        .authorize_hip3_action(pdi1, Hip3DeployAction::DisableDex, &deployer)
+        .is_ok());
+    // Validator override transitions to ValidatorDisabled regardless of caller.
+    assert_eq!(
+        reg.set_disabled_state(pdi1, &stranger, DisabledState::ValidatorDisabled, true),
+        Ok(DisabledState::UserDisabled)
+    );
 }

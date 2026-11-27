@@ -182,6 +182,39 @@ impl<C> DexRegistry<C> {
         }
     }
 
+    /// Transitions a HIP-3 DEX's [`DisabledState`] after verifying deployer or
+    /// `Hip3DeployAction::DisableDex` (selector `0x13`, `0x469e170`) authorization.
+    ///
+    /// Mirrors node #115's `disableDex` state write (`RE-007-node115-hip3-disabled-state-writer`,
+    /// `RE-008-node115-hip3-permission-membership`), setting `DisabledState::UserDisabled`
+    /// on deployer/sub-deployer disable or `DisabledState::ValidatorDisabled` on validator override.
+    pub fn set_disabled_state(
+        &mut self,
+        pdi: Pdi,
+        caller: &Address,
+        new_state: DisabledState,
+        is_validator_override: bool,
+    ) -> Result<DisabledState, RegistryError> {
+        let slot = self.get_mut(pdi)?;
+        match &mut slot.metadata {
+            DexMetadata::Main { .. } => Err(RegistryError::UnauthorizedDeployer),
+            DexMetadata::Hip3 { schema, state, .. } => {
+                if !is_validator_override
+                    && !schema.sub_deployers.is_authorized(
+                        &schema.deployer,
+                        Hip3DeployAction::DisableDex,
+                        caller,
+                    )
+                {
+                    return Err(RegistryError::UnauthorizedDeployer);
+                }
+                let prev = state.disabled_state;
+                state.disabled_state = new_state;
+                Ok(prev)
+            }
+        }
+    }
+
     /// Scans across all registered DEX slots in PDI order (mirroring `0x2c774c0`
     /// `dex_registry.rs:37`), returning `true` as soon as `predicate` matches.
     pub fn any_slot<F>(&self, predicate: F) -> bool
