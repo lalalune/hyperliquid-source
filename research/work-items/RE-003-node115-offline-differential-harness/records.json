@@ -1,0 +1,93 @@
+{
+  "architecture": "x86_64",
+  "controls": [
+    {
+      "actual": "match",
+      "control": "C1_valid_deterministic_match",
+      "expected": "match",
+      "passed": true
+    },
+    {
+      "actual": "match",
+      "control": "C2_repeatability_byte_for_byte",
+      "expected": "match",
+      "passed": true
+    },
+    {
+      "actual": "rejected",
+      "control": "C3_wrong_hash_rejected",
+      "expected": "rejected",
+      "passed": true,
+      "reason": "target_sha256_mismatch"
+    },
+    {
+      "actual": "rejected",
+      "control": "C4_invalid_and_oversized_fixture_rejected",
+      "expected": "rejected",
+      "passed": true,
+      "reasons": [
+        "malformed_json_fixture",
+        "oversized_fixture"
+      ]
+    },
+    {
+      "actual": "failed",
+      "control": "C5_socket_denied_seccomp",
+      "expected": "failed",
+      "passed": true
+    },
+    {
+      "actual": "failed",
+      "control": "C6_write_outside_scratch_denied",
+      "expected": "failed",
+      "passed": true
+    },
+    {
+      "actual": "failed",
+      "control": "C7_spawn_and_timeout_denied",
+      "expected": "failed",
+      "passed": true
+    },
+    {
+      "actual": "mismatch",
+      "control": "C8_value_mismatch_preserved",
+      "expected": "mismatch",
+      "passed": true
+    },
+    {
+      "actual": "rejected",
+      "control": "C9_unapproved_mask_rejected",
+      "expected": "rejected",
+      "passed": true,
+      "reason": "unapproved_normalization_mask:unreviewed_mask"
+    },
+    {
+      "actual": "not-run",
+      "control": "C10_captured_node115_approval_gate",
+      "expected": "not-run",
+      "passed": true,
+      "reason": "captured_artifact_requires_separate_execution_approval"
+    }
+  ],
+  "controls_passed": 10,
+  "controls_total": 10,
+  "denied_syscalls_x86_64": {
+    "clone": 56,
+    "clone3": 435,
+    "fork": 57,
+    "mount": 165,
+    "ptrace": 101,
+    "setns": 308,
+    "socket": 41,
+    "socketpair": 53,
+    "umount2": 166,
+    "unshare": 272,
+    "vfork": 58
+  },
+  "policy_id": "re003-bwrap-unshare-all-seccomp-x86_64-v1",
+  "sandbox_tool": "bubblewrap 0.13.1",
+  "schema_version": 1,
+  "target_execution_status": "not-run",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "work_item": "RE-003-node115-offline-differential-harness"
+}
