@@ -16,12 +16,20 @@ use crate::lz4::{Lz4Error, compress_prepend_size, decompress_size_prepended, sho
 pub const DEFAULT_WRITE_TIMEOUT_SECS: f64 = 60.0;
 
 /// Observed LZ4 stats reporting window in `net_utils/src/tcp/lz4_stats.rs`
-/// (`0x458f40` => `300.0` seconds).
+/// (`0x478540b -> .rodata 0x458f40` => `300.0` seconds).
 pub const LZ4_STATS_WINDOW_SECS: f64 = 300.0;
 
+/// Observed LZ4 ratio warning threshold in `net_utils/src/tcp/lz4_stats.rs`
+/// (`0x47857c0: movabs $0x3fe0000000000000` => `0.5`).
+pub const LZ4_STATS_RATIO_WARN_THRESHOLD: f64 = 0.5;
+
 /// Observed traffic recorder reporting window in `net_utils/src/tcp/traffic_recorder.rs`
-/// (`0x458cd8` => `30.0` seconds).
+/// (`0x4781d3a -> .rodata 0x458cd8` => `30.0` seconds).
 pub const TRAFFIC_RECORDER_WINDOW_SECS: f64 = 30.0;
+
+/// Observed `TcpListener` accept error retry sleep in `net_utils/src/tcp/tcp_listener.rs`
+/// (`0x2afb0d4: movabs $0x3ff0000000000000` => `1.0` second).
+pub const ACCEPT_RETRY_SLEEP_SECS: f64 = 1.0;
 
 /// Default listener maximum frame payload limit (`node115-listener-prefix`).
 pub const DEFAULT_MAX_FRAME_BYTES: u64 = node115_listener_prefix::LISTENER_LIMIT;

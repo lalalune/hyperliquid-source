@@ -6,6 +6,8 @@
 //! tcp_listener,tcp_stream,traffic_recorder,write}`) and integrates the verified
 //! node #115 LZ4, TCP framing, greeting, gossip, and HTTP/2 transport micro-crates.
 
+#![forbid(unsafe_code)]
+
 pub mod gossip;
 pub mod ip_semaphore;
 pub mod lz4;
@@ -35,18 +37,22 @@ pub use gossip::{
     ClientBlocksError, GossipRpcRequest, GossipRpcResponse, GossipStatus, Hardfork,
     PEERS_RESPONSE_LIMIT, PeerEntry,
 };
-pub use ip_semaphore::{IpSemaphore, IpSemaphorePermit, SemaphoreError};
+pub use ip_semaphore::{
+    IP_SEMAPHORE_STATS_INTERVAL_SECS, IP_SEMAPHORE_WARN_UTILIZATION, IpSemaphore,
+    IpSemaphorePermit, SemaphoreError,
+};
 pub use lz4::{Lz4Error, compress_prepend_size, decompress_size_prepended, should_compress_for_port};
 pub use primitives::{
-    BoundedChannel, ChannelError, ProfiledRwLock, RetryExhausted, RetryPolicy, sleep_retry,
+    BoundedChannel, CRITICAL_WRITE_THRESHOLD_MS, ChannelError, ProfiledRwLock, RetryExhausted,
+    RetryPolicy, SLOW_WRITE_THRESHOLD_MS, sleep_retry,
 };
 pub use rate_limiter::{AlertConfig, RateLimitDecision, RateLimiter};
 pub use stream_protocols::{
     AbciStreamGreeting, EvmKvsMsg, GreetingFixedPart, GreetingHash, WireSignature,
 };
 pub use tcp::{
-    DEFAULT_MAX_FRAME_BYTES, DEFAULT_WRITE_TIMEOUT_SECS, Direction, FramedTcpStream,
-    LZ4_STATS_WINDOW_SECS, Lz4Stats, TRAFFIC_RECORDER_WINDOW_SECS, TcpClient, TcpError,
-    TcpListener, TrafficRecorder, encode_frame, read_bincode_frame, read_frame,
-    write_bincode_frame, write_frame,
+    ACCEPT_RETRY_SLEEP_SECS, DEFAULT_MAX_FRAME_BYTES, DEFAULT_WRITE_TIMEOUT_SECS, Direction,
+    FramedTcpStream, LZ4_STATS_RATIO_WARN_THRESHOLD, LZ4_STATS_WINDOW_SECS, Lz4Stats,
+    TRAFFIC_RECORDER_WINDOW_SECS, TcpClient, TcpError, TcpListener, TrafficRecorder, encode_frame,
+    read_bincode_frame, read_frame, write_bincode_frame, write_frame,
 };

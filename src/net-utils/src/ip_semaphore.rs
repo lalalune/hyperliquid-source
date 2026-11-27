@@ -5,6 +5,14 @@ use std::collections::HashMap;
 use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
 
+/// Observed periodic telemetry/cleanup interval in node #115 `net_utils/src/ip_semaphore.rs`
+/// (`0x477116a: movabs $0x404e000000000000` => `60.0` seconds).
+pub const IP_SEMAPHORE_STATS_INTERVAL_SECS: f64 = 60.0;
+
+/// Observed permit utilization alert threshold in node #115 `net_utils/src/ip_semaphore.rs`
+/// (`0x4771300: movabs $0x3fe999999999999a` => `0.8`, i.e., 80% of permits in use).
+pub const IP_SEMAPHORE_WARN_UTILIZATION: f64 = 0.8;
+
 /// Error returned when permit acquisition fails.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SemaphoreError {

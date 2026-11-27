@@ -358,3 +358,53 @@ fn ip_semaphore_rate_limiter_stats_and_primitives() {
     });
     assert_eq!(lines, vec![b"a\n".to_vec(), b"    ".to_vec(), b"b\n".to_vec()]);
 }
+
+#[test]
+fn node115_net_utils_binary_constants_and_error_contracts() {
+    use net_utils::{
+        ACCEPT_RETRY_SLEEP_SECS, CRITICAL_WRITE_THRESHOLD_MS, DEFAULT_WRITE_TIMEOUT_SECS,
+        IP_SEMAPHORE_STATS_INTERVAL_SECS, IP_SEMAPHORE_WARN_UTILIZATION,
+        LZ4_STATS_RATIO_WARN_THRESHOLD, LZ4_STATS_WINDOW_SECS, SLOW_WRITE_THRESHOLD_MS,
+        TRAFFIC_RECORDER_WINDOW_SECS,
+    };
+
+    assert_eq!(IP_SEMAPHORE_STATS_INTERVAL_SECS, 60.0);
+    assert_eq!(IP_SEMAPHORE_WARN_UTILIZATION, 0.8);
+    assert_eq!(SLOW_WRITE_THRESHOLD_MS, 50);
+    assert_eq!(CRITICAL_WRITE_THRESHOLD_MS, 350);
+    assert_eq!(DEFAULT_WRITE_TIMEOUT_SECS, 60.0);
+    assert_eq!(LZ4_STATS_WINDOW_SECS, 300.0);
+    assert_eq!(LZ4_STATS_RATIO_WARN_THRESHOLD, 0.5);
+    assert_eq!(TRAFFIC_RECORDER_WINDOW_SECS, 30.0);
+    assert_eq!(ACCEPT_RETRY_SLEEP_SECS, 1.0);
+
+    // IPv6 rejection matches node #115 `ip not v4` check (`0x93c599` / `0x606ec3`).
+    let v6_err = TcpClient::new(
+        SocketAddr::from(([0, 0, 0, 0, 0, 0, 0, 1], 4001)),
+        "v6_peer",
+    )
+    .unwrap_err();
+    assert!(matches!(v6_err, TcpError::IpNotV4(_)));
+    assert!(v6_err.to_string().starts_with("ip not v4: "));
+
+    // Closed semaphore rejects new acquisitions immediately.
+    let sem = IpSemaphore::new("closed_test", 2, 1);
+    sem.close();
+    assert_eq!(
+        sem.try_acquire(IpAddr::V4(Ipv4Addr::LOCALHOST)).unwrap_err(),
+        SemaphoreError::Closed
+    );
+
+    // Retry exhaustion preserves exact node #115 diagnostic prefix (`0x444d46`).
+    let ex = sleep_retry::<(), _, _>(
+        RetryPolicy {
+            max_retries: 2,
+            initial_backoff: Duration::ZERO,
+            max_backoff: Duration::ZERO,
+        },
+        |_| Err("boom"),
+    )
+    .unwrap_err();
+    assert_eq!(ex.attempts, 3);
+    assert_eq!(ex.to_string(), "async_sleep_retry retries exhausted: boom");
+}

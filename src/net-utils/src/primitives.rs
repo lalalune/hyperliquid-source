@@ -10,6 +10,14 @@ use std::time::{Duration, Instant};
 
 // --- rw_lock.rs (`profiled_rw_lock/`, `blocked_writer/profiled_rw_lock/`) ---
 
+/// Observed primary slow-lock threshold in node #115 `net_utils/src/rw_lock.rs`
+/// (`0x56496fb -> .rodata 0x459038` = `0.05`s = `50` ms).
+pub const SLOW_WRITE_THRESHOLD_MS: u64 = 50;
+
+/// Observed secondary/critical slow-lock alert threshold in node #115 `net_utils/src/rw_lock.rs`
+/// (`0x5649789 -> .rodata 0x458f50` = `0.35`s = `350` ms).
+pub const CRITICAL_WRITE_THRESHOLD_MS: u64 = 350;
+
 /// RwLock wrapper recording acquisition counts and max wait latency.
 #[derive(Debug)]
 pub struct ProfiledRwLock<T> {
@@ -29,7 +37,7 @@ impl<T> ProfiledRwLock<T> {
             read_acquisitions: AtomicU64::new(0),
             write_acquisitions: AtomicU64::new(0),
             blocked_writers: AtomicU64::new(0),
-            slow_threshold: Duration::from_millis(50),
+            slow_threshold: Duration::from_millis(SLOW_WRITE_THRESHOLD_MS),
         }
     }
 
