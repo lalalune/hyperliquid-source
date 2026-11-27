@@ -5,6 +5,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod bole_liquidation;
 pub mod orchestrator;
 pub mod spot_deploy;
 pub mod stake_requirement;

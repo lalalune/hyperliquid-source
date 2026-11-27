@@ -5,6 +5,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod liquidation;
 pub mod margin_user_state;
 pub mod position_risk;
 pub mod reference_oracle;

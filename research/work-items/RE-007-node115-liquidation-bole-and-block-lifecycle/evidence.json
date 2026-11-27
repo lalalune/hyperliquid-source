@@ -1,0 +1,187 @@
+{
+  "work_item": "RE-007-node115-liquidation-bole-and-block-lifecycle",
+  "components": [
+    "risk",
+    "exchange"
+  ],
+  "target_release": "node-115",
+  "target_path": "artifacts/node/115/hl-node",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "anchored_slices": [
+    {
+      "name": "clearinghouse_backstop_position_alloc",
+      "va": "0x44dcf80",
+      "size": 548,
+      "sha256": "ad8ab2d7a8ea91768150a9e518a7d2a6ccc01e88899656662f15b4469588b0e2"
+    },
+    {
+      "name": "clearinghouse_price_keep_old_544",
+      "va": "0x3d987f0",
+      "size": 834,
+      "sha256": "5d854b54497e96900803e5c4f62820c393a337058dde98bd6be8abcf580e7990"
+    },
+    {
+      "name": "exchange_bole_liquidation_spot_order",
+      "va": "0x2c80670",
+      "size": 973,
+      "sha256": "4d3c4952b9d5e9d0cf88f08a64914d3dcc6a6cb100680781629a393bee76dc96"
+    },
+    {
+      "name": "exchange_begin_block_main",
+      "va": "0x2bdf8f0",
+      "size": 46769,
+      "sha256": "225649f70f438609a3bf19555e1a01ce18bee7dfa80fb5179ba16225e4fa437c"
+    },
+    {
+      "name": "exchange_end_block_194",
+      "va": "0x2c71250",
+      "size": 3157,
+      "sha256": "a94a85af1fb68f0afdab2729d7d4f0016c3a21d80ad864e337528fc49b0f1800"
+    }
+  ],
+  "begin_block_phases": [
+    {
+      "name": "distribute_funding",
+      "lea_va": "0x2bdfb11",
+      "string_va": "0x60e19e",
+      "string_len": 18,
+      "bucket_guard_va": "0x453890",
+      "bucket_guard_f64": [
+        0.35,
+        0.05
+      ]
+    },
+    {
+      "name": "update_funding_rates",
+      "lea_va": "0x2be0732",
+      "string_va": "0x60e1db",
+      "string_len": 20,
+      "bucket_guard_va": "0x453530",
+      "bucket_guard_f64": [
+        0.01,
+        0.05
+      ]
+    },
+    {
+      "name": "cancel_aggressive_orders_at_oi_cap",
+      "lea_va": "0x2be11a0",
+      "string_va": "0x60e23a",
+      "string_len": 34,
+      "bucket_guard_va": "0x453530",
+      "bucket_guard_f64": [
+        0.01,
+        0.05
+      ]
+    },
+    {
+      "name": "prune_book_empty_user_states",
+      "lea_va": "0x2be191a",
+      "string_va": "0x60e21e",
+      "string_len": 28,
+      "bucket_guard_va": "0x453520",
+      "bucket_guard_f64": [
+        0.05,
+        0.05
+      ]
+    },
+    {
+      "name": "refresh_main_perp_dex_stale_oracle",
+      "lea_va": "0x2be66b6",
+      "string_va": "0x60e25c",
+      "string_len": 34,
+      "bucket_guard_va": "0x453530",
+      "bucket_guard_f64": [
+        0.01,
+        0.05
+      ]
+    },
+    {
+      "name": "refresh_hip3_stale_mark_pxs",
+      "lea_va": "0x2be6cb5",
+      "string_va": "0x60e203",
+      "string_len": 27,
+      "bucket_guard_va": "0x453530",
+      "bucket_guard_f64": [
+        0.01,
+        0.05
+      ]
+    },
+    {
+      "name": "apply_bole_liquidations",
+      "lea_va": "0x2be7ab5",
+      "string_va": "0x60e1b0",
+      "string_len": 23,
+      "bucket_guard_va": "0x453530",
+      "bucket_guard_f64": [
+        0.01,
+        0.05
+      ]
+    }
+  ],
+  "end_block_action_router_call": {
+    "call_va": "0x2c719c3",
+    "target_va": "0x2bda7c0"
+  },
+  "rodata_constants": {
+    "bole_liquidator_addr_va": "0x60e1c7",
+    "bole_liquidator_addr_hex": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "bole_liquidator_16b_va": "0x4518f0",
+    "bole_liquidator_16b_hex": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "liquidator_cross_margin_err_va": "0x444f1c",
+    "liquidator_cross_margin_err": "Liquidator must use cross margin for asset "
+  },
+  "instruction_anchors": {
+    "bole_floor_one": [
+      "0x2c808ab",
+      "4983f8014983d000"
+    ],
+    "bole_liquidator_tail_4b": [
+      "0x2c80913",
+      "c7842430010000bbbbbbbb"
+    ],
+    "bole_tif_ioc_1": [
+      "0x2c809a4",
+      "b901000000"
+    ],
+    "end_block_calls_action_router": [
+      "0x2c719c3",
+      "e8f88df6ff"
+    ],
+    "backstop_hip3_mod10000_magic": [
+      "0x44dcf91",
+      "48ba4b598638d6c56d34"
+    ]
+  },
+  "panic_locations": [
+    {
+      "va": "0x648bb28",
+      "path": "l1/src/clearinghouse/clearinghouse.rs",
+      "line": 179,
+      "col": 98
+    },
+    {
+      "va": "0x648ba50",
+      "path": "l1/src/qtys/impl_ntl.rs",
+      "line": 70,
+      "col": 1
+    },
+    {
+      "va": "0x644d9c0",
+      "path": "l1/src/exchange/impl_bole.rs",
+      "line": 384,
+      "col": 35
+    },
+    {
+      "va": "0x644d738",
+      "path": "l1/src/exchange/begin_block.rs",
+      "line": 266,
+      "col": 51
+    },
+    {
+      "va": "0x644d9a8",
+      "path": "l1/src/exchange/end_block.rs",
+      "line": 194,
+      "col": 32
+    }
+  ]
+}

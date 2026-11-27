@@ -427,3 +427,93 @@ fn reference_oracle_0x366f900_and_oracle_kind_0x3db4e40_match_rules() {
         }
     );
 }
+
+#[test]
+fn liquidation_backstop_allocation_0x44dcf80_and_adl_classification_match_rules() {
+    use clearinghouse::liquidation::{
+        backstop_liquidate_position_allocation, classify_liquidation,
+        evaluate_isolated_position_liquidation, LiquidationAction,
+        ERR_LIQUIDATOR_MUST_USE_CROSS_MARGIN,
+    };
+    use clearinghouse::margin_user_state::{
+        MarginTableStore, PositionMarginInput, HIP3_PERP_ASSET_STRIDE,
+    };
+
+    assert_eq!(
+        ERR_LIQUIDATOR_MUST_USE_CROSS_MARGIN,
+        "Liquidator must use cross margin for asset "
+    );
+
+    // Pro-rata cross backstop allocation across two positions (25% / 75% of total_abs_ntl = 400_000).
+    let oracles = [1_000, 2_000];
+    let mut remaining = 20_000i64;
+    let a1 = backstop_liquidate_position_allocation(
+        HIP3_PERP_ASSET_STRIDE,
+        100, // ntli = 100_000 (25%) -> allocated_margin = 5_000
+        &oracles,
+        400_000,
+        20_000,
+        &mut remaining,
+    )
+    .unwrap()
+    .unwrap();
+    assert_eq!(a1.ntli, 100_000);
+    assert_eq!(a1.allocated_margin, 5_000);
+    assert_eq!(a1.liquidation_pnl, -95_000);
+    assert_eq!(remaining, 15_000);
+
+    let a2 = backstop_liquidate_position_allocation(
+        HIP3_PERP_ASSET_STRIDE + 1,
+        -150, // ntli = -300_000 (75%) -> allocated_margin = 15_000
+        &oracles,
+        400_000,
+        20_000,
+        &mut remaining,
+    )
+    .unwrap()
+    .unwrap();
+    assert_eq!(a2.ntli, -300_000);
+    assert_eq!(a2.allocated_margin, 15_000);
+    assert_eq!(a2.liquidation_pnl, 315_000);
+    assert_eq!(remaining, 0);
+
+    // Zero total_abs_ntl returns Ok(None).
+    assert_eq!(
+        backstop_liquidate_position_allocation(0, 10, &oracles, 0, 100, &mut remaining).unwrap(),
+        None
+    );
+
+    // Maintenance (2_500) vs 2/3 backstop (1_666) vs underwater ADL classification.
+    let store = MarginTableStore::new();
+    let mut iso = PositionMarginInput {
+        is_isolated: true,
+        leverage: 20,
+        raw_usd: -97_500, // account_value = -97_500 + 100_000 = 2_500 == maint
+        szi: 100,
+        margin_table_id: 20,
+    };
+    assert_eq!(
+        evaluate_isolated_position_liquidation(&iso, 1_000, 20, &store).unwrap(),
+        LiquidationAction::Healthy
+    );
+    iso.raw_usd = -98_000; // account_value = 2_000 in [1_666, 2_500) -> MarketLiquidate
+    assert_eq!(
+        evaluate_isolated_position_liquidation(&iso, 1_000, 20, &store).unwrap(),
+        LiquidationAction::MarketLiquidate {
+            shortfall_to_maintenance: 500
+        }
+    );
+    iso.raw_usd = -99_000; // account_value = 1_000 < 1_666 -> BackstopLiquidate
+    assert_eq!(
+        evaluate_isolated_position_liquidation(&iso, 1_000, 20, &store).unwrap(),
+        LiquidationAction::BackstopLiquidate {
+            shortfall_to_backstop: 666
+        }
+    );
+    iso.raw_usd = -100_250; // account_value = -250 < 0 -> AdlDeficit
+    assert_eq!(
+        evaluate_isolated_position_liquidation(&iso, 1_000, 20, &store).unwrap(),
+        LiquidationAction::AdlDeficit { deficit_usd: 250 }
+    );
+    assert_eq!(classify_liquidation(500, 500, 333), LiquidationAction::Healthy);
+}

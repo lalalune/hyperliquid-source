@@ -300,3 +300,78 @@ fn stake_requirement_table_cooldown_and_gates_match_node115_0x2c59480() {
         }
     );
 }
+
+#[test]
+fn bole_liquidation_0x2c80670_and_begin_block_7_phase_schedule_match_node115() {
+    use exchange::bole_liquidation::{
+        build_bole_liquidation_spot_order, compute_bole_liquidation_limit_px, BeginBlockPhase,
+        SpotPairMeta, BOLE_LIQUIDATOR_ADDRESS,
+    };
+
+    // Exact 7-phase begin_block schedule order & bucket-guard constants from 0x2bdf8f0.
+    let names: Vec<&str> = BeginBlockPhase::SCHEDULE_ORDER
+        .iter()
+        .map(|p| p.name())
+        .collect();
+    assert_eq!(
+        names,
+        vec![
+            "distribute_funding",
+            "update_funding_rates",
+            "cancel_aggressive_orders_at_oi_cap",
+            "prune_book_empty_user_states",
+            "refresh_main_perp_dex_stale_oracle",
+            "refresh_hip3_stale_mark_pxs",
+            "apply_bole_liquidations",
+        ]
+    );
+    assert_eq!(BeginBlockPhase::DistributeFunding.bucket_guard(), (0.35, 0.05));
+    assert_eq!(BeginBlockPhase::PruneBookEmptyUserStates.bucket_guard(), (0.05, 0.05));
+    assert_eq!(BeginBlockPhase::ApplyBoleLiquidations.bucket_guard(), (0.01, 0.05));
+    assert_eq!(BOLE_LIQUIDATOR_ADDRESS, [0xbb; 20]);
+
+    let spots = [
+        SpotPairMeta {
+            spot_id: 7,
+            base_token: 3,
+            quote_token: 1, // non-USDC quote skipped
+        },
+        SpotPairMeta {
+            spot_id: 12,
+            base_token: 3,
+            quote_token: 0, // USDC quote selected
+        },
+    ];
+    let user = [0x44; 20];
+    let mut next_oid = 500u64;
+
+    // Token 0 (USDC) rejected.
+    assert_eq!(
+        build_bole_liquidation_spot_order(0, 100, 0.95, user, &spots, Some(10_000), &mut next_oid),
+        None
+    );
+    assert_eq!(next_oid, 500);
+
+    // Token 3 picks spot_id 12 (quote=0), rounds limit_px, increments oid, uses 0xbb*20 liquidator & IOC tif=1.
+    let order = build_bole_liquidation_spot_order(
+        3,
+        250,
+        0.95,
+        user,
+        &spots,
+        Some(1_001),
+        &mut next_oid,
+    )
+    .unwrap();
+    assert_eq!(order.oid, 500);
+    assert_eq!(next_oid, 501);
+    assert_eq!(order.spot_id, 12);
+    assert_eq!(order.liquidator, BOLE_LIQUIDATOR_ADDRESS);
+    assert_eq!(order.liquidated_user, user);
+    assert_eq!(order.limit_px, 951); // round(1001 * 0.95) = round(950.95) = 951
+    assert_eq!(order.tif, 1);
+
+    // Zero or negative rounded price floors to 1 (`cmpq $1, %r8; adcq $0, %r8`).
+    assert_eq!(compute_bole_liquidation_limit_px(10, 0.0), 1);
+    assert_eq!(compute_bole_liquidation_limit_px(10, -0.5), 1);
+}
