@@ -1,7 +1,7 @@
 use node115_assets::qtys::{OverflowKind, RecordingOverflowSink};
 use node115_fees::credit::{
-    FeeCreditMode, FeeDistributionRecord, FeeLedger, FeeScaleError, SecondarySplitRow,
-    tally_millionths,
+    FILL_FEE_INPUT_CAP, FILL_FEE_PRE_X100_CAP, FeeCreditMode, FeeDistributionRecord, FeeLedger,
+    FeeScaleError, SecondarySplitRow, compute_fill_fee_triple, settle_fill_fee, tally_millionths,
 };
 use node115_fees::schedule::{is_monotonically_non_increasing, matches_node115_0x36e1b10};
 use node115_fees::vlm::{
@@ -275,4 +275,49 @@ fn schedule_monotonicity_and_microcrate_interop() {
         ranges: [0.0, 1.0],
     };
     let _ = fee_schedule_compose::evaluate(&sched, |_, _, _| true);
+}
+
+#[test]
+fn fill_fee_scaling_and_settlement_pipeline_match_0x44896f0() {
+    assert_eq!(FILL_FEE_INPUT_CAP, i64::MAX as u64 / 50);
+    assert_eq!(FILL_FEE_PRE_X100_CAP, i64::MAX / 100);
+
+    // Main DEX (is_hip3=false): scale_a=1.0, scale_b=0.0
+    // notional=100_000_000 (100 USD), fee_rate=0.0005 -> 50_000 / 10_000 = 5
+    let (extra, base, deployer) = compute_fill_fee_triple(100_000_000, 0.0005, false, false, None);
+    assert_eq!((extra, base, deployer), (5, 5, 0));
+
+    // HIP-3 growth mode with deployer_scale=0.5 -> deployer gets 50%
+    let (extra_h, base_h, dep_h) =
+        compute_fill_fee_triple(100_000_000, 0.0005, true, true, Some(0.5));
+    assert_eq!((extra_h, base_h, dep_h), (5, 5, 2));
+
+    // Full settlement pipeline (`0x44896f0 -> 0x3c1a3f0 -> 0x46a6860 -> 0x3c1ae50`)
+    let mut ledger = FeeLedger::default();
+    let mut sink = RecordingOverflowSink::default();
+    let rec = FeeDistributionRecord {
+        primary: Some((addr(2), 4)),
+        secondary: None,
+        gross: 10,
+        rebate: 2,
+        protocol: 3,
+    };
+    // side_kind == 2 skips settlement completely (`0x4489b34`)
+    assert_eq!(
+        settle_fill_fee(&mut ledger, addr(1), 0, 2, 7, &rec, &mut sink),
+        Ok(false)
+    );
+    assert!(ledger.primary_cells.is_empty());
+
+    // side_kind == 0 runs extra_credit(7), scales record x100, and distributes
+    assert_eq!(
+        settle_fill_fee(&mut ledger, addr(1), 0, 0, 7, &rec, &mut sink),
+        Ok(true)
+    );
+    let cell = ledger.primary_cells[&(addr(1), 0)];
+    assert_eq!(cell.extra_credit, 7);
+    assert_eq!(cell.protocol_fee, 300);
+    assert_eq!(cell.net_fee, 500);
+    assert_eq!(cell.primary_paid, 400);
+    assert_eq!(ledger.primary_cells[&(addr(2), 0)].credit, 400);
 }

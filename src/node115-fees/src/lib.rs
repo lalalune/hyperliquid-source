@@ -29,7 +29,10 @@ pub use node115_fee_schedule_compose as fee_schedule_compose;
 pub use node115_fee_trial as fee_trial;
 
 pub use credit::{
-    FeeCell, FeeCreditMode, FeeDistributionRecord, FeeLedger, FeeScaleError, SecondarySplitRow,
+    FILL_FEE_INPUT_CAP, FILL_FEE_PRE_X100_CAP, FeeCell, FeeCreditMode, FeeDistributionRecord,
+    FeeLedger, FeeScaleError, HIP3_DEFAULT_SCALE_CAP, HIP3_NON_GROWTH_FACTOR,
+    HIP3_NON_GROWTH_RAW_SCALE, SecondarySplitRow, compute_fill_fee_triple,
+    scale_fill_fee_component, settle_fill_fee,
 };
 pub use schedule::is_monotonically_non_increasing;
 pub use vlm::{

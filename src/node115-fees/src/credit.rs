@@ -19,6 +19,98 @@ pub const U64_FLOAT_CLAMP_THRESHOLD: f64 = 18_446_744_073_709_549_568.0;
 /// Exact `#115` upper clamp threshold `2^63 - 1024` (`9223372036854774784.0`) in `0x3c10000`.
 pub const I64_FLOAT_CLAMP_THRESHOLD: f64 = 9_223_372_036_854_774_784.0;
 
+/// Exact `#115` `0x4489847` guard `i64::MAX / 50` (`0x28f5c28f5c28f5c`).
+pub const FILL_FEE_INPUT_CAP: u64 = 0x028f_5c28_f5c2_8f5c;
+
+/// Exact `#115` `0x4489858` clamp `i64::MAX / 100` (`0x147ae147ae147ae`) before x100 scaling.
+pub const FILL_FEE_PRE_X100_CAP: i64 = 0x0147_ae14_7ae1_47ae;
+
+/// Exact `#115` `0x44896f0` `.rodata` HIP-3 fee-scale constants (`0x4592b0`, `0x4593d0`, `0x4593e0`).
+pub const HIP3_DEFAULT_SCALE_CAP: f64 = 1.0;
+pub const HIP3_NON_GROWTH_RAW_SCALE: f64 = 5.0;
+pub const HIP3_NON_GROWTH_FACTOR: f64 = 0.1;
+
+/// Clamps an `f64` fee product using `#115` `0x448987e..0x4489912` rules:
+/// non-finite -> `0`; clamp to `[-i64::MAX/100, +i64::MAX/100]`; negative -> `0`; then `/ 10_000`.
+#[inline]
+pub fn scale_fill_fee_component(notional: u64, scale: f64, fee_rate: f64) -> u64 {
+    if (notional as i64) < 0 {
+        return 0;
+    }
+    let scaled_f = (notional as f64) * scale;
+    let scaled_i = if !scaled_f.is_finite() || scaled_f <= 0.0 {
+        0_i64
+    } else if scaled_f > I64_FLOAT_CLAMP_THRESHOLD {
+        i64::MAX
+    } else {
+        scaled_f as i64
+    };
+    let scaled_u = scaled_i.max(0) as u64;
+    let pre_div = if scaled_u > FILL_FEE_INPUT_CAP {
+        scaled_u
+    } else {
+        let prod = (scaled_u as f64) * fee_rate;
+        let clamped_i = if !prod.is_finite() {
+            0_i64
+        } else if prod > I64_FLOAT_CLAMP_THRESHOLD {
+            i64::MAX
+        } else if prod < -(i64::MAX as f64) {
+            i64::MIN
+        } else {
+            prod as i64
+        };
+        let bounded = clamped_i.clamp(-FILL_FEE_PRE_X100_CAP, FILL_FEE_PRE_X100_CAP);
+        bounded.max(0) as u64
+    };
+    pre_div / 10_000
+}
+
+/// Computes `(extra_credit, base_fee, deployer_fee)` matching `#115` `0x44896f0`
+/// (`0x4489762..0x4489b25`) for a fill of `notional` at `fee_rate`.
+pub fn compute_fill_fee_triple(
+    notional: u64,
+    fee_rate: f64,
+    is_hip3: bool,
+    growth_mode: bool,
+    deployer_scale: Option<f64>,
+) -> (u64, u64, u64) {
+    let (scale_a, scale_b) = if !is_hip3 {
+        (HIP3_DEFAULT_SCALE_CAP, 0.0)
+    } else if growth_mode {
+        let s = deployer_scale
+            .unwrap_or(HIP3_DEFAULT_SCALE_CAP)
+            .min(HIP3_DEFAULT_SCALE_CAP);
+        (HIP3_DEFAULT_SCALE_CAP, s)
+    } else {
+        let s = HIP3_NON_GROWTH_RAW_SCALE.min(HIP3_DEFAULT_SCALE_CAP) * HIP3_NON_GROWTH_FACTOR;
+        (HIP3_NON_GROWTH_FACTOR, s)
+    };
+    let extra = scale_fill_fee_component(notional, scale_a, fee_rate);
+    let base = scale_fill_fee_component(notional, 1.0, fee_rate);
+    let deployer = scale_fill_fee_component(notional, scale_b, fee_rate);
+    (extra, base, deployer)
+}
+
+/// Runs the complete `#115` `0x44896f0 -> 0x3c1a3f0 -> 0x46a6860 -> 0x3c1ae50` fill fee
+/// settlement pipeline into `ledger` (skipping cleanly when `side_kind == 2`).
+pub fn settle_fill_fee(
+    ledger: &mut FeeLedger,
+    user: UserAddress,
+    token_key: u64,
+    side_kind: u64,
+    extra_credit_amount: u64,
+    rec: &FeeDistributionRecord,
+    sink: &mut impl OverflowSink,
+) -> Result<bool, FeeScaleError> {
+    if side_kind == 2 {
+        return Ok(false);
+    }
+    ledger.extra_credit(user, token_key, extra_credit_amount, sink);
+    let scaled = rec.scale_x100()?;
+    ledger.distribute(user, token_key, &scaled, sink);
+    Ok(true)
+}
+
 /// Error returned by the checked `* 100` fee-record scaler (`0x46a6860`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FeeScaleError {
