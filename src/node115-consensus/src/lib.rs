@@ -9,6 +9,9 @@
 //! - [`admission`]: signed block (`0x57e8970` / `0x2786870`) and timeout
 //!   message (`0x2786a20`) admission front ends;
 //! - [`block_rules`]: block validation rules (`0x59d6b80`, `signed.rs:194`);
+//! - [`commit`]: HotStuff-2 certified two-chain commit rule (`0x2e157c0`),
+//!   128-bit strict 2/3 stake quorum (`0x4d3e1a0`), and `register_block`
+//!   stale/duplicate guards (`0x2e1da10`);
 //! - [`proposer`]: deterministic stake-weighted proposer selection (`0x595cb30`);
 //! - [`tc_verify`]: timeout certificate verification (`0x5960390` + `0x564b510`);
 //! - [`timeout_flow`]: first-timer polling selector (`0x2cdca20`) and
@@ -25,6 +28,7 @@
 
 pub mod admission;
 pub mod block_rules;
+pub mod commit;
 pub mod proposer;
 pub mod round_progression;
 pub mod tc_verify;
@@ -54,6 +58,11 @@ pub use admission::{
 pub use block_rules::{
     BlockJustification, BlockProposerProvider, BlockRuleError, ConsensusBlock, MAX_BLOCK_TX_HASHES,
     verify_block_rules,
+};
+pub use commit::{
+    CertifiedBlockNode, REGISTER_TAG_NOT_NEW, REGISTER_TAG_STALE, RegisterBlockOutcome,
+    TwoChainCommitOutcome, TwoChainCommitStore, block_round_from_parent_cert,
+    has_strict_two_thirds_quorum_u128,
 };
 pub use proposer::{
     PreparedWeights, ProposerError, ProposerScheduleHistory, ScheduleEvent, StakeRow,
