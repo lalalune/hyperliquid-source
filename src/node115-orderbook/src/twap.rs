@@ -96,6 +96,11 @@ impl TwapEngine {
         self.meta.remove(&(user, twap_id))
     }
 
+    /// Select this pass's due keys before executing any returned slice.
+    pub fn take_due(&mut self, now: twap_adv::Moment) -> Vec<(UserAddress, u64)> {
+        self.tracker.take_due(now)
+    }
+
     /// Execute one due TWAP slice at `(now, now_ms)` against `book`, using `#115`
     /// `node115-twap-limit-price`, `node115-twap-quantity`, and `node115-twap-advance`.
     #[allow(clippy::too_many_arguments)]

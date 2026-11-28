@@ -442,8 +442,11 @@ fn cloid_spot_oi_cap_trigger_oco_twap_and_schedule_cancel() {
         60.0,
         now,
     );
+    let batch = twap.take_due(now);
+    assert_eq!(batch, [(user(4), 500)]);
+    let (slice_user, twap_id) = batch[0];
     let exec = twap
-        .execute_slice(user(4), 500, 501, now, 1_700_000_000_000, Some(Px(9_900)), &mut spot, &mut risk, &mut sink)
+        .execute_slice(slice_user, twap_id, 501, now, 1_700_000_000_000, Some(Px(9_900)), &mut spot, &mut risk, &mut sink)
         .unwrap();
     assert!(exec.slice_sz.raw() > 0);
     assert!(exec.filled_sz.raw() > 0);
