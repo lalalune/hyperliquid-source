@@ -681,7 +681,7 @@ fn impact_walk_l2_aggregation_and_order_price_shape_match_node115() {
         base_ctx,
     )
     .unwrap();
-    assert_eq!(shaped_ask.limit_px, Px(90_010));
+    assert_eq!(shaped_ask.limit_px, Px(90_001));
 
     // Exact status words (`0x19c`, `0xde`, `0x6d`, `0x6c`, `0xc8`, `0x78`, `0x63`)
     assert_eq!(

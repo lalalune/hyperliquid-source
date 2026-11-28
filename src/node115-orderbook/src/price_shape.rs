@@ -14,6 +14,7 @@
 use node115_assets::pdi::Side;
 use node115_assets::qtys::{Px, Sz};
 use node115_fees::UserAddress;
+use node115_mid_market_order_builder::tick_size_with_cap;
 
 /// Bid limit slippage multiplier (`0x459400`).
 pub const BID_SLIPPAGE_FACTOR: f64 = 1.1;
@@ -63,6 +64,8 @@ pub struct PriceShapeRequest {
 pub struct PriceShapeContext {
     pub user_blocked: bool,
     pub mark_px: Px,
+    /// Market tick cap in raw price units: 10^(6 - size decimals). A tick already
+    /// computed for the same pre-grid price also gives the native step.
     pub tick: u64,
     pub available_notional: u64,
     /// When `true`, skips the `$10` min-notional check (step 9 gate == 1, e.g. reduce-only).
@@ -189,7 +192,7 @@ pub fn shape_order_price(
         BID_SLIPPAGE_FACTOR
     };
     let pre_grid = cast_f64_to_u64_min1(slip_factor * (moved_ref as f64));
-    let tick = ctx.tick.max(1);
+    let tick = tick_size_with_cap(pre_grid, ctx.tick);
     let mut q = pre_grid / tick;
     if is_ask {
         q = q.saturating_add(1);

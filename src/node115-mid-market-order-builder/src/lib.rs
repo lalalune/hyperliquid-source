@@ -181,10 +181,16 @@ pub fn tick_size(price: u64, decimals: u8) -> Option<u64> {
     if decimals >= 7 {
         return None;
     }
+    let cap = 10u64.pow(6 - u32::from(decimals));
+    Some(tick_size_with_cap(price, cap))
+}
+
+/// Price-dependent tick for a market whose decimal precision cap is already known.
+/// The node takes the smaller of the five-significant-digit step and that cap.
+pub fn tick_size_with_cap(price: u64, cap: u64) -> u64 {
     let digits = if price == 0 { 1 } else { price.ilog10() + 1 };
     let base = 10u64.saturating_pow(digits.saturating_sub(5));
-    let cap = 10u64.pow(6 - u32::from(decimals));
-    Some(base.min(cap))
+    base.min(cap.max(1))
 }
 
 pub fn time_millis(time: PackedTime) -> u64 {
