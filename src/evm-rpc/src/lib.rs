@@ -5,6 +5,7 @@
 //! (`a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`).
 
 pub mod fee_history;
+mod fee_history_result;
 pub mod forwarder;
 pub mod limiter;
 pub mod method_router;
@@ -15,6 +16,7 @@ pub use fee_history::{
     FeeHistoryError, FeeHistoryRange, RewardRow, BLOB_GAS_DIVISOR, MAX_FEE_HISTORY_BLOCKS,
     MAX_REWARD_PERCENTILES,
 };
+pub use fee_history_result::FeeHistoryResult;
 pub use forwarder::{
     build_send_raw_tx_json_rpc, decode_raw_tx_hex, encode_raw_tx_hex, forward_url_for_selector,
     ForwardError, ForwardErrorKind, HexDecodeError, MAINNET_EVM_RPC_URL, TESTNET_EVM_RPC_URL,
