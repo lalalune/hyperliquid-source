@@ -1,0 +1,43 @@
+Darwin arm64
+Python 3.9.6
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+GNU objdump (GNU Binutils) 2.45
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+
+$ python3 -B research/work-items/RE-017-node115-replay-action-count-to-apply/verify.py
+PASS: SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 155 ranges in 8 indexed FDEs
+PASS: ready queue pair reaches the converter; pending cloned rows are distinct from original descriptor
+PASS: collector triple plus original descriptor address reach engine unchanged through adapters
+PASS: engine compares collected and converted counts; distinct storage/field/byte controls
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x5a6e97b --stop-address=0x5a6e9ad artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 5a6e97b: 66 0f 10 84 24 b0 01 00 00   	movupd	xmm0, xmmword ptr [rsp + 0x1b0]
+ 5a6e984: 66 0f 29 84 24 90 02 00 00   	movapd	xmmword ptr [rsp + 0x290], xmm0
+ 5a6e98d: 48 8b 84 24 c0 01 00 00      	mov	rax, qword ptr [rsp + 0x1c0]
+ 5a6e995: 48 89 84 24 a0 02 00 00      	mov	qword ptr [rsp + 0x2a0], rax
+ 5a6e99d: 48 8d 84 24 20 03 00 00      	lea	rax, [rsp + 0x320]
+ 5a6e9a5: 48 89 84 24 a8 02 00 00      	mov	qword ptr [rsp + 0x2a8], rax
+
+$ objdump -d -M intel --insn-width=16 --start-address=0x5a066f4 --stop-address=0x5a0671a artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000005a066f4 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x341d3c>:
+ 5a066f4:	4c 8b 70 10                                     	mov    r14,QWORD PTR [rax+0x10]
+ 5a066f8:	4c 89 b4 24 30 02 00 00                         	mov    QWORD PTR [rsp+0x230],r14
+ 5a06700:	48 8b 44 24 08                                  	mov    rax,QWORD PTR [rsp+0x8]
+ 5a06705:	48 8b 40 10                                     	mov    rax,QWORD PTR [rax+0x10]
+ 5a06709:	48 89 84 24 38 02 00 00                         	mov    QWORD PTR [rsp+0x238],rax
+ 5a06711:	49 39 c6                                        	cmp    r14,rax
+ 5a06714:	0f 85 d8 13 00 00                               	jne    5a07af2 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x34093e>
