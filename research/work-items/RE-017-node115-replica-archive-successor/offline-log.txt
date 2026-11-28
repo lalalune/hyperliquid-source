@@ -1,0 +1,20 @@
+Darwin arm64
+Python 3.9.6
+$ python3 -B "$PACKET/verify.py" --repo "$REPO"
+FDE=0x595a6b0 VA=0x595a6d9 instruction=4883fe01
+FDE=0x595a6b0 VA=0x595a6dd instruction=4883d6ff
+FDE=0x595a6b0 VA=0x595a6f5 instruction=4c69f210270000
+FDE=0x595a6b0 VA=0x595a715 instruction=4c89742458
+FDE=0x595a6b0 VA=0x595a775 instruction=488d442458
+FDE=0x50e2f80 VA=0x50e307b instruction=c604030a
+Verified #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; native rotation stem and line framing
+Rejected control: wrong shard pin
+Rejected control: wrong explicit height
+Rejected control: duplicate height
+Rejected control: truncated line
+Rejected control: blank line
+Rejected control: wrong checkpoint
+Rejected control: coordinate overflow
+Selected synthetic record SHA-256 6fbab2673b5de9847794c636b54a518e03d7f2ab5637b402dd2987d6f84a2c4a (original line bytes)
+$ python3 -B "$PACKET/extract.py" "$SYNTHETIC_SHARD" --chunk-start 10000 --checkpoint-height 10000 --sha256 "$PIN" > "$RECORD"
+CLI result equals the original synthetic line byte-for-byte.
