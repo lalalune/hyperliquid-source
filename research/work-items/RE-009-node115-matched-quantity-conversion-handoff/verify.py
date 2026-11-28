@@ -52,7 +52,7 @@ def check(reader):
         assert site + len(ins) + int.from_bytes(ins[-width:], "little", signed=True) == target
 
 
-assert len(rows) >= 100
+assert len(rows) >= 95
 check(read)
 controls = (0x3CE9048, 0x3CE90BB, 0x3CE9147, 0x3CE9164, 0x3DAC78D, 0x3DAC7D0)
 for bad in controls:

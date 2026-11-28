@@ -7,3 +7,5 @@ On the qualifying tree path, it takes the descriptor's +8 pointer and +0x10 heig
 This establishes the conversion handoff for the matched traversal. The separate remove-by-key conversion is described in #7511. Run `PYTHONPATH=tools python3 research/work-items/RE-009-node115-matched-quantity-conversion-handoff/verify.py`.
 
 The verifier binds the retained instruction bytes and relative targets to the pinned ELF and checks corruption detection. The allocation-size and ownership descriptions are static interpretations of the instruction windows, not behavioral or differential tests. The target is not executed.
+
+Instruction windows end at complete instructions; the previous export cut two instructions at the window boundaries, so those incomplete rows are omitted. The retained excerpts are partial and do not establish complete function behavior.
