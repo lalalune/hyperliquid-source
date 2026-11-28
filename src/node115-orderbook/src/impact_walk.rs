@@ -69,16 +69,14 @@ where
 
 /// Rounds a raw positive price to `n_sig_figs` (`2..=5`) and optional `mantissa` (`2` or `5`
 /// when `n_sig_figs == 5`), rounding bids DOWN and asks UP so L2 bucketed quotes stay conservative.
+/// Matches the public order-book server's unit tick times the mantissa for prices with at most five digits.
 pub fn bucket_l2_px(px: Px, side: Side, n_sig_figs: u32, mantissa: Option<u64>) -> Px {
     let raw = px.raw();
     if raw == 0 || !(2..=5).contains(&n_sig_figs) {
         return px;
     }
     let digits = raw.ilog10() + 1;
-    if digits <= n_sig_figs {
-        return px;
-    }
-    let shift = digits - n_sig_figs;
+    let shift = digits.saturating_sub(n_sig_figs);
     let base_step = 10_u64.saturating_pow(shift);
     let step = match (n_sig_figs, mantissa) {
         (5, Some(2)) => base_step.saturating_mul(2),
@@ -92,7 +90,7 @@ pub fn bucket_l2_px(px: Px, side: Side, n_sig_figs: u32, mantissa: Option<u64>) 
         Side::Bid => (raw / step) * step,
         Side::Ask => raw.div_ceil(step).saturating_mul(step),
     };
-    Px(bucket.max(1))
+    Px(bucket)
 }
 
 /// Aggregates L2 book levels into conservative `n_sig_figs`/`mantissa` buckets capped at `max_levels`.
