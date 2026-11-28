@@ -1,0 +1,103 @@
+2da45cb0a761cff6b478e40421699857d87a94df
+rustc 1.95.0 (59807616e 2026-04-14)
+cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+$ cargo test --offline --locked --manifest-path src/node115-db/Cargo.toml --test write_batch_validation
+   Compiling node115-startup-admission v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-startup-admission)
+   Compiling node115-reverse-path-components v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-reverse-path-components)
+   Compiling node115-checkpoint-plan v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-owned-db-open/checkpoint-plan)
+   Compiling node115-restore-copy v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-owned-db-open/restore-copy)
+   Compiling node115-storage-value-decode v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-storage-value-decode)
+   Compiling node115-block-handle-codec v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-block-handle-codec)
+   Compiling node115-indexed-artifact-variant v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-indexed-artifact-variant)
+   Compiling node115-db-hub-byte-key v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-db-hub-byte-key)
+   Compiling node115-owned-db-open v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-owned-db-open)
+   Compiling node115-replica-end-height v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-replica-end-height)
+   Compiling node115-checkpoint-discovery v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-checkpoint-discovery)
+   Compiling node115-db v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-db)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.52s
+     Running tests/write_batch_validation.rs (/tmp/hl-node115-offline-batch-validation.rMywaK/target/debug/deps/write_batch_validation-f6fdb7731c422997)
+
+running 1 test
+test bad_column_family_leaves_earlier_batch_operations_unapplied ... FAILED
+
+failures:
+
+---- bad_column_family_leaves_earlier_batch_operations_unapplied stdout ----
+
+thread 'bad_column_family_leaves_earlier_batch_operations_unapplied' (193927408) panicked at tests/write_batch_validation.rs:55:5:
+assertion `left == right` failed: bad family must prevent the earlier put
+  left: Some([117, 110, 99, 111, 109, 109, 105, 116, 116, 101, 100])
+ right: None
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    bad_column_family_leaves_earlier_batch_operations_unapplied
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--test write_batch_validation`
+Baseline exit code: 101
+$ python3 -B research/work-items/RE-009-node115-offline-batch-validation/verify.py
+PASS: authenticated a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+PASS: selected native wrappers assemble a separate batch before submitting it to storage
+$ cargo test --offline --locked --manifest-path src/node115-db/Cargo.toml
+   Compiling node115-db v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-db)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.57s
+     Running unittests src/lib.rs (/tmp/hl-node115-offline-batch-validation.rMywaK/target/debug/deps/node115_db-686bbc0369bb06e6)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration.rs (/tmp/hl-node115-offline-batch-validation.rMywaK/target/debug/deps/integration-89ab3fa2c4b3264b)
+
+running 12 tests
+test rocks_db_niche_block_reader_and_indexed_artifact_variants ... ok
+test db_home_checkpoint_subdir_lt_hashes_and_74_slot_capture_offsets ... ok
+test owned_db_home_checkpoint_guard_and_live_vs_slow_budgets ... ok
+test rocks_db_owned_db_dir_guard ... ok
+test checkpoint_shard_marker_uses_node115_ascii_uppercase ... ok
+test indexed_block_reader_point_and_range_query_inclusive ... ok
+test db_hub_byte_key_storage_decode_and_snapshot_selectors ... ok
+test db_hub_29_kind_prefix_table_and_3_shard_routing ... ok
+test storage_db_closure_latest_checkpoint_loader_db_hub_path_and_single_run_block_query ... ok
+test db_home_guard_discovery_plan_restore_copy_and_replica_height ... ok
+test latest_checkpoint_checks_both_regular_marker_forms ... ok
+test rocksdb_3_shard_profiles_tcp_ceiling_and_persistent_checkpoint_roundtrip ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/write_batch_validation.rs (/tmp/hl-node115-offline-batch-validation.rMywaK/target/debug/deps/write_batch_validation-f6fdb7731c422997)
+
+running 1 test
+test bad_column_family_leaves_earlier_batch_operations_unapplied ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests node115_db
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+$ cargo test --offline --locked --release --manifest-path src/node115-db/Cargo.toml --test write_batch_validation
+   Compiling node115-startup-admission v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-startup-admission)
+   Compiling node115-reverse-path-components v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-reverse-path-components)
+   Compiling node115-restore-copy v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-owned-db-open/restore-copy)
+   Compiling node115-block-handle-codec v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-block-handle-codec)
+   Compiling node115-owned-db-open v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-owned-db-open)
+   Compiling node115-indexed-artifact-variant v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-indexed-artifact-variant)
+   Compiling node115-storage-value-decode v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-storage-value-decode)
+   Compiling node115-checkpoint-plan v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-owned-db-open/checkpoint-plan)
+   Compiling node115-db-hub-byte-key v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-db-hub-byte-key)
+   Compiling node115-checkpoint-discovery v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-checkpoint-discovery)
+   Compiling node115-replica-end-height v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-replica-end-height)
+   Compiling node115-db v0.1.0 (/private/tmp/hl-node115-offline-batch-validation.rMywaK/src/node115-db)
+    Finished `release` profile [optimized] target(s) in 0.67s
+     Running tests/write_batch_validation.rs (/tmp/hl-node115-offline-batch-validation.rMywaK/target/release/deps/write_batch_validation-34738b99824905ed)
+
+running 1 test
+test bad_column_family_leaves_earlier_batch_operations_unapplied ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s

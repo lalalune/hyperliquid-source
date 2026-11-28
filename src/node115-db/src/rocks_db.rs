@@ -252,8 +252,16 @@ impl PersistentShardKvStore {
         Ok(existed)
     }
 
-    /// Apply a batch of put/delete operations and atomically flush all touched column families.
+    /// Validate all column families before applying any operation, then flush
+    /// the touched families with per-file replacement.
     pub fn write_batch(&mut self, ops: &[DbWriteBatchOp]) -> io::Result<()> {
+        for op in ops {
+            let family = match op {
+                DbWriteBatchOp::Put { cf, .. } | DbWriteBatchOp::Delete { cf, .. } => cf,
+            };
+            self.cf_mut(family)?;
+        }
+
         let mut touched = BTreeMap::<String, ()>::new();
         for op in ops {
             match op {
