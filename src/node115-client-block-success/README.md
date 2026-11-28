@@ -40,3 +40,10 @@ before visiting children, then refund each child's reservation immediately
 before decoding it. Structural vote rows remain in wire order; native map
 normalization, result-union ABI, allocator failure and full node equivalence
 are outside this API's claim.
+
+`decode_replay_payload_prefix(input, limit)` reuses the same Block, attachment
+and blob readers for the selected `ClientBlockWireOrTx` prefix. It starts a
+fresh metered reader and preserves a trailing suffix. The result distinguishes
+an absent attachment list from a present empty list, and returns Tx bytes
+without interpreting them. See the
+[RE-017 replay wire payload evidence](../../research/work-items/RE-017-node115-replay-wire-payload-codec/README.md).

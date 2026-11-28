@@ -286,3 +286,104 @@ fn metered_invalid_proof_option_consumes_tag_and_keeps_charge() {
     assert_eq!(outcome.charged, 198);
     assert_eq!(outcome.remaining, &[0xaa]);
 }
+
+fn replay_block(option: u8) -> Vec<u8> {
+    let mut input = vec![0];
+    signature(&mut input);
+    header(&mut input, false, false);
+    input.extend([0, option]); // no commit proof, then replay attachment option
+    input
+}
+
+#[test]
+fn replay_block_distinguishes_absent_empty_and_populated_attachments() {
+    use node115_client_block_success::{ReplayPayload, decode_replay_payload_prefix};
+
+    let mut absent = replay_block(0);
+    absent.push(0xee);
+    let plain = decode_replay_payload_prefix(&absent, 10_000_000);
+    assert_eq!(plain.remaining, &[0xee]);
+    let ReplayPayload::Block {
+        block,
+        attachments: None,
+    } = plain.result.unwrap()
+    else {
+        panic!("expected Block with absent attachments");
+    };
+    assert_eq!(block.header.address, [0x11; 20]);
+
+    let mut empty = replay_block(1);
+    empty.extend([0, 0xee]);
+    let empty_result = decode_replay_payload_prefix(&empty, 10_000_000);
+    assert_eq!(empty_result.remaining, &[0xee]);
+    assert_eq!(empty_result.charged, plain.charged + 8);
+    assert_eq!(
+        empty_result.result.unwrap(),
+        ReplayPayload::Block {
+            block: block.clone(),
+            attachments: Some(vec![]),
+        }
+    );
+
+    let mut one = replay_block(1);
+    one.push(1);
+    one.extend([0x66; 32]);
+    one.extend([3, 251, 252, 255, 0xee]);
+    let decoded = decode_replay_payload_prefix(&one, 10_000_000);
+    assert_eq!(decoded.remaining, &[0xee]);
+    let ReplayPayload::Block {
+        block: decoded_block,
+        attachments: Some(rows),
+    } = decoded.result.unwrap()
+    else {
+        panic!("expected Block with attachments")
+    };
+    assert_eq!(decoded_block, block);
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0].hash, [0x66; 32]);
+    assert_eq!(rows[0].bytes, [251, 252, 255]);
+    assert_eq!(decoded.charged, plain.charged + 51);
+}
+
+#[test]
+fn replay_tx_is_opaque_and_preserves_the_suffix_at_equal_budget() {
+    use node115_client_block_success::{ReplayPayload, decode_replay_payload_prefix};
+
+    let decode = decode_replay_payload_prefix(&[1, 3, 251, 252, 255, 0xee], 15);
+    assert_eq!(decode.result, Ok(ReplayPayload::Tx(vec![251, 252, 255])));
+    assert_eq!(decode.remaining, &[0xee]);
+    assert_eq!(decode.charged, 15);
+    let empty = decode_replay_payload_prefix(&[1, 0, 0xee], 12);
+    assert_eq!(empty.result, Ok(ReplayPayload::Tx(vec![])));
+    assert_eq!(empty.remaining, &[0xee]);
+}
+
+#[test]
+fn replay_rejects_unknown_variants_options_and_incomplete_blobs() {
+    use node115_client_block_success::{Error, ReplayError, decode_replay_payload_prefix};
+
+    let tag = decode_replay_payload_prefix(&[2, 0xee], 100);
+    assert_eq!(tag.result, Err(ReplayError::InvalidTag(2)));
+    assert_eq!((tag.remaining, tag.charged), (&[0xee][..], 4));
+    let mut invalid = replay_block(2);
+    invalid.push(0xee);
+    let option = decode_replay_payload_prefix(&invalid, 10_000_000);
+    assert_eq!(
+        option.result,
+        Err(ReplayError::Decode(Error::InvalidOption(2)))
+    );
+    assert_eq!(option.remaining, &[0xee]);
+
+    let short = decode_replay_payload_prefix(&[1, 3, 0x55], 15);
+    assert_eq!(
+        short.result,
+        Err(ReplayError::Decode(Error::UnexpectedEnd { additional: 2 }))
+    );
+    assert_eq!((short.remaining, short.charged), (&[0x55][..], 15));
+    let limit = decode_replay_payload_prefix(&[1, 3, 0x55], 14);
+    assert!(matches!(
+        limit.result,
+        Err(ReplayError::Decode(Error::U64(_)))
+    ));
+    assert_eq!((limit.remaining, limit.charged), (&[0x55][..], 15));
+}
