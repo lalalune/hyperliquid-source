@@ -1,0 +1,23 @@
+RE-017-node115-replay-connection-carrier
+Host: Darwin arm64; native target: Linux x86-64 ELF
+Command (with PACKET set to the staged work-item directory): PYTHONDONTWRITEBYTECODE=1 python3 "$PACKET/verify.py" --repo .
+target=artifacts/node/115/hl-node sha256=a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301 bytes=105896032
+Python 3.9.6
+FDE 0x4e45c50..0x4e45e66
+FDE 0x5861530..0x58616af
+FDE 0x4fba210..0x4fba2ee
+FDE 0x5a63100..0x5a6434f
+FDE 0x581a8b0..0x581aaae
+FDE 0x5a6e1e0..0x5a70656
+source=node/src/connections.rs alternate slot=0x64ebba0 target=0x4fba210
+PASS control: change cleared attachment word rejected
+PASS control: reverse zero-selector path rejected
+PASS control: alter chosen owner record slot rejected
+PASS control: alter queue row stride rejected
+PASS: 111 instruction anchors across 6 FDEs
+PASS: selected callback carries the full or Block-only wire owner to a 24-byte queue row
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+llvm-readelf -r artifacts/node/115/hl-node
+00000000064ebba0  0000000000000008 R_X86_64_RELATIVE                 4fba210
