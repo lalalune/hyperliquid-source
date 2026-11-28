@@ -972,3 +972,28 @@ fn e2e_phase5_full_closure_runtime_integration() {
     let _ = fs::remove_dir_all(&mainnet_dir);
     let _ = fs::remove_dir_all(&local_dir);
 }
+
+#[test]
+fn rpc_network_identity_follows_the_selected_chain_configuration() {
+    for (chain, id) in [
+        (ChainName::Local, 996_u64),
+        (ChainName::Sandbox, 997),
+        (ChainName::Testnet, 998),
+        (ChainName::Mainnet, 999),
+    ] {
+        let data_dir = unique_temp_dir(chain.name());
+        let engine = NodeEngine::open_or_restore(chain, &data_dir).expect("open chain");
+        let server = LocalHttpServer::start(Arc::new(RwLock::new(engine)), HttpServerConfig {
+            bind_addr: SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)),
+            serve_info: false,
+            serve_evm_rpc: true,
+        }).expect("start RPC server");
+        for (method, expected) in [("net_version", id.to_string()), ("eth_chainId", format!("0x{id:x}"))] {
+            let body = format!(r#"{{"jsonrpc":"2.0","id":1,"method":"{method}","params":[]}}"#);
+            let response = http_post(server.local_addr(), "/evm", &body).expect("network identity");
+            assert_eq!(response.body, format!(r#"{{"jsonrpc":"2.0","id":1,"result":"{expected}"}}"#), "{chain:?} {method}");
+        }
+        server.stop();
+        fs::remove_dir_all(data_dir).expect("clean up node data");
+    }
+}
