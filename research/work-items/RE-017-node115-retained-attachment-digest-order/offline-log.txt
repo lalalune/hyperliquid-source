@@ -1,0 +1,76 @@
+Darwin arm64
+Python 3.9.6
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+GNU objdump (GNU Binutils) 2.45
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+
+$ python3 -B research/work-items/RE-017-node115-retained-attachment-digest-order/verify.py
+PASS: authenticated a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 116 spans in 2 indexed FDEs
+PASS: two relocated sponge slots receive exact attachment byte view and write a 32-byte digest
+PASS: row digest precedes equal-count ordered 40-/32-byte digest comparison
+PASS: ordinarily accepted path preserves both original owner words; two-row stride control
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x4fade39 --stop-address=0x4fade68 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 4fade39: 4b 8d 04 34                  	lea	rax, [r12 + r14]
+ 4fade3d: 0f 10 00                     	movups	xmm0, xmmword ptr [rax]
+ 4fade40: 0f 10 48 10                  	movups	xmm1, xmmword ptr [rax + 0x10]
+ 4fade44: 0f 29 4c 24 70               	movaps	xmmword ptr [rsp + 0x70], xmm1
+ 4fade49: 0f 29 44 24 60               	movaps	xmmword ptr [rsp + 0x60], xmm0
+ 4fade4e: 4b 8b 44 34 20               	mov	rax, qword ptr [r12 + r14 + 0x20]
+ 4fade53: 48 8b 70 18                  	mov	rsi, qword ptr [rax + 0x18]
+ 4fade57: 48 8b 50 20                  	mov	rdx, qword ptr [rax + 0x20]
+ 4fade5b: 0f 57 c0                     	xorps	xmm0, xmm0
+ 4fade5e: 0f 29 44 24 50               	movaps	xmmword ptr [rsp + 0x50], xmm0
+ 4fade63: 0f 29 44 24 40               	movaps	xmmword ptr [rsp + 0x40], xmm0
+
+$ objdump -d -M intel --insn-width=16 --start-address=0x4fadfbd --stop-address=0x4fae04b artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004fadfbd <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9a473>:
+ 4fadfbd:	48 8b 54 24 20                                  	mov    rdx,QWORD PTR [rsp+0x20]
+ 4fadfc2:	48 8b 4a 20                                     	mov    rcx,QWORD PTR [rdx+0x20]
+ 4fadfc6:	49 8b 47 20                                     	mov    rax,QWORD PTR [r15+0x20]
+ 4fadfca:	48 39 c1                                        	cmp    rcx,rax
+ 4fadfcd:	4c 8b 74 24 08                                  	mov    r14,QWORD PTR [rsp+0x8]
+ 4fadfd2:	48 8b 5c 24 30                                  	mov    rbx,QWORD PTR [rsp+0x30]
+ 4fadfd7:	4c 8b 44 24 28                                  	mov    r8,QWORD PTR [rsp+0x28]
+ 4fadfdc:	75 6d                                           	jne    4fae04b <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9a3e5>
+ 4fadfde:	48 8b 72 18                                     	mov    rsi,QWORD PTR [rdx+0x18]
+ 4fadfe2:	49 8b 57 18                                     	mov    rdx,QWORD PTR [r15+0x18]
+ 4fadfe6:	48 c1 e0 05                                     	shl    rax,0x5
+ 4fadfea:	48 c1 e1 03                                     	shl    rcx,0x3
+ 4fadfee:	48 8d 0c 89                                     	lea    rcx,[rcx+rcx*4]
+ 4fadff2:	66 66 66 66 66 2e 0f 1f 84 00 00 00 00 00       	data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
+ 4fae000:	48 85 c9                                        	test   rcx,rcx
+ 4fae003:	74 41                                           	je     4fae046 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9a3ea>
+ 4fae005:	48 85 c0                                        	test   rax,rax
+ 4fae008:	74 41                                           	je     4fae04b <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9a3e5>
+ 4fae00a:	f3 0f 6f 06                                     	movdqu xmm0,XMMWORD PTR [rsi]
+ 4fae00e:	f3 0f 6f 4e 10                                  	movdqu xmm1,XMMWORD PTR [rsi+0x10]
+ 4fae013:	48 83 c6 28                                     	add    rsi,0x28
+ 4fae017:	f3 0f 6f 12                                     	movdqu xmm2,XMMWORD PTR [rdx]
+ 4fae01b:	66 0f 74 d0                                     	pcmpeqb xmm2,xmm0
+ 4fae01f:	f3 0f 6f 42 10                                  	movdqu xmm0,XMMWORD PTR [rdx+0x10]
+ 4fae024:	48 83 c2 20                                     	add    rdx,0x20
+ 4fae028:	66 0f 74 c1                                     	pcmpeqb xmm0,xmm1
+ 4fae02c:	66 0f db c2                                     	pand   xmm0,xmm2
+ 4fae030:	66 0f d7 f8                                     	pmovmskb edi,xmm0
+ 4fae034:	48 83 c0 e0                                     	add    rax,0xffffffffffffffe0
+ 4fae038:	48 83 c1 d8                                     	add    rcx,0xffffffffffffffd8
+ 4fae03c:	81 ff ff ff 00 00                               	cmp    edi,0xffff
+ 4fae042:	74 bc                                           	je     4fae000 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9a430>
+ 4fae044:	eb 05                                           	jmp    4fae04b <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9a3e5>
+ 4fae046:	48 85 c0                                        	test   rax,rax
+ 4fae049:	74 19                                           	je     4fae064 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9a3cc>
