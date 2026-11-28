@@ -1,0 +1,44 @@
+Darwin arm64
+Python 3.9.6
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+GNU objdump (GNU Binutils) 2.45
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+
+$ python3 -B research/work-items/RE-017-node115-replay-attachment-owner-handoff/verify.py
+PASS: SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 94 spans in indexed FDEs and worker entry
+PASS: present B survives unchanged; absent B and zero count construct owner (1,1,0,8,0)
+PASS: tag 0x2e pair survives the equality continuation into worker input
+PASS: changed instruction and swapped owner controls
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x4fad726 --stop-address=0x4fad736 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 4fad726: 48 85 d2                     	test	rdx, rdx
+ 4fad729: 74 20                        	je	0x4fad74b <.text+0x3b9444b>
+ 4fad72b: 48 89 77 08                  	mov	qword ptr [rdi + 0x8], rsi
+ 4fad72f: 48 89 57 10                  	mov	qword ptr [rdi + 0x10], rdx
+ 4fad733: c6 07 2e                     	mov	byte ptr [rdi], 0x2e
+
+$ objdump -d -M intel --insn-width=16 --start-address=0x4fadaba --stop-address=0x4fadae4 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004fadaba <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9a976>:
+ 4fadaba:	48 89 48 20                                     	mov    QWORD PTR [rax+0x20],rcx
+ 4fadabe:	0f 10 44 24 30                                  	movups xmm0,XMMWORD PTR [rsp+0x30]
+ 4fadac3:	0f 10 4c 24 40                                  	movups xmm1,XMMWORD PTR [rsp+0x40]
+ 4fadac8:	0f 11 48 10                                     	movups XMMWORD PTR [rax+0x10],xmm1
+ 4fadacc:	0f 11 00                                        	movups XMMWORD PTR [rax],xmm0
+ 4fadacf:	48 8b bc 24 80 00 00 00                         	mov    rdi,QWORD PTR [rsp+0x80]
+ 4fadad7:	4c 89 77 08                                     	mov    QWORD PTR [rdi+0x8],r14
+ 4fadadb:	48 89 47 10                                     	mov    QWORD PTR [rdi+0x10],rax
+ 4fadadf:	e9 4f fc ff ff                                  	jmp    4fad733 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9acfd>
