@@ -1,0 +1,48 @@
+Darwin arm64
+Python 3.9.6
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+GNU objdump (GNU Binutils) 2.45
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+
+$ python3 -B research/work-items/RE-017-node115-replay-block-publish-advance/verify.py
+PASS: SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 129 ranges in authenticated FDEs
+PASS: normal retained-result tag 0x2e exposes pair rows and an exclusive endpoint
+PASS: publish ordered Block/attachment words, then advance F+0x110 using the same Block owner
+PASS: distinct notification owner, repeat/exhaustion edges, synthetic ordered pairs and altered witness controls
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x5a819d1 --stop-address=0x5a819ec artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 5a819d1: 4c 89 44 24 08               	mov	qword ptr [rsp + 0x8], r8
+ 5a819d6: 48 89 4c 24 70               	mov	qword ptr [rsp + 0x70], rcx
+ 5a819db: 4c 89 4c 24 78               	mov	qword ptr [rsp + 0x78], r9
+ 5a819e0: 49 8d bf 80 00 00 00         	lea	rdi, [r15 + 0x80]
+ 5a819e7: e8 d4 96 d9 ff               	call	0x581b0c0 <.text+0x4401dc0>
+
+$ objdump -d -M intel --insn-width=16 --start-address=0x5a81a41 --stop-address=0x5a81a88 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000005a81a41 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x2c69ef>:
+ 5a81a41:	49 8d 86 10 01 00 00                            	lea    rax,[r14+0x110]
+ 5a81a48:	4c 89 28                                        	mov    QWORD PTR [rax],r13
+ 5a81a4b:	4c 39 e5                                        	cmp    rbp,r12
+ 5a81a4e:	49 bf 00 00 00 00 00 00 00 80                   	movabs r15,0x8000000000000000
+ 5a81a58:	4c 8b 44 24 08                                  	mov    r8,QWORD PTR [rsp+0x8]
+ 5a81a5d:	48 c7 c7 ff ff ff ff                            	mov    rdi,0xffffffffffffffff
+ 5a81a64:	48 8d 74 24 70                                  	lea    rsi,[rsp+0x70]
+ 5a81a69:	0f 85 e6 fe ff ff                               	jne    5a81955 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x2c6adb>
+ 5a81a6f:	48 8d bc 24 a0 00 00 00                         	lea    rdi,[rsp+0xa0]
+ 5a81a77:	e8 34 42 f5 ff                                  	call   59d5cb0 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x372780>
+ 5a81a7c:	4c 89 7b 08                                     	mov    QWORD PTR [rbx+0x8],r15
+ 5a81a80:	c6 03 44                                        	mov    BYTE PTR [rbx],0x44
+ 5a81a83:	e9 f7 02 00 00                                  	jmp    5a81d7f <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x2c66b1>
