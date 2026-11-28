@@ -1,0 +1,81 @@
+Work item: RE-009-node115-checkpoint-quorum-digest-read
+Target SHA-256: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+Source baseline: 6d9382f821930b10d181cb90fe4a32756fd8e069
+Validation uses the local target as data and synthetic checkpoints. No network calls.
+Darwin 25.4.0 arm64
+Python 3.12.16
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+
+
+  Registered Targets:
+    aarch64     - AArch64 (little endian)
+    aarch64_32  - AArch64 (little endian ILP32)
+    aarch64_be  - AArch64 (big endian)
+    amdgcn      - legacy name for amdgpu
+    amdgpu      - AMDGPU gfx6+
+    arm         - ARM
+    arm64       - ARM64 (little endian)
+    arm64_32    - ARM64 (little endian ILP32)
+    armeb       - ARM (big endian)
+    avr         - Atmel AVR Microcontroller
+    bpf         - BPF (host endian)
+    bpfeb       - BPF (big endian)
+    bpfel       - BPF (little endian)
+    hexagon     - Hexagon
+    lanai       - Lanai
+    loongarch32 - 32-bit LoongArch
+    loongarch64 - 64-bit LoongArch
+    mips        - MIPS (32-bit big endian)
+    mips64      - MIPS (64-bit big endian)
+    mips64el    - MIPS (64-bit little endian)
+    mipsel      - MIPS (32-bit little endian)
+    msp430      - MSP430 [experimental]
+    nvptx       - NVIDIA PTX 32-bit
+    nvptx64     - NVIDIA PTX 64-bit
+    ppc32       - PowerPC 32
+    ppc32le     - PowerPC 32 LE
+    ppc64       - PowerPC 64
+    ppc64le     - PowerPC 64 LE
+    r600        - AMD GPUs HD2XXX-HD6XXX
+    riscv32     - 32-bit RISC-V
+    riscv32be   - 32-bit big endian RISC-V
+    riscv64     - 64-bit RISC-V
+    riscv64be   - 64-bit big endian RISC-V
+    sparc       - Sparc
+    sparcel     - Sparc LE
+    sparcv9     - Sparc V9
+    spirv       - SPIR-V Logical
+    spirv32     - SPIR-V 32-bit
+    spirv64     - SPIR-V 64-bit
+    systemz     - SystemZ
+    thumb       - Thumb
+    thumbeb     - Thumb (big endian)
+    ve          - VE
+    wasm32      - WebAssembly 32-bit
+    wasm64      - WebAssembly 64-bit
+    x86         - 32-bit X86: Pentium-Pro and above
+    x86-64      - 64-bit X86: EM64T and AMD64
+    xcore       - XCore
+$ python3 -c "import msgpack; print(msgpack.__version__)"
+1.1.2
+$ packet=research/work-items/RE-009-node115-checkpoint-quorum-digest-read
+$ python3 -B "$packet/verify.py"
+verified 59 instruction windows in 7 FDEs and two negative byte controls
+named qrs: [u64 height, body], 104-byte native stride, body digest at row +0x48
+both MessagePack writer routes: named h or first positional slot, 32 bytes -> str8 lowercase hex
+$ python3 -B -m unittest discover -v -s "$packet" -p test_extract.py
+test_conflicting_rows (test_extract.ExtractTests.test_conflicting_rows) ... ok
+test_digest_is_hex_string (test_extract.ExtractTests.test_digest_is_hex_string) ... ok
+test_duplicate_digest_key_rejected (test_extract.ExtractTests.test_duplicate_digest_key_rejected) ... ok
+test_extra_document_rejected (test_extract.ExtractTests.test_extra_document_rejected) ... ok
+test_named_and_array_payload_without_neighbor_height_confusion (test_extract.ExtractTests.test_named_and_array_payload_without_neighbor_height_confusion) ... ok
+test_no_row_at_exact_height (test_extract.ExtractTests.test_no_row_at_exact_height) ... ok
+test_truncation_rejected (test_extract.ExtractTests.test_truncation_rejected) ... ok
+test_wrong_checksum (test_extract.ExtractTests.test_wrong_checksum) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.003s
+
+OK
