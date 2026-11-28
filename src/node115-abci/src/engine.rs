@@ -15,6 +15,7 @@ use node115_abci_checkpoint_replay_fixture::{
     BlockAdmissionError, DEFAULT_ROOT_CADENCE_MODULUS, ExternalDigestVote, RootProvenance,
     RootSelectorCell, SelectorTrace, SupportContext, select_root_impl,
 };
+pub use node115_chain_name_codec::ChainName;
 use node115_digest_reference_handoff::{Digest, Registry, ReplayHandoff, replay_handoff};
 
 use crate::hash_signature_tracker::{HashSignatureTracker, RecordVoteResult};
@@ -304,8 +305,17 @@ pub struct ApplyBlockPipelineInput<'a> {
     pub block_parent_time: (u64, u64),
     pub header_actions: u64,
     pub payload_actions: u64,
+    /// Raw Locus `chn` tag from the restored state, under the historical field name.
     pub feature_version: u8,
     pub prune_watermark: Option<u64>,
+}
+
+impl ApplyBlockPipelineInput<'_> {
+    /// Use the decoded Locus `chn` value when constructing an offline replay input.
+    pub fn with_restored_chain(mut self, chain: ChainName) -> Self {
+        self.feature_version = chain.tag();
+        self
+    }
 }
 
 /// Error returned by `AbciEngine::apply_block_pipeline`.

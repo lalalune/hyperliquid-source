@@ -563,7 +563,7 @@ fn snapshot_hardfork_compat_bundle_roundtrip_and_7_stage_apply_block_pipeline() 
     engine.local_raw_history.insert(9_900, [0x01; 32]);
     let (support, registry, reg_ctx) = sample_support_and_registry();
 
-    // Bad feature version short-circuits in Stage 1 without invoking begin_block/actions/end_block
+    // Testnet checkpoint preflight exits before begin_block/actions/end_block
     let blk = EngineBlock {
         prev_round: 500,
         new_round: 501,
@@ -581,9 +581,10 @@ fn snapshot_hardfork_compat_bundle_roundtrip_and_7_stage_apply_block_pipeline() 
             block_parent_time: (10, 20),
             header_actions: 2,
             payload_actions: 2,
-            feature_version: 2,
+            feature_version: REQUIRED_FEATURE_VERSION,
             prune_watermark: Some(9_900),
-        },
+        }
+        .with_restored_chain(node115_abci::engine::ChainName::from_name("Testnet").unwrap()),
         &support,
         &registry,
         reg_ctx,
@@ -612,9 +613,10 @@ fn snapshot_hardfork_compat_bundle_roundtrip_and_7_stage_apply_block_pipeline() 
                 block_parent_time: (10, 20),
                 header_actions: 2,
                 payload_actions: 2,
-                feature_version: REQUIRED_FEATURE_VERSION,
+                feature_version: 2,
                 prune_watermark: Some(9_900),
-            },
+            }
+            .with_restored_chain(node115_abci::engine::ChainName::from_name("Mainnet").unwrap()),
             &support,
             &registry,
             reg_ctx,
