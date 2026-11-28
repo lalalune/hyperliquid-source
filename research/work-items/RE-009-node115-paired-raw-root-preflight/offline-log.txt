@@ -1,0 +1,27 @@
+RE-009-node115-paired-raw-root-preflight
+Artifact: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+Host and tool versions
+Darwin arm64
+Python 3.9.6
+Apple LLVM version 21.0.0
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B /tmp/hl-node115-root-cadence.dm4Qqk/RE-009-node115-paired-raw-root-preflight/verify.py
+PASS: 22 #115 static spans, in FDEs, SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+PASS: instruction-derived 10000 test against 11 u64 controls
+PASS: ordinary periodic checkpoint: H=eligible-10000 H+1=skips-cadence
+PASS: custom cadence changes at H+1: H=eligible-10000 H+1=eligible-periodic
+PASS: target activates at H+1: H=eligible-10000 H+1=eligible-freeze
+PASS: inactive tag cannot trigger: H=eligible-10000 H+1=skips-cadence
+PASS: mode-2 suppresses matching gates: H=skips-mode-2 H+1=skips-mode-2
+PASS: non-10k invariant precedes mode: H=skips-mode-2 H+1=invariant-before-mode
+PASS: 10k invariant after mode: H=invariant-after-mode H+1=skips-cadence
+PASS: materialized zero only matters at ordinary division: H=eligible-10000 H+1=invalid-materialized-cadence
+PASS: wide period: H=eligible-periodic H+1=skips-cadence
+PASS: three out-of-range inputs rejected
+
+$ python3 -B /tmp/hl-node115-root-cadence.dm4Qqk/RE-009-node115-paired-raw-root-preflight/preflight.py 10000 --at-h 0 0 0 1000 --at-h1 0 0 0 1000
+10000	eligible-10000
+10001	skips-cadence
