@@ -1,0 +1,84 @@
+$ python3 -B research/work-items/RE-017-node115-retained-batch-fixture/verify.py
+0x5a81650..0x5a81ec8 0x5a81839 498dbe10010000 lea rdi, [r14 + 0x110]
+0x5a81650..0x5a81ec8 0x5a818b4 488b17 mov rdx, qword ptr [rdi]
+0x5a81650..0x5a81ec8 0x5a818ca e841b452ff call 0x4facd10 <.text+0x3b93a10>
+0x4facd10..0x4fad2fe 0x4facd3c 4989d5 mov r13, rdx
+0x4facd10..0x4fad2fe 0x4facd86 4c8d6110 lea r12, [rcx + 0x10]
+0x4facd10..0x4fad2fe 0x4facda3 4c89ac24d8000000 mov qword ptr [rsp + 0xd8], r13
+0x4facd10..0x4fad2fe 0x4facdab c68424e800000000 mov byte ptr [rsp + 0xe8], 0x0
+0x4facd10..0x4fad2fe 0x4facdd0 488d8c24d8000000 lea rcx, [rsp + 0xd8]
+0x4facd10..0x4fad2fe 0x4facdd8 e823e7b700 call 0x5b2b500 <.text+0x4712200>
+0x4facd10..0x4fad2fe 0x4facde2 3c2e cmp al, 0x2e
+0x4facd10..0x4fad2fe 0x4face1e 498d86b0000000 lea rax, [r14 + 0xb0]
+0x4facd10..0x4fad2fe 0x4face25 498d4e60 lea rcx, [r14 + 0x60]
+0x4facd10..0x4fad2fe 0x4face29 49395628 cmp qword ptr [r14 + 0x28], rdx
+0x4facd10..0x4fad2fe 0x4face38 48ffc1 inc rcx
+0x4facd10..0x4fad2fe 0x4face42 480f45d1 cmovne rdx, rcx
+0x4facd10..0x4fad2fe 0x4face46 48899424b8000000 mov qword ptr [rsp + 0xb8], rdx
+0x4facd10..0x4fad2fe 0x4face86 0f29842420010000 movaps xmmword ptr [rsp + 0x120], xmm0
+0x4facd10..0x4fad2fe 0x4face8e 0f298c2430010000 movaps xmmword ptr [rsp + 0x130], xmm1
+0x4facd10..0x4fad2fe 0x4facfb0 488b8424b8000000 mov rax, qword ptr [rsp + 0xb8]
+0x4facd10..0x4fad2fe 0x4facfb8 48898424d8000000 mov qword ptr [rsp + 0xd8], rax
+0x4facd10..0x4fad2fe 0x4facfc0 c68424e800000001 mov byte ptr [rsp + 0xe8], 0x1
+0x4facd10..0x4fad2fe 0x4facfc8 0f28842420010000 movaps xmm0, xmmword ptr [rsp + 0x120]
+0x4facd10..0x4fad2fe 0x4facfd0 0f288c2430010000 movaps xmm1, xmmword ptr [rsp + 0x130]
+0x4facd10..0x4fad2fe 0x4facfd8 488d8424e9000000 lea rax, [rsp + 0xe9]
+0x4facd10..0x4fad2fe 0x4facfe0 0f114810 movups xmmword ptr [rax + 0x10], xmm1
+0x4facd10..0x4fad2fe 0x4facfe4 0f1100 movups xmmword ptr [rax], xmm0
+0x4facd10..0x4fad2fe 0x4fad004 488d8c24d8000000 lea rcx, [rsp + 0xd8]
+0x4facd10..0x4fad2fe 0x4fad00c e8efe4b700 call 0x5b2b500 <.text+0x4712200>
+0x5b2b500..0x5b2b5df 0x5b2b526 4889ca mov rdx, rcx
+0x5b2b500..0x5b2b5df 0x5b2b529 e8922748ff call 0x4fadcc0 <.text+0x3b949c0>
+0x4fadcc0..0x4fae0fb 0x4fadd15 488b0a mov rcx, qword ptr [rdx]
+0x4fadcc0..0x4fae0fb 0x4fadd24 488b7830 mov rdi, qword ptr [rax + 0x30]
+0x4fadcc0..0x4fae0fb 0x4fadd28 4839cf cmp rdi, rcx
+0x4fadcc0..0x4fae0fb 0x4fadd2b 7575 jne 0x4fadda2 <.text+0x3b94aa2>
+0x4fadcc0..0x4fae0fb 0x4fadd31 f6421001 test byte ptr [rdx + 0x10], 0x1
+0x4fadcc0..0x4fae0fb 0x4fadd35 747c je 0x4faddb3 <.text+0x3b94ab3>
+0x4fadcc0..0x4fae0fb 0x4fadd37 4883c211 add rdx, 0x11
+0x4fadcc0..0x4fae0fb 0x4fadd3b f30f6f4048 movdqu xmm0, xmmword ptr [rax + 0x48]
+0x4fadcc0..0x4fae0fb 0x4fadd40 f30f6f4858 movdqu xmm1, xmmword ptr [rax + 0x58]
+0x4fadcc0..0x4fae0fb 0x4fadd49 660f74d0 pcmpeqb xmm2, xmm0
+0x4fadcc0..0x4fae0fb 0x4fadd52 660f74c1 pcmpeqb xmm0, xmm1
+0x4fadcc0..0x4fae0fb 0x4fadd56 660fdbc2 pand xmm0, xmm2
+0x4fadcc0..0x4fae0fb 0x4fadd5e 81f9ffff0000 cmp ecx, 0xffff
+verified 43 retained continuity spans, first-row seed and both link halves
+$ cargo test --locked --offline --manifest-path src/node115-replay-completed-payload/Cargo.toml
+   Compiling node115-u32-varint v0.1.0 (/private/tmp/hl-records-115-source/replay-retained-batch-build/src/node115-u32-varint)
+   Compiling node115-u64-reader-state v0.1.0 (/private/tmp/hl-records-115-source/replay-retained-batch-build/src/node115-gossip-response-record/reader)
+   Compiling node115-signed-scalar v0.1.0 (/private/tmp/hl-records-115-source/replay-retained-batch-build/src/node115-signed-scalar)
+   Compiling node115-daycount-date v0.1.0 (/private/tmp/hl-records-115-source/replay-retained-batch-build/src/node115-daycount-date)
+   Compiling node115-lz4-decode v0.1.0 (/private/tmp/hl-records-115-source/replay-retained-batch-build/src/node115-lz4-decode)
+   Compiling node115-lz4-literal-encoder v0.1.0 (/private/tmp/hl-records-115-source/replay-retained-batch-build/src/node115-lz4-literal-encoder)
+   Compiling node115-client-block-success v0.1.0 (/private/tmp/hl-records-115-source/replay-retained-batch-build/src/node115-client-block-success)
+   Compiling node115-replay-completed-payload v0.1.0 (/private/tmp/hl-records-115-source/replay-retained-batch-build/src/node115-replay-completed-payload)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.34s
+     Running unittests src/lib.rs (/tmp/hl-records-115-source/archive-header-build/target/debug/deps/node115_replay_completed_payload-b178156cc1b45297)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/completed.rs (/tmp/hl-records-115-source/archive-header-build/target/debug/deps/completed-ebc3a3ca235ed753)
+
+running 3 tests
+test stage_boundaries_preserve_the_inner_result_or_the_compression_error ... ok
+test tx_uses_the_actual_decoded_span_and_preserves_the_prefix_boundary ... ok
+test block_and_empty_attachment_option_survive_both_arms ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/retained_batch.rs (/tmp/hl-records-115-source/archive-header-build/target/debug/deps/retained_batch-626a5fe444be885b)
+
+running 3 tests
+test a_batch_advances_to_each_supplied_successor ... ok
+test each_reference_half_is_compared_and_identity_is_checked_first ... ok
+test middle_rows_require_same_kind_reference_and_local_observation ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests node115_replay_completed_payload
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
