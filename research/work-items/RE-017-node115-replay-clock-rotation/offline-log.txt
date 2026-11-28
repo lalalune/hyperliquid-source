@@ -1,0 +1,67 @@
+RE-017 node115 replay clock rotation for offline fixtures
+Artifact: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+Base: 2da45cb0a761cff6b478e40421699857d87a94df
+Darwin arm64
+cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+rustc 1.95.0 (59807616e 2026-04-14)
+
+$ cargo test --offline --locked --manifest-path src/node115-checkpoint-clock-text/Cargo.toml --test replay
+   Compiling node115-date-time-display v0.1.0 (/private/tmp/hl-node115-clock-replay.OK9VxO/src/node115-date-time-display)
+   Compiling node115-checkpoint-clock-text v0.1.0 (/private/tmp/hl-node115-clock-replay.OK9VxO/src/node115-checkpoint-clock-text)
+error[E0432]: unresolved imports `node115_checkpoint_clock_text::CheckpointClocks`, `node115_checkpoint_clock_text::ClockWords`
+ --> tests/replay.rs:1:37
+  |
+1 | use node115_checkpoint_clock_text::{CheckpointClocks, ClockWords, render_checkpoint_clock};
+  |                                     ^^^^^^^^^^^^^^^^  ^^^^^^^^^^ no `ClockWords` in the root
+  |                                     |
+  |                                     no `CheckpointClocks` in the root
+  |
+help: a similar name exists in the module
+  |
+1 - use node115_checkpoint_clock_text::{CheckpointClocks, ClockWords, render_checkpoint_clock};
+1 + use node115_checkpoint_clock_text::{CheckpointClockText, ClockWords, render_checkpoint_clock};
+  |
+
+For more information about this error, try `rustc --explain E0432`.
+error: could not compile `node115-checkpoint-clock-text` (test "replay") due to 1 previous error
+
+$ python3 -B /tmp/hl-node115-clock-replay.OK9VxO/research/work-items/RE-017-node115-replay-clock-rotation/verify.py
+PASS: #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 27 spans / 100 bytes match both begin FDEs
+PASS: five original branch targets, signed date, unsigned subday fields, and both replay-wrapper calls
+
+$ cargo test --offline --locked --manifest-path src/node115-checkpoint-clock-text/Cargo.toml --test replay
+   Compiling node115-checkpoint-clock-text v0.1.0 (/private/tmp/hl-node115-clock-replay.OK9VxO/src/node115-checkpoint-clock-text)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+     Running tests/replay.rs (src/node115-checkpoint-clock-text/target/debug/deps/replay-d737a29c5ac39e16)
+
+running 2 tests
+test packed_date_word_is_compared_as_signed ... ok
+test rotates_only_on_a_strictly_later_replay_clock ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+$ cargo test --offline --locked --manifest-path src/node115-checkpoint-clock-text/Cargo.toml
+   Compiling node115-checkpoint-clock-text v0.1.0 (/private/tmp/hl-node115-clock-replay.OK9VxO/src/node115-checkpoint-clock-text)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s
+     Running unittests src/lib.rs (src/node115-checkpoint-clock-text/target/debug/deps/node115_checkpoint_clock_text-77e64b552bdb38cc)
+
+running 2 tests
+test tests::retains_the_display_domain ... ok
+test tests::renders_checkpoint_words_with_literal_t ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/replay.rs (src/node115-checkpoint-clock-text/target/debug/deps/replay-d737a29c5ac39e16)
+
+running 2 tests
+test packed_date_word_is_compared_as_signed ... ok
+test rotates_only_on_a_strictly_later_replay_clock ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests node115_checkpoint_clock_text
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
