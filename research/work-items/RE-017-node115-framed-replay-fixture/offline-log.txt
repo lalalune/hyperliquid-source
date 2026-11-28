@@ -1,0 +1,77 @@
+$ python3 -B research/work-items/RE-017-node115-framed-replay-fixture/verify.py
+0x5a806f0..0x5a81584 0x5a80918 48c783e800000080969800 mov qword ptr [rbx + 0xe8], 0x989680
+0x5a806f0..0x5a81584 0x5a80c41 488b9380060000 mov rdx, qword ptr [rbx + 0x680]
+0x5a806f0..0x5a81584 0x5a80c48 48899388060000 mov qword ptr [rbx + 0x688], rdx
+0x5a806f0..0x5a81584 0x5a80c94 488993b0060000 mov qword ptr [rbx + 0x6b0], rdx
+0x5a806f0..0x5a81584 0x5a80ca2 4c8dab90060000 lea r13, [rbx + 0x690]
+0x5a806f0..0x5a81584 0x5a80cb9 e8d2360300 call 0x5ab4390 <.text+0x469b090>
+0x5a806f0..0x5a81584 0x5a80db8 488b8b88060000 mov rcx, qword ptr [rbx + 0x688]
+0x5a806f0..0x5a81584 0x5a80de1 4889ee mov rsi, rbp
+0x5a806f0..0x5a81584 0x5a80de4 4c89fa mov rdx, r15
+0x5a806f0..0x5a81584 0x5a80de7 e8c4fdddff call 0x5860bb0 <.text+0x44478b0>
+0x5ab4390..0x5ab5b4d 0x5ab43db 488b4320 mov rax, qword ptr [rbx + 0x20]
+0x5ab4390..0x5ab5b4d 0x5ab43df 48894328 mov qword ptr [rbx + 0x28], rax
+0x5ab4390..0x5ab5b4d 0x5ab4712 488d83a0000000 lea rax, [rbx + 0xa0]
+0x5ab4390..0x5ab5b4d 0x5ab472e 48894358 mov qword ptr [rbx + 0x58], rax
+0x5ab4390..0x5ab5b4d 0x5ab4732 48c7436005000000 mov qword ptr [rbx + 0x60], 0x5
+0x5ab4390..0x5ab5b4d 0x5ab4746 e805f3ffff call 0x5ab3a50 <.text+0x469a750>
+0x5ab4390..0x5ab5b4d 0x5ab474e 0f84c5000000 je 0x5ab4819 <.text+0x469b519>
+0x5ab4390..0x5ab5b4d 0x5ab4819 448bb3a0000000 mov r14d, dword ptr [rbx + 0xa0]
+0x5ab4390..0x5ab5b4d 0x5ab4820 410fce bswap r14d
+0x5ab4390..0x5ab5b4d 0x5ab4823 0fb6aba4000000 movzx ebp, byte ptr [rbx + 0xa4]
+0x5ab4390..0x5ab5b4d 0x5ab4831 e9c1030000 jmp 0x5ab4bf7 <.text+0x469b8f7>
+0x5ab4390..0x5ab5b4d 0x5ab4a24 48c783d801000005000000 mov qword ptr [rbx + 0x1d8], 0x5
+0x5ab4390..0x5ab5b4d 0x5ab4a42 e809f0ffff call 0x5ab3a50 <.text+0x469a750>
+0x5ab4390..0x5ab5b4d 0x5ab4a56 448bb318020000 mov r14d, dword ptr [rbx + 0x218]
+0x5ab4390..0x5ab5b4d 0x5ab4a5d 410fce bswap r14d
+0x5ab4390..0x5ab5b4d 0x5ab4a60 0fb6ab1c020000 movzx ebp, byte ptr [rbx + 0x21c]
+0x5ab4390..0x5ab5b4d 0x5ab4bfa 4c897358 mov qword ptr [rbx + 0x58], r14
+0x5ab4390..0x5ab5b4d 0x5ab4bfe 4c397328 cmp qword ptr [rbx + 0x28], r14
+0x5ab4390..0x5ab5b4d 0x5ab4c02 0f8395010000 jae 0x5ab4d9d <.text+0x469ba9d>
+0x5ab4390..0x5ab5b4d 0x5ab4d9d 4080fd01 cmp bpl, 0x1
+0x5ab4390..0x5ab5b4d 0x5ab4da1 0f944350 sete byte ptr [rbx + 0x50]
+0x5ab4390..0x5ab5b4d 0x5ab57a7 807b5000 cmp byte ptr [rbx + 0x50], 0x0
+0x5ab4390..0x5ab5b4d 0x5ab57ab 0f84bb000000 je 0x5ab586c <.text+0x469c56c>
+0x5ab4390..0x5ab5b4d 0x5ab57c1 488b4b28 mov rcx, qword ptr [rbx + 0x28]
+0x5ab4390..0x5ab5b4d 0x5ab57d5 ff15b51fa300 call qword ptr [rip + 0xa31fb5] # 0x64e7790
+verified 35 replay-specific framing spans, budgets and decoder handoffs
+$ cargo test --locked --offline --manifest-path src/node115-replay-completed-payload/Cargo.toml
+   Compiling node115-lz4-decode v0.1.0 (/private/tmp/hl-records-115-source/replay-framed-build/src/node115-lz4-decode)
+   Compiling node115-daycount-date v0.1.0 (/private/tmp/hl-records-115-source/replay-framed-build/src/node115-daycount-date)
+   Compiling node115-signed-scalar v0.1.0 (/private/tmp/hl-records-115-source/replay-framed-build/src/node115-signed-scalar)
+   Compiling node115-tcp-frame-plan v0.1.0 (/private/tmp/hl-records-115-source/replay-framed-build/src/node115-tcp-frame-plan)
+   Compiling node115-u64-reader-state v0.1.0 (/private/tmp/hl-records-115-source/replay-framed-build/src/node115-gossip-response-record/reader)
+   Compiling node115-u32-varint v0.1.0 (/private/tmp/hl-records-115-source/replay-framed-build/src/node115-u32-varint)
+   Compiling node115-lz4-literal-encoder v0.1.0 (/private/tmp/hl-records-115-source/replay-framed-build/src/node115-lz4-literal-encoder)
+   Compiling node115-client-block-success v0.1.0 (/private/tmp/hl-records-115-source/replay-framed-build/src/node115-client-block-success)
+   Compiling node115-tcp-stream-frame-lz4 v0.1.0 (/private/tmp/hl-records-115-source/replay-framed-build/src/node115-tcp-stream-frame-lz4)
+   Compiling node115-replay-completed-payload v0.1.0 (/private/tmp/hl-records-115-source/replay-framed-build/src/node115-replay-completed-payload)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.20s
+     Running unittests src/lib.rs (/tmp/hl-records-115-source/archive-header-build/target/debug/deps/node115_replay_completed_payload-a7e9a12e925d07a0)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/completed.rs (/tmp/hl-records-115-source/archive-header-build/target/debug/deps/completed-6d666b88bd7544fb)
+
+running 3 tests
+test stage_boundaries_preserve_the_inner_result_or_the_compression_error ... ok
+test tx_uses_the_actual_decoded_span_and_preserves_the_prefix_boundary ... ok
+test block_and_empty_attachment_option_survive_both_arms ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/framed.rs (/tmp/hl-records-115-source/archive-header-build/target/debug/deps/framed-b729e2b7bbb44fd0)
+
+running 2 tests
+test a_non_one_flag_uses_the_plain_payload_bytes ... ok
+test adjacent_plain_and_compressed_frames_reach_the_same_block_decoder ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests node115_replay_completed_payload
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
