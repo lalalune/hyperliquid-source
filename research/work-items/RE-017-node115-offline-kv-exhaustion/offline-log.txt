@@ -1,0 +1,101 @@
+2da45cb0a761cff6b478e40421699857d87a94df
+rustc 1.95.0 (59807616e 2026-04-14)
+cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+$ cargo test --offline --locked --manifest-path src/node115-db/Cargo.toml --test kv_snapshot_exhaustion
+   Compiling node115-startup-admission v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-startup-admission)
+   Compiling node115-reverse-path-components v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-reverse-path-components)
+   Compiling node115-checkpoint-plan v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-owned-db-open/checkpoint-plan)
+   Compiling node115-db-hub-byte-key v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-db-hub-byte-key)
+   Compiling node115-storage-value-decode v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-storage-value-decode)
+   Compiling node115-indexed-artifact-variant v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-indexed-artifact-variant)
+   Compiling node115-owned-db-open v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-owned-db-open)
+   Compiling node115-restore-copy v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-owned-db-open/restore-copy)
+   Compiling node115-block-handle-codec v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-block-handle-codec)
+   Compiling node115-checkpoint-discovery v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-checkpoint-discovery)
+   Compiling node115-replica-end-height v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-replica-end-height)
+   Compiling node115-db v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-db)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.52s
+     Running tests/kv_snapshot_exhaustion.rs (/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/target/debug/deps/kv_snapshot_exhaustion-0dc3ff0bdf3d2e48)
+
+running 1 test
+test shard_restore_requires_exactly_one_complete_column_family_record ... FAILED
+
+failures:
+
+---- shard_restore_requires_exactly_one_complete_column_family_record stdout ----
+
+thread 'shard_restore_requires_exactly_one_complete_column_family_record' (194018770) panicked at tests/kv_snapshot_exhaustion.rs:38:24:
+restore accepted concatenated snapshots: PersistentShardKvStore { root_dir: "/var/folders/73/d2wzvbxd3d34lh0b1fpw3_3m0000gn/T/hl-kv-83901-1795854787772037000/checkpoint/42/EvmState", shard: EvmState, data: {"EvmStateAccounts": {}, "EvmStateContracts": {}, "EvmStateStorage": {[108, 111, 99, 97, 108]: [102, 105, 114, 115, 116, 32, 115, 110, 97, 112, 115, 104, 111, 116]}, "default": {}} }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    shard_restore_requires_exactly_one_complete_column_family_record
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `--test kv_snapshot_exhaustion`
+Baseline exit code: 101
+$ python3 -B research/work-items/RE-017-node115-offline-kv-exhaustion/verify.py
+PASS: authenticated a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+PASS: native checkpoint JSON reader checks remaining input and rejects a non-whitespace tail
+$ cargo test --offline --locked --manifest-path src/node115-db/Cargo.toml
+   Compiling node115-db v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-db)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.55s
+     Running unittests src/lib.rs (/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/target/debug/deps/node115_db-0ea92d2991f39f70)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration.rs (/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/target/debug/deps/integration-cb9581f096018ac8)
+
+running 12 tests
+test owned_db_home_checkpoint_guard_and_live_vs_slow_budgets ... ok
+test rocks_db_owned_db_dir_guard ... ok
+test rocks_db_niche_block_reader_and_indexed_artifact_variants ... ok
+test db_home_checkpoint_subdir_lt_hashes_and_74_slot_capture_offsets ... ok
+test indexed_block_reader_point_and_range_query_inclusive ... ok
+test db_hub_byte_key_storage_decode_and_snapshot_selectors ... ok
+test db_hub_29_kind_prefix_table_and_3_shard_routing ... ok
+test checkpoint_shard_marker_uses_node115_ascii_uppercase ... ok
+test storage_db_closure_latest_checkpoint_loader_db_hub_path_and_single_run_block_query ... ok
+test db_home_guard_discovery_plan_restore_copy_and_replica_height ... ok
+test latest_checkpoint_checks_both_regular_marker_forms ... ok
+test rocksdb_3_shard_profiles_tcp_ceiling_and_persistent_checkpoint_roundtrip ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/kv_snapshot_exhaustion.rs (/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/target/debug/deps/kv_snapshot_exhaustion-0dc3ff0bdf3d2e48)
+
+running 1 test
+test shard_restore_requires_exactly_one_complete_column_family_record ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+   Doc-tests node115_db
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+$ cargo test --offline --locked --release --manifest-path src/node115-db/Cargo.toml --test kv_snapshot_exhaustion
+   Compiling node115-startup-admission v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-startup-admission)
+   Compiling node115-reverse-path-components v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-reverse-path-components)
+   Compiling node115-restore-copy v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-owned-db-open/restore-copy)
+   Compiling node115-db-hub-byte-key v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-db-hub-byte-key)
+   Compiling node115-checkpoint-plan v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-owned-db-open/checkpoint-plan)
+   Compiling node115-owned-db-open v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-owned-db-open)
+   Compiling node115-storage-value-decode v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-storage-value-decode)
+   Compiling node115-indexed-artifact-variant v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-indexed-artifact-variant)
+   Compiling node115-block-handle-codec v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-block-handle-codec)
+   Compiling node115-checkpoint-discovery v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-checkpoint-discovery)
+   Compiling node115-replica-end-height v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-replica-end-height)
+   Compiling node115-db v0.1.0 (/private/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/src/node115-db)
+    Finished `release` profile [optimized] target(s) in 0.63s
+     Running tests/kv_snapshot_exhaustion.rs (/tmp/hl-node115-offline-kv-exhaustion.WgkgXt/target/release/deps/kv_snapshot_exhaustion-cb10e5a7083fbf06)
+
+running 1 test
+test shard_restore_requires_exactly_one_complete_column_family_record ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
