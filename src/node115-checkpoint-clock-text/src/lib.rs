@@ -35,6 +35,9 @@ pub fn render_checkpoint_clock(
     Some(CheckpointClockText { bytes, length })
 }
 
+mod ingress;
+pub use ingress::{ClockIngressError, parse_checkpoint_clock, stage_decoded_clock_pair};
+
 #[cfg(test)]
 mod tests {
     use super::*;
