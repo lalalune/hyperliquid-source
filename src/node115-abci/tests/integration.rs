@@ -259,6 +259,38 @@ fn real_blake3_state_root_and_timer_maturity_end_to_end() {
 }
 
 #[test]
+fn checkpoint_output_requires_exact_null_path_spelling() {
+    use std::path::Path;
+
+    use node115_abci::state::{CheckpointFormat, classify_checkpoint_path};
+
+    assert_eq!(
+        classify_checkpoint_path(Path::new("/dev/null")),
+        CheckpointFormat::SkipDevNull,
+    );
+    for spelling in ["/dev//null", "/dev/./null", "//dev/null", "/dev/null/"] {
+        let path = Path::new(spelling);
+        assert_eq!(path, Path::new("/dev/null"), "{spelling}");
+        assert_eq!(
+            classify_checkpoint_path(path),
+            CheckpointFormat::PrettyJson,
+            "{spelling}",
+        );
+    }
+    assert_eq!(
+        classify_checkpoint_path(Path::new("checkpoint//state.rmp")),
+        CheckpointFormat::MessagePackRmp,
+    );
+    for spelling in ["state.RMP", ".rmp", "state.rmp.json"] {
+        assert_eq!(
+            classify_checkpoint_path(Path::new(spelling)),
+            CheckpointFormat::PrettyJson,
+            "{spelling}",
+        );
+    }
+}
+
+#[test]
 fn tracker_wire_schema_checkpoint_format_and_straggler_filter() {
     use node115_abci::engine::{
         EvmCheckpointFilterOutcome, MARKED_FOR_DELETION_MARKER, classify_evm_checkpoint_entry,
