@@ -1,0 +1,45 @@
+RE-017-node115-empty-delayer-fixture
+Darwin arm64
+Python 3.9.6
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B /tmp/hl-node115-empty-delayer.KDQ9Um/RE-017-node115-empty-delayer-fixture/verify.py
+PASS: #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 40 pinned spans across 4 FDEs
+PASS: 13 relative branches/calls and loader relocation 0x64e4f10 -> 0x3bec320
+
+$ python3 -B /tmp/hl-node115-empty-delayer.KDQ9Um/RE-017-node115-empty-delayer-fixture/test_project.py
+test_cli_emits_binary_only_and_no_partial_output_on_error (__main__.EmptyDelayerFixtureTests) ... ok
+test_exact_delta_and_untouched_pointer_word (__main__.EmptyDelayerFixtureTests) ... ok
+test_layout_digest_and_height_are_checked (__main__.EmptyDelayerFixtureTests) ... ok
+test_second_application_has_no_further_delta (__main__.EmptyDelayerFixtureTests) ... ok
+test_unsupported_loader_branches (__main__.EmptyDelayerFixtureTests) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.064s
+
+OK
+
+$ PYTHONPATH=/tmp/hl-node115-empty-delayer.KDQ9Um/RE-017-node115-empty-delayer-fixture:/tmp/hl-node115-loader-writes.aFxnjg/RE-017-node115-loader-write-fixture python3 -B - <<'PY'
+from hashlib import sha256
+from struct import unpack_from
+from test_project import fixture, HEIGHT
+from project import project_empty_delayer
+from apply_writes import apply
+
+def digest(image):
+    return sha256(image).hexdigest()
+
+image = fixture()
+before = apply(image, digest(image), HEIGHT, "after-c-staking")
+loaded = project_empty_delayer(before, digest(before), HEIGHT)
+final = apply(loaded, digest(loaded), HEIGHT, "after-action-delayer")
+assert unpack_from("<Q", final, 0xef8) == unpack_from("<Q", image, 0x30)
+assert unpack_from("<4Q", final, 0x40e0) == (0, 8, 0, 0)
+assert unpack_from("<Q", final, 0x4120) == (0,)
+assert final[0x39b0] == 2
+assert final[0x3e28:0x3e2a] == final[0x3ee0:0x3ee2] == bytes(2)
+print("PASS: composed post-c-staking stores, empty delayer helper and post-delayer stores")
+PY
+PASS: composed post-c-staking stores, empty delayer helper and post-delayer stores
