@@ -317,3 +317,72 @@ fn position_boundary_overflow_and_request_corruption_cases() {
         RequestAccess::RejectedNotLocalhost
     );
 }
+
+#[test]
+fn projected_position_values_match_the_documented_account_example() {
+    use info_api::position::{project_position_values, PositionValues};
+
+    // clearinghouseState ETH example: 0.0335 ETH, mark 2,985.90, entry 2,986.30.
+    let values = project_position_values(335, 298_590, 100_041_050, 4)
+        .unwrap()
+        .unwrap();
+    assert_eq!(
+        values,
+        PositionValues {
+            signed_size: 0.0335,
+            position_value: 100.02765,
+            unrealized_pnl: -0.0134,
+            entry_price: Some(2986.3),
+        }
+    );
+    let short = project_position_values(-335, 298_590, 100_041_050, 4)
+        .unwrap()
+        .unwrap();
+    assert_eq!(short.signed_size, -values.signed_size);
+    assert_eq!(short.position_value, values.position_value);
+    assert_eq!(short.unrealized_pnl, -values.unrealized_pnl);
+    assert_eq!(short.entry_price, values.entry_price);
+}
+
+#[test]
+fn projection_observes_integer_division_flat_rows_and_signed_word_boundaries() {
+    use info_api::position::{project_position_values, PositionValueBoundary};
+
+    for decimals in 0..=6 {
+        let size_scale = 10u64.pow(decimals.into()) as f64;
+        let entry_scale = 10u64.pow((6 - decimals).into()) as f64;
+        let row = project_position_values(3, 5, 10, decimals)
+            .unwrap()
+            .unwrap();
+        assert_eq!(row.signed_size, 3. / size_scale);
+        assert_eq!(row.entry_price, Some(3. / entry_scale));
+        assert_eq!(row.unrealized_pnl, 5. / 1_000_000.);
+        assert_eq!(
+            project_position_values(3, 5, 2, decimals)
+                .unwrap()
+                .unwrap()
+                .entry_price,
+            None
+        );
+    }
+    let minimum = project_position_values(i64::MIN, 1, 0, 6).unwrap().unwrap();
+    assert_eq!(minimum.position_value, (1u64 << 63) as f64 / 1_000_000.);
+    assert_eq!(minimum.unrealized_pnl, 0.);
+    assert_eq!(minimum.entry_price, None);
+    assert_eq!(
+        project_position_values(0, u64::MAX, u64::MAX, 255),
+        Ok(None)
+    );
+    assert_eq!(
+        project_position_values(1, 1, 1, 7),
+        Err(PositionValueBoundary::AssetDecimals)
+    );
+    assert_eq!(
+        project_position_values(2, i64::MAX as u64, 0, 0),
+        Err(PositionValueBoundary::MarkOrProduct)
+    );
+    assert_eq!(
+        project_position_values(2, 1, u64::MAX, 0),
+        Err(PositionValueBoundary::EntrySign)
+    );
+}

@@ -114,6 +114,42 @@ class TestInfoApiCrate115(unittest.TestCase):
             off = self.va_to_off(va)
             self.assertEqual(self.data[off : off + len(expected)], expected, anchor["label"])
 
+    def test_position_display_loads_scales_and_output_lanes(self) -> None:
+        self.assertEqual(self.fdes[0x2C7FD80]["end"], 0x2C80666)
+
+        def check_bytes(va, encoding):
+            raw = bytes.fromhex(encoding)
+            off = self.va_to_off(va)
+            self.assertEqual(self.data[off:off + len(raw)], raw, hex(va))
+
+        # Pointers bind each load to its corresponding table or scalar.
+        for address, opcode, target in [
+            (0x2C800C0, "488d05", 0x5ED748),  # entry: 6 minus size decimals
+            (0x2C8036C, "488d0d", 0x5F1880),  # signed size: size decimals
+            (0x2C80373, "660f2805", 0x451CE0), # packed division high lane
+            (0x2C8044D, "f20f102d", 0x4599A0), # signed quote amounts
+        ]:
+            check_bytes(address, opcode)
+            next_pc = address + len(bytes.fromhex(opcode)) + 4
+            disp, = struct.unpack_from("<i", self.data, self.va_to_off(next_pc - 4))
+            self.assertEqual(next_pc + disp, target)
+        for address in [0x5ED748, 0x5F1880]:
+            self.assertEqual(struct.unpack_from("<7d", self.data, self.va_to_off(address)),
+                             tuple(float(10 ** exponent) for exponent in range(7)))
+        self.assertEqual(struct.unpack_from("<2d", self.data, self.va_to_off(0x451CE0)),
+                         (0.0, 1_000_000.0))
+        self.assertEqual(struct.unpack_from("<d", self.data, self.va_to_off(0x4599A0))[0], 1_000_000.)
+        check_bytes(0x2C800DF, "4889e948f7d9480f48cd")  # magnitude of signed product
+        check_bytes(0x2C80105, "48898c2490000000")
+        check_bytes(0x2C80199, "48898c2490000000")
+        check_bytes(0x2C80380, "f2480f2a542440")    # convert signed position size
+        check_bytes(0x2C8038E, "f20f10ac2490000000") # load magnitude bits for u64 conversion
+        check_bytes(0x2C80397, "f2480f2a5c2438")    # convert signed PnL
+        check_bytes(0x2C803F7, "f2440f114b08")       # write optional entry payload
+        check_bytes(0x2C80448, "66410f14d3")         # size and converted magnitude
+        check_bytes(0x2C80459, "f20f5edd")           # divide PnL by quote scale
+        check_bytes(0x2C80480, "660f5ed0660f115348f20f115b58")  # +48, +50, +58
+
     def test_key_fdes_match_eh_frame(self) -> None:
         for item in self.evidence["key_fdes"]:
             start = int(item["start"], 16)
