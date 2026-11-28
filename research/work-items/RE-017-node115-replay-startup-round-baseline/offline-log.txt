@@ -1,0 +1,48 @@
+Darwin arm64
+Python 3.9.6
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+GNU objdump (GNU Binutils) 2.45
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+
+$ python3 -B research/work-items/RE-017-node115-replay-expected-pair-origin/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 28 spans in 3 FDEs
+PASS: startup result pointer +0x18/+0x20 feeds input +0x100/+0x108
+PASS: task copy preserves both words and the pinned poll consumes them in order
+
+$ python3 -B research/work-items/RE-017-node115-local-restore-replay-pair/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 49 spans in 3 FDEs
+PASS: local restore builder pointer survives the tagged output selection into R15
+PASS: empty-vector continuation copies restored state +0x18/+0x20 to replay comparison +0x100/+0x108
+PASS: the first inline-state dispatch routes through a separate call and replaces R15 on its selected result
+
+$ python3 -B research/work-items/RE-017-node115-replay-startup-round-baseline/verify.py
+PASS: SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 70 spans in 4 indexed FDEs
+PASS: both routes initialize receive-buffer prefix (0, 8, 0) and copy state+0x30 to input+0x110
+PASS: installed poll preloads the preserved baseline and skips the tail on zero count
+PASS: distinct checkpoint words and three changed-witness controls
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x2af5797 --stop-address=0x2af57a9 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 2af5797: 48 8b 44 24 10               	mov	rax, qword ptr [rsp + 0x10]
+ 2af579c: 0f 10 40 18                  	movups	xmm0, xmmword ptr [rax + 0x18]
+ 2af57a0: 0f 29 44 24 60               	movaps	xmmword ptr [rsp + 0x60], xmm0
+ 2af57a5: 4c 8b 70 30                  	mov	r14, qword ptr [rax + 0x30]
+
+$ objdump -d -M intel --insn-width=16 --start-address=0x2cc24b2 --stop-address=0x2cc24c0 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000002cc24b2 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x3085f7e>:
+ 2cc24b2:	41 0f 10 47 18                                  	movups xmm0,XMMWORD PTR [r15+0x18]
+ 2cc24b7:	0f 29 44 24 10                                  	movaps XMMWORD PTR [rsp+0x10],xmm0
+ 2cc24bc:	4d 8b 67 30                                     	mov    r12,QWORD PTR [r15+0x30]
