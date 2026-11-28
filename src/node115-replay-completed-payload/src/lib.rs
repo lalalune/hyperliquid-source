@@ -6,6 +6,7 @@ pub use node115_lz4_decode::DecodeError as CompressionError;
 
 use node115_client_block_success::{decode_replay_payload_prefix, replay_parent_projection};
 use node115_lz4_decode::decode;
+use std::cmp::Ordering;
 
 /// Selected initial producer value for both decoded capacity and reader charge.
 pub const REPLAY_LIMIT: u64 = 10_000_000;
@@ -35,7 +36,50 @@ pub enum ReplayBlockCheck {
     Mismatch { observed: [u64; 2] },
 }
 
+/// Decoded local-state fields before the optional startup hardfork rewrite.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct LocalStartupState {
+    pub height: u64,
+    pub context_round: u64,
+    pub hardfork_version: u64,
+    pub hardfork_round: u64,
+    pub scheduled_freeze_height: Option<u64>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct StaleFreezeHeight {
+    pub target: u64,
+    pub restored: u64,
+}
+
 impl DecodedPrefix {
+    /// Compare with the state sampled by the selected local startup path.
+    /// This models the word selection on normal continuation, without applying
+    /// the rewrite's other state changes or running its helpers.
+    pub fn check_local_startup(
+        &self,
+        state: LocalStartupState,
+    ) -> Result<ReplayBlockCheck, StaleFreezeHeight> {
+        let original = [state.hardfork_version, state.hardfork_round];
+        let expected = match state.scheduled_freeze_height {
+            None => original,
+            Some(target) => match target.cmp(&state.height) {
+                Ordering::Less => {
+                    return Err(StaleFreezeHeight {
+                        target,
+                        restored: state.height,
+                    });
+                }
+                Ordering::Equal => [
+                    state.hardfork_version.saturating_add(1),
+                    state.context_round,
+                ],
+                Ordering::Greater => original,
+            },
+        };
+        Ok(self.check_block_identity(expected))
+    }
+
     /// Use the caller-supplied startup pair in the observed comparison order.
     /// The successor is available only on the matching Block continuation.
     pub fn check_block_identity(&self, expected: [u64; 2]) -> ReplayBlockCheck {
