@@ -1,0 +1,66 @@
+Darwin arm64
+Python 3.9.6
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+GNU objdump (GNU Binutils) 2.45
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+
+$ python3 -B research/work-items/RE-017-node115-bootstrap-response-row-handoff/verify.py
+PASS: SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 160 ranges in indexed FDEs and worker entry
+PASS: selected completed reply retains its vector words after the 0x44 / 3 / discriminator check
+PASS: 16-byte ordered rows advance once and reach the worker; cursor equality skips the row
+PASS: two distinct rows, exhausted cursor and mutated witness controls
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x5a841db --stop-address=0x5a84242 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 5a841db: 41 80 fe 44                  	cmp	r14b, 0x44
+ 5a841df: 75 61                        	jne	0x5a84242 <.text+0x466af42>
+ 5a841e1: 4c 89 a3 98 02 00 00         	mov	qword ptr [rbx + 0x298], r12
+ 5a841e8: 66 0f 6f 84 24 b0 03 00 00   	movdqa	xmm0, xmmword ptr [rsp + 0x3b0]
+ 5a841f1: f3 0f 7f 83 a0 02 00 00      	movdqu	xmmword ptr [rbx + 0x2a0], xmm0
+ 5a841f9: 48 8b 83 a0 02 00 00         	mov	rax, qword ptr [rbx + 0x2a0]
+ 5a84200: 48 8b 8b a8 02 00 00         	mov	rcx, qword ptr [rbx + 0x2a8]
+ 5a84207: 48 89 8b b0 02 00 00         	mov	qword ptr [rbx + 0x2b0], rcx
+ 5a8420e: c6 83 c8 02 00 00 00         	mov	byte ptr [rbx + 0x2c8], 0x0
+ 5a84215: 48 c1 e1 04                  	shl	rcx, 0x4
+ 5a84219: 48 01 c1                     	add	rcx, rax
+ 5a8421c: 48 89 83 28 02 00 00         	mov	qword ptr [rbx + 0x228], rax
+ 5a84223: 48 89 83 30 02 00 00         	mov	qword ptr [rbx + 0x230], rax
+ 5a8422a: 4c 89 a3 38 02 00 00         	mov	qword ptr [rbx + 0x238], r12
+ 5a84231: 48 89 8b 40 02 00 00         	mov	qword ptr [rbx + 0x240], rcx
+ 5a84238: 48 8b 7c 24 38               	mov	rdi, qword ptr [rsp + 0x38]
+ 5a8423d: e9 93 ea ff ff               	jmp	0x5a82cd5 <.text+0x46699d5>
+
+$ objdump -d -M intel --insn-width=16 --start-address=0x5a82cd5 --stop-address=0x5a82d41 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000005a82cd5 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x2c575b>:
+ 5a82cd5:	48 39 c8                                        	cmp    rax,rcx
+ 5a82cd8:	48 89 7c 24 38                                  	mov    QWORD PTR [rsp+0x38],rdi
+ 5a82cdd:	0f 84 2c 01 00 00                               	je     5a82e0f <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x2c5621>
+ 5a82ce3:	48 8d 48 10                                     	lea    rcx,[rax+0x10]
+ 5a82ce7:	48 89 8b 30 02 00 00                            	mov    QWORD PTR [rbx+0x230],rcx
+ 5a82cee:	48 8b 08                                        	mov    rcx,QWORD PTR [rax]
+ 5a82cf1:	48 8b 40 08                                     	mov    rax,QWORD PTR [rax+0x8]
+ 5a82cf5:	48 89 8b 48 02 00 00                            	mov    QWORD PTR [rbx+0x248],rcx
+ 5a82cfc:	48 89 83 50 02 00 00                            	mov    QWORD PTR [rbx+0x250],rax
+ 5a82d03:	48 8b 93 68 02 00 00                            	mov    rdx,QWORD PTR [rbx+0x268]
+ 5a82d0a:	48 89 93 d0 02 00 00                            	mov    QWORD PTR [rbx+0x2d0],rdx
+ 5a82d11:	48 89 8b d8 02 00 00                            	mov    QWORD PTR [rbx+0x2d8],rcx
+ 5a82d18:	48 89 83 e0 02 00 00                            	mov    QWORD PTR [rbx+0x2e0],rax
+ 5a82d1f:	c6 83 f0 04 00 00 00                            	mov    BYTE PTR [rbx+0x4f0],0x0
+ 5a82d26:	4c 8d a3 d0 02 00 00                            	lea    r12,[rbx+0x2d0]
+ 5a82d2d:	48 8d bc 24 20 14 00 00                         	lea    rdi,[rsp+0x1420]
+ 5a82d35:	4c 89 e6                                        	mov    rsi,r12
+ 5a82d38:	48 8b 14 24                                     	mov    rdx,QWORD PTR [rsp]
+ 5a82d3c:	e8 9f 6a 00 00                                  	call   5a897e0 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x2bec50>
