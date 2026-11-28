@@ -32,6 +32,33 @@ pub struct ReductionRow {
     pub value: ReductionNode,
 }
 
+/// Outcomes supplied at the top-level #115 capture boundary.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum CaptureSlot {
+    /// No child was produced for the initialized slot.
+    Empty,
+    /// The child reduced to the selected omit status.
+    Omitted,
+    Value(ReductionNode),
+}
+
+/// Collect the surviving rows without renumbering intervening empty slots.
+pub fn reduce_top_level_capture(
+    slots: [CaptureSlot; ROOT_CAPTURE_SLOT_COUNT],
+) -> Vec<ReductionRow> {
+    slots
+        .into_iter()
+        .enumerate()
+        .filter_map(|(index, slot)| match slot {
+            CaptureSlot::Value(value) => Some(ReductionRow {
+                index: index as u64,
+                value,
+            }),
+            CaptureSlot::Empty | CaptureSlot::Omitted => None,
+        })
+        .collect()
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum EncodeError {
     ArrayLengthExceedsU32(usize),
