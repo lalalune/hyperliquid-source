@@ -456,3 +456,31 @@ fn rocks_db_per_shard_checkpoint_marker_and_owned_db_dir_guard() {
         "OwnedDbDir invalid dir /var/hl/checkpoint/42000"
     );
 }
+
+#[test]
+fn latest_checkpoint_checks_both_regular_marker_forms() {
+    let root = unique_tmp("latest-marker");
+    let home = DbHome::new(&root).unwrap();
+    let incomplete = home.checkpoint_dir_for_height(300);
+    let typed = home.checkpoint_dir_for_height(200);
+    let global = home.checkpoint_dir_for_height(100);
+    for path in [&incomplete, &typed, &global] {
+        fs::create_dir_all(path.join("EvmState")).unwrap();
+    }
+    fs::create_dir(incomplete.join("CHECKPOINT_COMPLETE")).unwrap();
+    fs::create_dir(incomplete.join("CHECKPOINT_COMPLETE_EVMSTATE")).unwrap();
+    fs::create_dir(typed.join("CHECKPOINT_COMPLETE")).unwrap();
+    fs::write(typed.join("CHECKPOINT_COMPLETE_EVMSTATE"), b"").unwrap();
+    fs::write(global.join("CHECKPOINT_COMPLETE"), b"").unwrap();
+
+    let first = home.load_latest_checkpoint(Some("EvmState")).unwrap();
+    assert_eq!(first.height, 200);
+    assert_eq!(first.path, typed);
+    fs::remove_file(typed.join("CHECKPOINT_COMPLETE_EVMSTATE")).unwrap();
+    assert_eq!(
+        home.load_latest_checkpoint(Some("EvmState")).unwrap().height,
+        100
+    );
+
+    let _ = fs::remove_dir_all(&root);
+}

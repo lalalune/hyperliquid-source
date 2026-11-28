@@ -114,8 +114,9 @@ impl DbHome {
     /// 1. Verifies `<db_home>/checkpoint` exists (`"checkpoint outer dir does not exist ..."`).
     /// 2. Scans entries strictly matching unsigned ASCII digits (`+`/`-` rejected at `0x4469183`/`0x4469188`),
     ///    returning `"no checkpoints to load: ..."` if none exist.
-    /// 3. Sorts descending by height and checks `<entry>/CHECKPOINT_COMPLETE` + optional
-    ///    `required_subdir`, returning `"unable to load any current checkpoint from ..."` if none qualify.
+    /// 3. Sorts descending by height and requires a regular global or EVM completion
+    ///    marker plus any supplied `required_subdir`. If none qualify, returns
+    ///    `"unable to load any current checkpoint from ..."`.
     pub fn load_latest_checkpoint(
         &self,
         required_subdir: Option<&str>,
@@ -144,7 +145,9 @@ impl DbHome {
         }
         parsed.sort_by_key(|b| std::cmp::Reverse(b.0));
         for (height, path) in parsed {
-            if !path.join("CHECKPOINT_COMPLETE").exists() {
+            if !path.join("CHECKPOINT_COMPLETE").is_file()
+                && !path.join("CHECKPOINT_COMPLETE_EVMSTATE").is_file()
+            {
                 continue;
             }
             if let Some(sub) = required_subdir
