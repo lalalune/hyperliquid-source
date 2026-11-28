@@ -268,13 +268,8 @@ def interpret(items):
         f.inferred('global_allocator', f'jemalloc {jem[0]}',
                    'bundled jemalloc version string present; crate (likely tikv-jemalloc-sys) version '
                    'is not visible unless a registry/vendor path names it')
-    except_size = (get('section.gcc_except_table_size') or [0])[0]
-    if except_size > 1_000_000:
-        f.inferred('panic_strategy', 'unwind',
-                   f'.gcc_except_table is {except_size} bytes; panic=abort emits no Rust cleanup landing '
-                   'pads, though linked C++ code also contributes; confirm by checking LSDA owners')
-    else:
-        f.unknown('panic_strategy', 'map LSDA owners to Rust functions; the except table is too small to decide')
+    f.unknown('panic_strategy', 'the root crate compiler invocation or equivalent build metadata; '
+              'the linked exception tables can include independently compiled inputs')
     if get('string.ub_checks_message_present') == [False]:
         f.inferred('debug_assertions', 'off (release-like profile)',
                    'std ub_checks precondition message is absent; it is emitted when debug assertions '

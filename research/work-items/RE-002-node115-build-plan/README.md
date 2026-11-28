@@ -136,7 +136,7 @@ the visor capture or to any other release.
 
 Machine-readable result: `build-plan.json` holds one row per field, and every row
 marked `exact` carries the key that `verify.py` re-derives. The plan has 33 rows:
-17 `exact`, 6 `inferred` and 10 `unresolved`.
+17 `exact`, 5 `inferred` and 11 `unresolved`.
 
 What passed: all 17 exact rows match the artifact, at the digest in the plan, and
 the corruption control is detected.
@@ -145,6 +145,7 @@ What remains unknown, and why the bytes cannot settle it:
 
 | Field | What would resolve it |
 | --- | --- |
+| root `panic` strategy | Root crate compiler invocation or equivalent profile metadata. The [panic strategy comparison](../RE-002-node115-panic-strategy/README.md) identifies the linked runtime and tests both settings. |
 | `opt_level` | instruction patterns of a rebuilt known function at each opt-level |
 | `codegen_units` | function ordering and partitioning in a matched rebuild |
 | `lto` | cross-crate inlining evidence against a matched rebuild |
@@ -205,4 +206,4 @@ image must set, not that any image has matched.
 
 Next question: for one bounded function that this release's provenance record
 already binds, does a rebuild at the plan's settings reproduce its bytes, and
-which of the ten unresolved inputs changes the result first?
+which of the eleven unresolved inputs changes the result first?
