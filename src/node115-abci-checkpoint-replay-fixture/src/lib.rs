@@ -14,6 +14,9 @@
 
 #![forbid(unsafe_code)]
 
+mod compact_local_restore;
+pub use compact_local_restore::{CompactLocalRestoreError, CompactLocalRestoreInput};
+
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
