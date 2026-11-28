@@ -135,6 +135,10 @@ fn handle_connection(
     };
 
     let (status, reason, resp_body) = dispatch_request(&method, &path, &body, peer_ip, state);
+    if status == 204 {
+        write!(stream, "HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n")?;
+        return stream.flush();
+    }
     let reply = format!(
         "HTTP/1.1 {status} {reason}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{resp_body}",
         resp_body.len()
@@ -349,9 +353,29 @@ fn handle_evm_rpc(body: &[u8], state: &ServerState) -> (u16, &'static str, Strin
             ),
         );
     };
-    let id_json = extract_json_id_token(body).unwrap_or_else(|| "1".to_string());
+    let id = json_field(body, b"id");
+    let id_json = match id {
+        Some(token) => match response_id(token) {
+            Some(raw) => raw,
+            None => return (200, "OK", r#"{"jsonrpc":"2.0","id":null,"error":{"code":-32600,"message":"Invalid Request"}}"#.into()),
+        },
+        None => "null",
+    };
+    let response = dispatch_evm_call(body, state, &method_name, id_json);
+    if id.is_some() {
+        response
+    } else {
+        (204, "No Content", String::new())
+    }
+}
 
-    let Ok(&canonical_method) = state.evm_router.get(&method_name) else {
+fn dispatch_evm_call(
+    body: &[u8],
+    state: &ServerState,
+    method_name: &str,
+    id_json: &str,
+) -> (u16, &'static str, String) {
+    let Ok(&canonical_method) = state.evm_router.get(method_name) else {
         return (
             200,
             "OK",
@@ -485,44 +509,94 @@ fn handle_evm_rpc(body: &[u8], state: &ServerState) -> (u16, &'static str, Strin
     )
 }
 
-fn extract_json_string_field(body: &[u8], target_key: &[u8]) -> Option<String> {
-    let mut cursor = 0usize;
+/// Locate an immediate member of an object, preserving the encoded value for reply IDs.
+fn json_field<'a>(body: &'a [u8], target_key: &[u8]) -> Option<&'a [u8]> {
+    let mut cursor = 0;
     skip_ws(body, &mut cursor);
     if body.get(cursor) != Some(&b'{') {
         return None;
     }
     cursor += 1;
     let mut scratch = Vec::new();
-    while cursor < body.len() {
+    loop {
         skip_ws(body, &mut cursor);
-        if body.get(cursor) == Some(&b'}') {
-            break;
-        }
         if body.get(cursor) != Some(&b'"') {
-            cursor += 1;
-            continue;
+            return None;
         }
         cursor += 1;
         scratch.clear();
-        let key = match scan_json_string(body, &mut cursor, &mut scratch).ok()? {
-            ScanOutput::Borrowed(b) | ScanOutput::Scratch(b) => b.to_vec(),
+        let matches = match scan_json_string(body, &mut cursor, &mut scratch).ok()? {
+            ScanOutput::Borrowed(key) | ScanOutput::Scratch(key) => key == target_key,
         };
         skip_ws(body, &mut cursor);
         if body.get(cursor) != Some(&b':') {
-            continue;
+            return None;
         }
         cursor += 1;
         skip_ws(body, &mut cursor);
-        if key == target_key && body.get(cursor) == Some(&b'"') {
-            cursor += 1;
-            scratch.clear();
-            let val = match scan_json_string(body, &mut cursor, &mut scratch).ok()? {
-                ScanOutput::Borrowed(b) | ScanOutput::Scratch(b) => b.to_vec(),
-            };
-            return String::from_utf8(val).ok();
+        let start = cursor;
+        let mut nesting = Vec::new();
+        while let Some(&byte) = body.get(cursor) {
+            match byte {
+                b'"' => {
+                    cursor += 1;
+                    scratch.clear();
+                    scan_json_string(body, &mut cursor, &mut scratch).ok()?;
+                }
+                b'{' | b'[' => {
+                    nesting.push(if byte == b'{' { b'}' } else { b']' });
+                    cursor += 1;
+                }
+                b'}' | b']' if !nesting.is_empty() => {
+                    if nesting.pop() != Some(byte) {
+                        return None;
+                    }
+                    cursor += 1;
+                }
+                b',' | b'}' if nesting.is_empty() => break,
+                _ => cursor += 1,
+            }
         }
+        if !nesting.is_empty() || cursor == start {
+            return None;
+        }
+        if matches {
+            return Some(body[start..cursor].trim_ascii_end());
+        }
+        if body.get(cursor) != Some(&b',') {
+            return None;
+        }
+        cursor += 1;
     }
-    None
+}
+
+fn response_id(raw: &[u8]) -> Option<&str> {
+    let text = std::str::from_utf8(raw).ok()?;
+    match raw {
+        b"null" | b"0" => Some(text),
+        [b'1'..=b'9', ..] => text.parse::<u64>().ok().map(|_| text),
+        [b'"', ..] => {
+            let mut cursor = 1;
+            scan_json_string(raw, &mut cursor, &mut Vec::new()).ok()?;
+            (cursor == raw.len()).then_some(text)
+        }
+        _ => None,
+    }
+}
+
+fn extract_json_string_field(body: &[u8], key: &[u8]) -> Option<String> {
+    let raw = json_field(body, key)?;
+    if raw.first() != Some(&b'"') {
+        return None;
+    }
+    let mut cursor = 1;
+    let mut scratch = Vec::new();
+    match scan_json_string(raw, &mut cursor, &mut scratch).ok()? {
+        ScanOutput::Borrowed(bytes) | ScanOutput::Scratch(bytes) if cursor == raw.len() => {
+            Some(std::str::from_utf8(bytes).ok()?.to_owned())
+        }
+        _ => None,
+    }
 }
 
 fn extract_first_param_string(body: &[u8]) -> Option<String> {
@@ -534,25 +608,6 @@ fn extract_first_param_string(body: &[u8]) -> Option<String> {
     let rest = after.strip_prefix('"')?;
     let end = rest.find('"')?;
     Some(rest[..end].to_string())
-}
-
-fn extract_json_id_token(body: &[u8]) -> Option<String> {
-    let text = std::str::from_utf8(body).ok()?;
-    let idx = text.find("\"id\"")?;
-    let after = text[idx + 4..].trim_start();
-    let after = after.strip_prefix(':')?.trim_start();
-    if let Some(rest) = after.strip_prefix('"') {
-        let end = rest.find('"')?;
-        return Some(format!("\"{}\"", &rest[..end]));
-    }
-    let end = after
-        .find(|c: char| !c.is_ascii_digit())
-        .unwrap_or(after.len());
-    if end == 0 {
-        None
-    } else {
-        Some(after[..end].to_string())
-    }
 }
 
 fn skip_ws(input: &[u8], cursor: &mut usize) {

@@ -189,6 +189,26 @@ fn e2e_localhost_http_info_and_evm_rpc_across_restart() {
         assert_eq!(chain_id.status_code, 200);
         assert!(chain_id.body.contains("\"result\":\"0x3e6\""));
 
+        for id in [r#""desk\"/quote""#, "null", "18446744073709551615"] {
+            let request = format!(
+                r#"{{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":{id}}}"#
+            );
+            let reply = http_post(addr, "/evm", &request).expect("correlated block number");
+            assert_eq!(
+                reply.body,
+                format!(r#"{{"jsonrpc":"2.0","id":{id},"result":"0x3"}}"#)
+            );
+        }
+
+        let extension = r#"{"jsonrpc":"2.0","context":{"id":"context"},"method":"eth_blockNumber","params":[],"id":"actual"}"#;
+        let reply = http_post(addr, "/evm", extension).expect("top-level correlation");
+        assert_eq!(reply.body, r#"{"jsonrpc":"2.0","id":"actual","result":"0x3"}"#);
+
+        let notice = r#"{"jsonrpc":"2.0","method":"eth_blockNumber","params":[]}"#;
+        let reply = http_post(addr, "/evm", notice).expect("block notification");
+        assert_eq!(reply.status_code, 204);
+        assert!(reply.body.is_empty());
+
         let blk_num = http_post(
             addr,
             "/evm",
