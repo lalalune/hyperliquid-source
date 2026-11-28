@@ -1,0 +1,147 @@
+{
+  "component": "action-dispatch",
+  "dispatch_crosswalk": {
+    "count": 17,
+    "evidence_file": "research/work-items/RE-010-variant-payload-dispatch-115/arms.tsv",
+    "helper": "0x18bf680",
+    "variants": [
+      2,
+      7,
+      8,
+      12,
+      14,
+      16,
+      17,
+      19,
+      20,
+      21,
+      70,
+      71,
+      75,
+      92,
+      100,
+      102,
+      109
+    ]
+  },
+  "fdes": {
+    "0x141e3a0": {
+      "bytes": "554889e5415741564154534883ec204989d64989f74889fb41f6c6010f8591000000410fb61784d20f84c700000031c04c89f94531e4eb180f1f8400000000000fb6d24901d44801d10fb61184d2746b48ffc184d279e989d640f6de710f0fb7114901d44801d14883c102ebdc4d85e4400f94c64008f089d640c0e60789d740c0e7054080e7404008f740c0ef05400fb6f789d740d0ef4080e702400fb6ffc0ea0280e2020fb6d24801f94801d14801f1eb964d89f449d1eceb194983fc100f92c184c874054531e4eb094d01e40f88990000004d85e4741c4c89e7ff15fe0f0c054885c07516bf010000004c89e6ff1503100c05b8010000004531e44c8965c0488945c848c745d000000000488d359c58fd04488d7dc04c89fa4c89f1ff152c120c0584c0751f488b45d0488943100f1045c00f11034889d84883c4205b415c415e415f5dc3488d3d968803ff488d0dab57fd044c8d058458fd04488d55dfbe56000000ff1595110c050f0b31ff4c89e6ff15800f0c054889c3488b75c04885f6740c488b7dc831d2ff15700f0c054889dfe81825fd04",
+      "end": "0x141e538",
+      "sha256": "aa4d4d0611c533e38c65e1577c0426b5163846c01225556743d4d4345cadd1fe",
+      "size": 408
+    },
+    "0x18be120": {
+      "bytes": "415741564154534883ec184989d64889fb41f6c601750e4889e74c89f2ff15a515c204eb3e49d1ee74254989f44c89f7ff152a13c2044885c074514989c74889c74c89e64c89f2ff159b13c204eb0641bf010000004c8934244c897c24084c89742410488b44241048894318488b042448894308488b44240848894310c603064883c4185b415c415e415fc3bf010000004c89f6ff15de12c204",
+      "end": "0x18be1ba",
+      "sha256": "1843d78f492ce208e9a206c7f17e56e5a81e9d88fe9a463346655d81943e8a00",
+      "size": 154
+    },
+    "0x18bf680": {
+      "bytes": "534883ec504889fbc64424380d488d050c03b6044889442408488d05f0d7b5044889442410488d4424384889442418488b051a08c2044889442420488d4424084889442428488d05e4a8480148894424304883c708488d359ef9b8fe488d542418e83aeaffff48c703010000004889d84883c4505bc3",
+      "end": "0x18bf6f6",
+      "sha256": "9da3454c4d7a9b1973b0b8de193d7693e3b2b8ad6d824e48ecb4b970fb6a36bb",
+      "size": 118
+    }
+  },
+  "inference": [
+    "Combining the two functions, the bounded output layout is an outer 8-byte value 1 followed by a 32-byte object whose first byte is 6 and whose remaining bytes contain three constructor-produced qwords. These bytes are observed; source-level enum/type names are not established.",
+    "For the tagged-length branch, the three qwords have the observed length/pointer/length dataflow. Their Rust-level ownership or semantic field names are not claimed."
+  ],
+  "observations": [
+    {
+      "address": "0x18bf680",
+      "fact": "The helper receives an output pointer, passes output+8 to 0x18be120, then stores the 64-bit value 1 at output+0 and returns the original output pointer."
+    },
+    {
+      "address": "research/work-items/RE-010-variant-payload-dispatch-115/arms.tsv",
+      "fact": "The verified E114A dispatch table maps 17 variants (2, 7, 8, 12, 14, 16, 17, 19, 20, 21, 70, 71, 75, 92, 100, 102 and 109) to this same helper."
+    },
+    {
+      "address": "0x18be120",
+      "fact": "The inner constructor writes byte tag 6 at its output base and writes three qwords at offsets +8, +16 and +24 from local values; the resulting inner object occupies 32 bytes."
+    },
+    {
+      "address": "0x18be175",
+      "fact": "On the tagged-length branch, the three qwords are length, pointer (or empty sentinel 1), and length; nonempty input is allocated and copied through the observed relocation slots."
+    },
+    {
+      "address": "0x18be137",
+      "fact": "On the even-pointer branch, the constructor delegates initialization to the function pointer loaded from GOT slot 0x64df6e8, then copies three qwords from its local record."
+    },
+    {
+      "address": "0x64df6e8",
+      "fact": "The R_X86_64_RELATIVE relocation resolves this slot to 0x141e3a0, whose complete FDE is included below."
+    },
+    {
+      "address": "0x141e3a0",
+      "fact": "The relocated helper receives an output record, the saved format-text pointer and the descriptor; it allocates a string buffer, passes the buffer plus format/descriptor to slot 0x64df6f0, then copies its three-qword string record to the caller output."
+    },
+    {
+      "address": "0x64df6f0",
+      "fact": "The formatter call slot relocates to 0x1680500; this packet records the call boundary and does not claim that callee body."
+    },
+    {
+      "address": "0x18bf6d5",
+      "fact": "The helper supplies rodata address 0x44f07a and a descriptor record to the inner constructor; the witnessed bytes begin with the tagged format text `invalid type: ... expected ...`."
+    }
+  ],
+  "question": "What 40-byte result envelope does E114A helper 0x18bf680 write, and what formatter path constructs its inner object?",
+  "relocations": {
+    "0x64df480": {
+      "addend": "0x6355830",
+      "symbol_index": 0,
+      "type": 8
+    },
+    "0x64df498": {
+      "addend": "0x141e264",
+      "symbol_index": 0,
+      "type": 8
+    },
+    "0x64df4a0": {
+      "addend": "0x635de30",
+      "symbol_index": 0,
+      "type": 8
+    },
+    "0x64df508": {
+      "addend": "0x0",
+      "symbol_index": 7,
+      "type": 6
+    },
+    "0x64df6a0": {
+      "addend": "0x1680c30",
+      "symbol_index": 0,
+      "type": 8
+    },
+    "0x64df6e8": {
+      "addend": "0x141e3a0",
+      "symbol_index": 0,
+      "type": 8
+    },
+    "0x64df6f0": {
+      "addend": "0x1680500",
+      "symbol_index": 0,
+      "type": 8
+    },
+    "0x64dfed0": {
+      "addend": "0x5c4f380",
+      "symbol_index": 0,
+      "type": 8
+    }
+  },
+  "rodata": {
+    "address": "0x44f07a",
+    "bytes": "0e696e76616c696420747970653a20c00b2c20657870656374656420c0002f68"
+  },
+  "scope": "Partial static helper result-layout evidence only; no payload type naming, full action path, Rust implementation, runtime execution, or component gate is claimed.",
+  "target": {
+    "release": 115,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "size": 105896032
+  },
+  "unresolved": [
+    "The implementation behind formatter slot 0x64df6f0 and exact formatted output bytes for supplied descriptor values.",
+    "The source-level E114A payload type and meaning of the outer value 1 / inner tag 6.",
+    "The complete formatting result bytes and runtime reachability of this helper."
+  ]
+}
