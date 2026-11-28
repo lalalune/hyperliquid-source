@@ -1,4 +1,6 @@
 //! Selected replica response JSON emission. Entry serialization is an explicit boundary.
+pub mod collector;
+
 use std::io::{self, Write};
 
 pub enum Response<'a, T> {
