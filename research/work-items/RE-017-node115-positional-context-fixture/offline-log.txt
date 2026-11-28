@@ -1,0 +1,63 @@
+RE-017-node115-positional-context-fixture
+Darwin arm64
+Python 3.9.6
+msgpack 1.1.2
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B research/work-items/RE-017-node115-positional-context-replay-key/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 34 spans in the context reader FDE
+PASS: positional height and round use distinct decoders and reach output +0x28/+0x30
+PASS: successful decoding still requires the following required clock slots
+
+$ python3 -B research/work-items/RE-009-node115-positional-context-clock-pair/verify.py
+PASS: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 66 instruction spans in two #115 FDEs
+PASS: positional clock projection output +0x60/+0x6c; formatter operands 5/6/7/8
+
+$ python3 -B research/work-items/RE-009-node115-msgpack-clock-text-path/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 41 spans in three FDEs
+PASS: fixstr and three explicit length markers converge on the MessagePack Time conversion
+PASS: MessagePack and JSON use the same format table, interpreter, and time constructor
+
+$ /tmp/hl-context-rmp-venv/bin/python -B /tmp/hl-node115-pos-context.mSkSW6/RE-017-node115-positional-context-fixture/test_project.py
+test_identity_height_duplicate_and_outer_eof (__main__.PositionalContextTests) ... ok
+test_mutations_do_not_fall_back_to_named_context_defaults (__main__.PositionalContextTests) ... ok
+test_selects_arrays_under_named_parent_with_large_unrelated_branch (__main__.PositionalContextTests) ... ok
+test_stages_round_at_verified_boundary_and_cli_reports_both_clocks (__main__.PositionalContextTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.054s
+
+OK
+
+$ PYTHONPATH=/tmp/hl-node115-pos-context.mSkSW6/RE-017-node115-positional-context-fixture:/tmp/hl-node115-assemble.zpDuLH/RE-017-node115-compact-assemble-fixture:/tmp/hl-node115-loader-writes.aFxnjg/RE-017-node115-loader-write-fixture /tmp/hl-context-rmp-venv/bin/python -B - <<'PY'
+from hashlib import sha256
+from pathlib import Path
+from struct import pack_into, unpack_from
+from tempfile import TemporaryDirectory
+from assemble import assemble, EVM_BLOCK_SIZE
+from project import DECODED_SIZE, project, stage_round
+from apply_writes import apply
+from test_project import checkpoint, context, HEIGHT, ROUND
+
+def digest(data):
+    return sha256(data).hexdigest()
+
+with TemporaryDirectory() as directory:
+    raw = checkpoint(context())
+    path = Path(directory) / "checkpoint.rmp"
+    path.write_bytes(raw)
+    fields = project(path, digest(raw), HEIGHT)
+decoded = bytearray(DECODED_SIZE)
+pack_into("<QQ", decoded, 0x28, HEIGHT, 99)
+decoded = stage_round(decoded, digest(decoded), fields)
+evm = bytes(EVM_BLOCK_SIZE)
+compact = assemble(decoded, evm, digest(decoded), digest(evm), HEIGHT, bytes(4), bytes(3))
+loaded = apply(compact, digest(compact), HEIGHT, "entry")
+assert unpack_from("<QQ", loaded, 0x28) == (HEIGHT, ROUND)
+assert unpack_from("<Q", loaded, 0x20) == (ROUND,)
+assert unpack_from("<Q", loaded, 0xDF0) == (ROUND,)
+print("PASS: positional Context fixture -> staged round -> compact assembler -> loader entry round words")
+PY
+PASS: positional Context fixture -> staged round -> compact assembler -> loader entry round words
