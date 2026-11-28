@@ -227,10 +227,9 @@
     },
     {
       "field": "profile.panic_strategy",
-      "status": "inferred",
-      "value": "unwind",
-      "reasoning": ".gcc_except_table is 2,900,276 bytes and Rust cleanup landing pads are present. panic=abort emits no Rust landing pads.",
-      "would_resolve": "not stored in the ELF, so a matched rebuild is the remaining test"
+      "status": "unresolved",
+      "value": null,
+      "would_resolve": "the root crate compiler invocation or equivalent build record. Node #115 contains a Rust exception-raising runtime and cleanup tables from multiple producers. RE-002-node115-panic-strategy reproduces Rust dependency cleanup with both abort and unwind root settings."
     },
     {
       "field": "profile.debug_assertions",
@@ -282,7 +281,7 @@
     "toolchain": "rustup toolchain 1.95.0 (59807616e), target x86_64-unknown-linux-gnu, rust-lld 22.1.2",
     "linker": "rust-lld, position independent, immediate binding, full RELRO, no runpath",
     "source_layout": "workspace at /home/ubuntu/hl/code_Mainnet with z_vendor and z_forks directories",
-    "cargo_profile": "release, panic=unwind, no debug symbols in the shipped file",
+    "cargo_profile": "release candidate with panic=unwind on the evidence of the linked Rust runtime; root flags remain unresolved; no debug symbols in the shipped file",
     "allocator": "tikv-jemalloc-sys with bundled jemalloc 5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7",
     "unresolved_inputs": [
       "opt-level",
@@ -290,6 +289,7 @@
       "LTO",
       "RUSTFLAGS",
       "target-cpu features",
+      "root panic strategy",
       "overflow-checks",
       "frame pointers",
       "Cargo.lock and the vendored crate versions",

@@ -167,6 +167,11 @@ class DeriveTests(unittest.TestCase):
             self.assertEqual([(i['label'], i['value']) for i in by_key(facts, key)], [('unknown', None)], key)
         self.assertEqual(by_key(facts, 'linker')[0]['label'], 'inferred')
 
+    def test_large_exception_table_cannot_identify_the_root_crate_profile(self):
+        items = [{'key': 'section.gcc_except_table_size', 'value': 2_900_276, 'label': 'exact'}]
+        strategy, = by_key(interpret(items), 'panic_strategy')
+        self.assertEqual((strategy['label'], strategy['value']), ('unknown', None))
+
     def test_diff_ignores_offsets_and_reports_changed_values(self):
         old = {'facts': [{'key': 'k', 'label': 'exact', 'value': 1, 'evidence': {'file_offset': '0x1'}},
                          {'key': 'same', 'label': 'exact', 'value': 2, 'evidence': {'file_offset': '0x2'}}]}
