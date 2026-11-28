@@ -76,9 +76,13 @@ pub fn zip_exact_slices<'a, A, B>(
     Ok(left.iter().zip(right.iter()).collect())
 }
 
-/// Required feature-version byte checked at `0x5a04f52` (`cmp byte ptr [S + 0xb9a], 3`,
-/// `"assertion failed: features_ok"` at `0x93a641`).
-pub const REQUIRED_FEATURE_VERSION: u8 = 3;
+/// Required restored chain for the selected replay path. The guard compares
+/// the Locus `chn` byte at state +0xb9a (expanded layout +0x170a) with tag 3.
+pub const REQUIRED_REPLAY_CHAIN: node115_chain_name_codec::ChainName =
+    node115_chain_name_codec::ChainName::Mainnet;
+
+/// Historical name for the raw chain tag accepted by the selected replay path.
+pub const REQUIRED_FEATURE_VERSION: u8 = REQUIRED_REPLAY_CHAIN.tag();
 
 /// Ordered pre-execution guard errors proven in `AbciEngine::apply_block` (`0x5a04ec3..0x5a04f59`).
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -107,7 +111,7 @@ pub enum ApplyBlockPreconditionError {
         header_actions: u64,
         payload_actions: u64,
     },
-    /// `[S + 0xb9a] != REQUIRED_FEATURE_VERSION` (`0x5a04f52..0x5a04f59 -> 0x5a062b6`: `features_ok`).
+    /// Restored chain tag differs from Mainnet (legacy variant name).
     FeatureVersionMismatch { expected: u8, actual: u8 },
 }
 
@@ -441,7 +445,7 @@ impl AbciState {
         block_parent_time: (u64, u64),
         header_actions: u64,
         payload_actions: u64,
-        feature_version: u8,
+        restored_chain_tag: u8,
     ) -> Result<(), ApplyBlockPreconditionError> {
         if let Some(hf) = self.hardfork_height {
             if hf < self.inner.height {
@@ -480,10 +484,10 @@ impl AbciState {
                 payload_actions,
             });
         }
-        if feature_version != REQUIRED_FEATURE_VERSION {
+        if restored_chain_tag != REQUIRED_REPLAY_CHAIN.tag() {
             return Err(ApplyBlockPreconditionError::FeatureVersionMismatch {
-                expected: REQUIRED_FEATURE_VERSION,
-                actual: feature_version,
+                expected: REQUIRED_REPLAY_CHAIN.tag(),
+                actual: restored_chain_tag,
             });
         }
         Ok(())
