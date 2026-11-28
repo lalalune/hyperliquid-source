@@ -17,6 +17,7 @@ use node115_abci_checkpoint_replay_fixture::{
 };
 use node115_digest_reference_handoff::{Digest, Registry, ReplayHandoff, replay_handoff};
 
+use crate::abci_hash::{EncodeError, ReductionRow, compute_reduction_tree_root};
 use crate::hash_signature_tracker::{HashSignatureTracker, RecordVoteResult};
 use crate::state::{AbciState, ApplyBlockPreconditionError};
 
@@ -52,6 +53,19 @@ pub struct EngineBlockReport {
     pub quorum_sink_lines: Vec<String>,
     pub handoff: ReplayHandoff,
     pub local_root: Option<(RootProvenance, SelectorTrace)>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RestoredRootReport {
+    pub height: u64,
+    pub digest: Digest,
+    pub selector: SelectorTrace,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RestoredRootError {
+    ReplayAlreadyStarted,
+    Encode(EncodeError),
 }
 
 /// Cohesive offline ABCI engine uniting `AbciState`, `HashSignatureTracker` (`S + 0x3e50`),
@@ -155,12 +169,7 @@ impl AbciEngine {
         let post_height = self.state.height();
         let local_root = if self.root_cadence_matches(post_height) {
             if let Some(digest) = block.synthetic_local_root {
-                let trace = select_root_impl(
-                    &mut self.selector_cell,
-                    |cell, _| cell.words[0],
-                    fallback_cpuid,
-                );
-                self.local_raw_history.insert(post_height, digest);
+                let trace = self.select_and_record_root(post_height, digest, fallback_cpuid);
                 Some((
                     RootProvenance::LocalPostComparison {
                         height: post_height,
@@ -184,6 +193,50 @@ impl AbciEngine {
             handoff,
             local_root,
         })
+    }
+
+    /// Compute and retain the fixture's reconstructed H root before first replay.
+    pub fn record_restored_root<F>(
+        &mut self,
+        rows: &[ReductionRow],
+        fallback_cpuid: F,
+    ) -> Result<Option<RestoredRootReport>, RestoredRootError>
+    where
+        F: FnMut(&mut RootSelectorCell, usize) -> u64,
+    {
+        let height = self.state.height();
+        let start = self.state.inner.replay_initializer;
+        if height != start.initial_height || self.state.round() != start.initial_round {
+            return Err(RestoredRootError::ReplayAlreadyStarted);
+        }
+        if !self.root_cadence_matches(height) {
+            return Ok(None);
+        }
+        let digest = compute_reduction_tree_root(rows).map_err(RestoredRootError::Encode)?;
+        let selector = self.select_and_record_root(height, digest, fallback_cpuid);
+        Ok(Some(RestoredRootReport {
+            height,
+            digest,
+            selector,
+        }))
+    }
+
+    fn select_and_record_root<F>(
+        &mut self,
+        height: u64,
+        digest: Digest,
+        fallback_cpuid: F,
+    ) -> SelectorTrace
+    where
+        F: FnMut(&mut RootSelectorCell, usize) -> u64,
+    {
+        let trace = select_root_impl(
+            &mut self.selector_cell,
+            |cell, _| cell.words[0],
+            fallback_cpuid,
+        );
+        self.local_raw_history.insert(height, digest);
+        trace
     }
 
     /// Prune `local_raw_history` (`ctx + 0x400`) via `BTreeMap::split_off(&watermark.saturating_add(1))`
