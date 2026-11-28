@@ -1,0 +1,129 @@
+RE-017-node115-compact-lthash-rust
+Darwin arm64
+rustc 1.95.0 (59807616e 2026-04-14)
+Python 3.9.6
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B /tmp/hl-node115-lthash-inspect.R6Cqz4/RE-017-node115-materialized-lthash-lanes/verify.py
+PASS: #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 67 exact spans in 8 FDEs
+PASS: ordered selected cache constructors and compact offsets accounts_hash=0x1200, contracts_hash=0x1b08, storage_hash=0x2410
+
+$ python3 -B research/work-items/RE-009-node115-lthash-homomorphic-and-hardfork-version/verify.py --self-test
+RE-009-node115-lthash-homomorphic-and-hardfork-version verified: 8 FDEs, 10 anchors, 4 literals, 4/4 negative controls rejected.
+
+$ cargo test --offline --locked --manifest-path /tmp/hl-node115-compact-lthash.pZS0T5/src/node115-abci/Cargo.toml
+   Compiling node115-startup-admission v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-startup-admission)
+   Compiling node115-staking-weight-comparison v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-staking-weight-comparison)
+   Compiling node115-reverse-path-components v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-reverse-path-components)
+   Compiling node115-digest-reference-handoff v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-digest-reference-handoff)
+   Compiling node115-indexed-artifact-variant v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-indexed-artifact-variant)
+   Compiling node115-digest-vote-admission v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-digest-vote-admission)
+   Compiling node115-owned-db-open v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-owned-db-open)
+   Compiling node115-storage-value-decode v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-storage-value-decode)
+   Compiling node115-block-handle-codec v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-block-handle-codec)
+   Compiling node115-db-hub-byte-key v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-db-hub-byte-key)
+   Compiling node115-checkpoint-discovery v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-checkpoint-discovery)
+   Compiling node115-replica-end-height v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-replica-end-height)
+   Compiling node115-digest-support-gate v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-digest-support-gate)
+   Compiling node115-checkpoint-plan v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-owned-db-open/checkpoint-plan)
+   Compiling node115-restore-copy v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-owned-db-open/restore-copy)
+   Compiling node115-quorum-line v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-digest-reference-handoff/quorum-line)
+   Compiling node115-abci-blake3 v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-abci-blake3)
+   Compiling node115-abci-checkpoint-replay-fixture v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-abci-checkpoint-replay-fixture)
+   Compiling node115-db v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-db)
+   Compiling node115-abci v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-abci)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.46s
+     Running unittests src/lib.rs (/tmp/hl-node115-compact-lthash.pZS0T5/target/debug/deps/node115_abci-474a8514eb41bad4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration.rs (/tmp/hl-node115-compact-lthash.pZS0T5/target/debug/deps/integration-6ede7deb659c4416)
+
+running 10 tests
+test tracker_rounds_fractional_delays_to_nearest_nanosecond ... ok
+test state_serialize_buffer_elapsed_seconds_and_zip_exact_slices ... ok
+test reduction_tree_preimage_matches_re017_msgpack_vectors ... ok
+test tracker_watermark_seal_prune_window_and_recheck ... ok
+test apply_block_six_ordered_guards_and_history_split_off_cutoff ... ok
+test real_blake3_state_root_and_timer_maturity_end_to_end ... ok
+test tracker_wire_schema_checkpoint_format_and_straggler_filter ... ok
+test engine_offline_replay_freeze_guard_and_checkpoint_maintenance ... ok
+test lthash_big_endian_homomorphic_arithmetic_and_hardfork_version_check ... ok
+test snapshot_hardfork_compat_bundle_roundtrip_and_7_stage_apply_block_pipeline ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/lthash_compact_restore.rs (/tmp/hl-node115-compact-lthash.pZS0T5/target/debug/deps/lthash_compact_restore-43f16bbd67ce993b)
+
+running 2 tests
+test compact_input_must_have_the_exact_size_and_requested_height ... ok
+test materialized_records_feed_the_existing_rust_lthash_operations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests node115_abci
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+$ PYTHONPATH=/tmp/hl-node115-evm-cache-block.Fh7wwh/RE-017-node115-evm-cache-block-fixture:/tmp/hl-node115-assemble.zpDuLH/RE-017-node115-compact-assemble-fixture FIXTURE=/tmp/hl-node115-compact-lthash.pZS0T5/compact.bin python3 -B - <<'PY'
+from hashlib import sha256
+from os import environ
+from pathlib import Path
+from struct import pack, pack_into
+from assemble import assemble, DECODED_SIZE
+from build_block import build_block
+
+def digest(value):
+    return sha256(value).hexdigest()
+
+records = (
+    bytes(range(256)) * 8 + pack("<QQ", 11, 13)
+    + bytes([32]) * 2048 + pack("<QQ", (1 << 64) - 1, 17)
+    + bytes([51]) * 2048 + pack("<QQ", 0, (1 << 64) - 1)
+)
+descriptor_fixture = bytes([0xa5]) * 0x2f0
+block = build_block(records, digest(records), descriptor_fixture, digest(descriptor_fixture))
+decoded = bytearray(DECODED_SIZE)
+pack_into("<Q", decoded, 0x28, 415)
+compact = assemble(decoded, block, digest(decoded), digest(block), 415, bytes(4), bytes(3))
+Path(environ["FIXTURE"]).write_bytes(compact)
+print("Synthetic compact fixture SHA-256:", digest(compact))
+PY
+
+$ mkdir -p /tmp/hl-node115-compact-lthash.pZS0T5/src/node115-abci/examples
+
+$ cat > /tmp/hl-node115-compact-lthash.pZS0T5/src/node115-abci/examples/check_compact_lthash.rs <<'RS'
+use node115_abci::lt_hash::LtHashes;
+
+fn main() {
+    let image = std::fs::read(std::env::args_os().nth(1).unwrap()).unwrap();
+    let hashes = LtHashes::from_compact_checkpoint(&image, 415).unwrap();
+    for (index, word) in hashes.accounts_hash.hash.iter().copied().enumerate() {
+        assert_eq!(word, (index % 256) as u8);
+    }
+    assert_eq!((hashes.accounts_hash.n_elements, hashes.accounts_hash.n_bytes), (11, 13));
+    assert_eq!(hashes.contracts_hash.hash, [32; 2048]);
+    assert_eq!((hashes.contracts_hash.n_elements, hashes.contracts_hash.n_bytes), (u64::MAX, 17));
+    assert_eq!(hashes.storage_hash.hash, [51; 2048]);
+    assert_eq!((hashes.storage_hash.n_elements, hashes.storage_hash.n_bytes), (0, u64::MAX));
+    let (accounts, contracts, storage) = hashes.checksums();
+    assert_ne!(accounts, contracts);
+    assert_ne!(accounts, storage);
+    assert_ne!(contracts, storage);
+    println!("PASS: constructed compact fixture decoded into all three Rust LtHash fields");
+}
+RS
+
+$ cargo run --offline --locked --manifest-path /tmp/hl-node115-compact-lthash.pZS0T5/src/node115-abci/Cargo.toml --example check_compact_lthash -- /tmp/hl-node115-compact-lthash.pZS0T5/compact.bin
+Synthetic compact fixture SHA-256: d338f0eb69b13b13dd2bb7c14fa3b97a4a320357c19510de65d03d61949e906c
+   Compiling node115-abci v0.1.0 (/tmp/hl-node115-compact-lthash.pZS0T5/src/node115-abci)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running `/tmp/hl-node115-compact-lthash.pZS0T5/target/debug/examples/check_compact_lthash /tmp/hl-node115-compact-lthash.pZS0T5/compact.bin`
+PASS: constructed compact fixture decoded into all three Rust LtHash fields

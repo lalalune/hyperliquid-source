@@ -115,6 +115,13 @@ pub struct LtHashes {
     pub storage_hash: LtHash,
 }
 
+/// Invalid shape or checkpoint height for the compact LtHash projection.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum CompactLtHashFixtureError {
+    WrongSize { actual: usize },
+    HeightMismatch { expected: u64, actual: u64 },
+}
+
 impl LtHashes {
     pub const fn new() -> Self {
         Self {
@@ -122,6 +129,48 @@ impl LtHashes {
             contracts_hash: LtHash::new(),
             storage_hash: LtHash::new(),
         }
+    }
+
+    /// Read the three native EVM cache records from a caller-pinned compact checkpoint.
+    ///
+    /// This uses the selected #115 materialized layout. Descriptors and native
+    /// pointers are outside the three records and are never interpreted.
+    pub fn from_compact_checkpoint(
+        image: &[u8],
+        expected_height: u64,
+    ) -> Result<Self, CompactLtHashFixtureError> {
+        const COMPACT_SIZE: usize = 0x42c8;
+        const HEIGHT_OFFSET: usize = 0x28;
+        const ACCOUNTS_OFFSET: usize = 0x1200;
+        const CONTRACTS_OFFSET: usize = 0x1b08;
+        const STORAGE_OFFSET: usize = 0x2410;
+
+        if image.len() != COMPACT_SIZE {
+            return Err(CompactLtHashFixtureError::WrongSize {
+                actual: image.len(),
+            });
+        }
+        let actual = u64::from_le_bytes(image[HEIGHT_OFFSET..][..8].try_into().unwrap());
+        if actual != expected_height {
+            return Err(CompactLtHashFixtureError::HeightMismatch {
+                expected: expected_height,
+                actual,
+            });
+        }
+
+        let read_record = |offset: usize| {
+            let (hash, counters) = image[offset..][..LT_HASH_BYTES + 16].split_at(LT_HASH_BYTES);
+            LtHash {
+                hash: hash.try_into().unwrap(),
+                n_elements: u64::from_le_bytes(counters[..8].try_into().unwrap()),
+                n_bytes: u64::from_le_bytes(counters[8..].try_into().unwrap()),
+            }
+        };
+        Ok(Self {
+            accounts_hash: read_record(ACCOUNTS_OFFSET),
+            contracts_hash: read_record(CONTRACTS_OFFSET),
+            storage_hash: read_record(STORAGE_OFFSET),
+        })
     }
 
     pub fn checksums(&self) -> ([u8; 32], [u8; 32], [u8; 32]) {
