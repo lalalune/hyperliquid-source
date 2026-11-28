@@ -254,7 +254,7 @@ where
     }
 
     let mut idx = 0;
-    let mut chain = ChainName::Mainnet;
+    let mut chain = None;
     let mut subcommand: Option<Subcommand> = None;
     let mut flags = BTreeSet::new();
     let mut values = BTreeMap::new();
@@ -272,12 +272,12 @@ where
             let raw = items
                 .get(idx)
                 .ok_or_else(|| CliError::MissingOptionValue("chain".to_string()))?;
-            chain = parse_chain(raw).ok_or_else(|| CliError::InvalidChain(raw.clone()))?;
+            chain = Some(parse_chain(raw).ok_or_else(|| CliError::InvalidChain(raw.clone()))?);
             idx += 1;
             continue;
         }
         if let Some(raw) = tok.strip_prefix("--chain=") {
-            chain = parse_chain(raw).ok_or_else(|| CliError::InvalidChain(raw.to_string()))?;
+            chain = Some(parse_chain(raw).ok_or_else(|| CliError::InvalidChain(raw.to_string()))?);
             idx += 1;
             continue;
         }
@@ -330,6 +330,7 @@ where
     }
 
     let sub = subcommand.ok_or(CliError::MissingSubcommand)?;
+    let chain = chain.ok_or(CliError::MissingRequiredOption("chain"))?;
 
     for req in required_options_for(sub) {
         if !values.contains_key(*req) {
@@ -446,7 +447,7 @@ pub fn help_text() -> String {
     let mut out = format!(
         "hl-node {VERSION} (independent node #115 workspace reconstruction)\n\
          \n\
-         USAGE:\n    hl-node [--chain <Local|Sandbox|Testnet|Mainnet>] <SUBCOMMAND> [OPTIONS]\n\
+         USAGE:\n    hl-node --chain <Local|Sandbox|Testnet|Mainnet> <SUBCOMMAND> [OPTIONS]\n\
          \n\
          SUBCOMMANDS:\n"
     );
