@@ -1,0 +1,75 @@
+RE-017-node115-named-rmp-startup-staging
+Darwin arm64
+Python 3.9.6
+msgpack 1.1.2
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B research/work-items/RE-017-node115-local-context-hardfork/verify.py
+PASS: pinned #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 103 spans in 6 FDEs
+PASS: selected local outer decoder reaches Context reader 0x1b3e730
+PASS: hardfork maps to field 1 and child 0x1a32fa0, with version and round in order
+PASS: selected map return keeps version/round at +0x18/+0x20, zero on omission
+PASS: caller stages both returned words at stack+0x1810 through stack+0x610
+
+$ python3 -B research/work-items/RE-017-node115-local-hardfork-materialization/verify.py
+PASS: pinned #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 115 spans in 8 FDEs
+PASS: local Context staging pair follows the selected Locus and Exchange returns
+PASS: allocated decoder result retains the pair at +0x18/+0x20
+PASS: local startup materializer copies the same offsets before the optional rewrite
+
+$ python3 -B research/work-items/RE-017-node115-local-scheduled-freeze-option/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 51 spans in 6 FDEs
+PASS: Exchange field 13 identifies scheduled_freeze_height via its duplicate diagnostic
+PASS: omitted and nil yield tag 0; unsigned value yields tag 1 and a payload
+PASS: materializer preserves option offsets tested by local startup
+
+$ /tmp/hl-context-rmp-venv/bin/python -B /tmp/hl-node115-named-rmp-startup.NCwJoC/RE-017-node115-named-rmp-startup-staging/test_stage.py
+test_exact_byte_updates_and_cli (__main__.NamedStartupTests) ... ok
+test_input_identity_size_height_and_eof (__main__.NamedStartupTests) ... ok
+test_options_and_required_child_fields (__main__.NamedStartupTests) ... ok
+test_pins_independent_words_and_streams_unrelated_bytes (__main__.NamedStartupTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.059s
+
+OK
+
+$ PYTHONPATH=/tmp/hl-node115-named-rmp-startup.NCwJoC/RE-017-node115-named-rmp-startup-staging:/tmp/hl-node115-assemble.zpDuLH/RE-017-node115-compact-assemble-fixture FIXTURE_DIR=/tmp/hl-node115-named-rmp-startup.NCwJoC /tmp/hl-context-rmp-venv/bin/python -B - <<'PY'
+from hashlib import sha256
+from os import environ
+from pathlib import Path
+from assemble import assemble, EVM_BLOCK_SIZE
+from stage import read_checkpoint, stage
+from test_stage import checkpoint, decoded, HEIGHT
+
+def digest(data):
+    return sha256(data).hexdigest()
+
+directory = Path(environ["FIXTURE_DIR"])
+marker = directory / "checkpoint" / "41" / "CHECKPOINT_COMPLETE"
+marker.parent.mkdir(parents=True)
+marker.touch()
+evm = bytes(EVM_BLOCK_SIZE)
+for label, payload in [("absent", None), ("future", 42), ("equal", 41), ("past", 40)]:
+    raw = checkpoint({"version": (1 << 64) - 1, "round": 99}, payload)
+    path = directory / (label + ".rmp")
+    path.write_bytes(raw)
+    fields = read_checkpoint(path, digest(raw), HEIGHT)
+    source = decoded()
+    staged = stage(source, digest(source), fields)
+    compact = assemble(staged, evm, digest(staged), digest(evm), HEIGHT, bytes(4), bytes(3))
+    (directory / (label + ".compact")).write_bytes(compact)
+    print(label, "named source digest", digest(raw), "compact digest", digest(compact))
+PY
+
+$ /tmp/hl-node115-compact-local-restore.WRBvnD/target/debug/examples/check_local_inputs /tmp/hl-node115-named-rmp-startup.NCwJoC
+absent named source digest 58af4bc66ecfbd35e009a5c73f6b9c86cc7e90f3497f71ce897c4d4baa9a7877 compact digest 4c452665e21f91796db2f67924365f745f02210cc08ad0b8da0395fcda9e308d
+future named source digest 752cc7a092e072cd3edece1a00452bb7fd86ec9e79bfca67674b55a44a28607f compact digest d61552ae05c1ff9961adf09976b36a2272b81784918489299ae1e7e008805eb7
+equal named source digest 0df90cb87ecd120291ef1163f32d03c96b8c310edfb1a7fda63a5c2becbfefd0 compact digest 28327f18842261afc49a964e348c5d53794e25e32309c2336e7249c3cb480e6e
+past named source digest 943f118c1a22b63a2d1abdeec78ad8417d5d6a4a903bccd9ffca46e31036a14e compact digest 552f3a1bddba35b3a5240ebe0b00e56bb3ebd698136b684dfbed5fe388a79333
+PASS: compact checkpoint -> local startup input -> absent fixture outcome
+PASS: compact checkpoint -> local startup input -> future fixture outcome
+PASS: compact checkpoint -> local startup input -> equal fixture outcome
+PASS: compact checkpoint -> local startup input -> past fixture outcome
