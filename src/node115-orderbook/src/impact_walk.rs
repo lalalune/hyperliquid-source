@@ -33,10 +33,32 @@ pub fn impact_walk_levels<I>(
 where
     I: IntoIterator<Item = (Px, Sz)>,
 {
+    impact_walk_order_sizes(
+        levels.into_iter().map(|(px, size)| (px, [size])),
+        target_ntl,
+        sink,
+    )
+}
+
+/// Sum the FIFO quantities of each visited level. Reaching the target at
+/// 0x46a65fb branches to the partial fill at 0x46a670c, bypassing both
+/// native paths that advance to the next level.
+pub(crate) fn impact_walk_order_sizes<I, S>(
+    levels: I,
+    target_ntl: Ntl,
+    sink: &mut impl OverflowSink,
+) -> Option<Px>
+where
+    I: IntoIterator<Item = (Px, S)>,
+    S: IntoIterator<Item = Sz>,
+{
     let mut running_ntl = Ntl::ZERO;
     let mut running_fill_sz = Sz::ZERO;
 
-    for (px, level_sz) in levels {
+    for (px, orders) in levels {
+        let level_sz = orders
+            .into_iter()
+            .fold(Sz::ZERO, |sum, size| sum.sat_add(size, sink));
         if px.raw() == 0 || level_sz.is_zero() {
             return None;
         }

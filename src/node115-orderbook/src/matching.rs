@@ -735,21 +735,13 @@ impl Book {
         target_ntl: node115_assets::qtys::Ntl,
         sink: &mut impl OverflowSink,
     ) -> Option<Px> {
-        let levels: Vec<(Px, Sz)> = self
-            .half(side)
-            .iter()
-            .map(|(&key, lvl)| {
-                let px = Px(key.unsigned_abs());
-                let mut sum = Sz::ZERO;
-                for slot in self.slab.level_slots(lvl) {
-                    if let Some(rec) = self.slab.get(slot) {
-                        sum = sum.sat_add(rec.sz, sink);
-                    }
-                }
-                (px, sum)
-            })
-            .collect();
-        crate::impact_walk::impact_walk_levels(levels, target_ntl, sink)
+        let levels = self.half(side).iter().map(|(&key, level)| {
+            let sizes = self.slab
+                .iter_level_slots(level)
+                .filter_map(|slot| self.slab.get(slot).map(|order| order.sz));
+            (Px(key.unsigned_abs()), sizes)
+        });
+        crate::impact_walk::impact_walk_order_sizes(levels, target_ntl, sink)
     }
 
     /// Compute `(bid_impact_px, ask_impact_px)` for `target_ntl` matching node #115 `0x44d9060`
