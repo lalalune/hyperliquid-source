@@ -1,0 +1,239 @@
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x1c0658c --stop-address=0x1c065b7 artifacts/node/115/hl-node
+ 1c0658c: 80 fa 02                     	cmp	dl, 0x2
+ 1c0658f: 0f 85 85 1c 00 00            	jne	0x1c0821a <.text+0x7eef1a>
+ 1c06595: 48 8b b4 24 50 01 00 00      	mov	rsi, qword ptr [rsp + 0x150]
+ 1c0659d: 4c 89 ef                     	mov	rdi, r13
+ 1c065a0: 31 d2                        	xor	edx, edx
+ 1c065a2: e8 09 84 d8 ff               	call	0x198e9b0 <.text+0x5756b0>
+ 1c065a7: 48 8d 8c 24 f3 01 00 00      	lea	rcx, [rsp + 0x1f3]
+ 1c065af: 80 bc 24 f0 01 00 00 01      	cmp	byte ptr [rsp + 0x1f0], 0x1
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x1c07c75 --stop-address=0x1c07c98 artifacts/node/115/hl-node
+ 1c07c75: f2 0f 10 44 24 48            	movsd	xmm0, qword ptr [rsp + 0x48]
+ 1c07c7b: f2 0f 11 44 24 18            	movsd	qword ptr [rsp + 0x18], xmm0
+ 1c07c81: 83 7c 24 10 01               	cmp	dword ptr [rsp + 0x10], 0x1
+ 1c07c86: 0f 85 1b 04 00 00            	jne	0x1c080a7 <.text+0x7eeda7>
+ 1c07c8c: c7 44 24 10 00 00 00 00      	mov	dword ptr [rsp + 0x10], 0x0
+ 1c07c94: 31 c0                        	xor	eax, eax
+ 1c07c96: 31 c9                        	xor	ecx, ecx
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x1c080a7 --stop-address=0x1c08138 artifacts/node/115/hl-node
+ 1c080a7: 48 8d 7c 24 40               	lea	rdi, [rsp + 0x40]
+ 1c080ac: 4c 89 f6                     	mov	rsi, r14
+ 1c080af: 31 d2                        	xor	edx, edx
+ 1c080b1: e8 fa 68 d8 ff               	call	0x198e9b0 <.text+0x5756b0>
+ 1c080b6: 80 7c 24 40 00               	cmp	byte ptr [rsp + 0x40], 0x0
+ 1c080bb: 74 25                        	je	0x1c080e2 <.text+0x7eede2>
+ 1c080bd: 0f 10 44 24 48               	movups	xmm0, xmmword ptr [rsp + 0x48]
+ 1c080c2: 0f 10 4c 24 58               	movups	xmm1, xmmword ptr [rsp + 0x58]
+ 1c080c7: 0f 11 84 24 c8 02 00 00      	movups	xmmword ptr [rsp + 0x2c8], xmm0
+ 1c080cf: 0f 11 8c 24 d8 02 00 00      	movups	xmmword ptr [rsp + 0x2d8], xmm1
+ 1c080d7: 4c 39 fd                     	cmp	rbp, r15
+ 1c080da: 0f 84 3d ff ff ff            	je	0x1c0801d <.text+0x7eed1d>
+ 1c080e0: eb 98                        	jmp	0x1c0807a <.text+0x7eed7a>
+ 1c080e2: 83 44 24 10 fe               	add	dword ptr [rsp + 0x10], -0x2
+ 1c080e7: 0f b6 44 24 41               	movzx	eax, byte ptr [rsp + 0x41]
+ 1c080ec: 0f b6 4c 24 42               	movzx	ecx, byte ptr [rsp + 0x42]
+ 1c080f1: 0f 10 44 24 53               	movups	xmm0, xmmword ptr [rsp + 0x53]
+ 1c080f6: 0f 10 4c 24 43               	movups	xmm1, xmmword ptr [rsp + 0x43]
+ 1c080fb: 0f 29 8c 24 70 01 00 00      	movaps	xmmword ptr [rsp + 0x170], xmm1
+ 1c08103: 0f 29 84 24 80 01 00 00      	movaps	xmmword ptr [rsp + 0x180], xmm0
+ 1c0810b: 3c 02                        	cmp	al, 0x2
+ 1c0810d: 0f 84 81 fb ff ff            	je	0x1c07c94 <.text+0x7ee994>
+ 1c08113: 0f 28 84 24 70 01 00 00      	movaps	xmm0, xmmword ptr [rsp + 0x170]
+ 1c0811b: 0f 28 8c 24 80 01 00 00      	movaps	xmm1, xmmword ptr [rsp + 0x180]
+ 1c08123: 0f 29 8c 24 10 04 00 00      	movaps	xmmword ptr [rsp + 0x410], xmm1
+ 1c0812b: 0f 29 84 24 00 04 00 00      	movaps	xmmword ptr [rsp + 0x400], xmm0
+ 1c08133: e9 60 fb ff ff               	jmp	0x1c07c98 <.text+0x7ee998>
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x1c0825a --stop-address=0x1c08275 artifacts/node/115/hl-node
+ 1c0825a: 48 8d 05 c6 0a 9c fe         	lea	rax, [rip - 0x163f53a]  # 0x5c8d27
+ 1c08261: 48 89 84 24 f0 00 00 00      	mov	qword ptr [rsp + 0xf0], rax
+ 1c08269: 48 c7 84 24 f8 00 00 00 01 00 00 00  	mov	qword ptr [rsp + 0xf8], 0x1
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x1c0839d --stop-address=0x1c083b8 artifacts/node/115/hl-node
+ 1c0839d: 48 8d 05 60 37 9c fe         	lea	rax, [rip - 0x163c8a0]  # 0x5cbb04
+ 1c083a4: 48 89 84 24 f0 00 00 00      	mov	qword ptr [rsp + 0xf0], rax
+ 1c083ac: 48 c7 84 24 f8 00 00 00 07 00 00 00  	mov	qword ptr [rsp + 0xf8], 0x7
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x198ea0a --stop-address=0x198ea26 artifacts/node/115/hl-node
+ 198ea0a: 3c 90                        	cmp	al, -0x70
+ 198ea0c: 73 0a                        	jae	0x198ea18 <.text+0x575718>
+ 198ea0e: 24 0f                        	and	al, 0xf
+ 198ea10: 41 89 c0                     	mov	r8d, eax
+ 198ea13: e9 9b 00 00 00               	jmp	0x198eab3 <.text+0x5757b3>
+ 198ea18: 3c a0                        	cmp	al, -0x60
+ 198ea1a: 73 0a                        	jae	0x198ea26 <.text+0x575726>
+ 198ea1c: 24 0f                        	and	al, 0xf
+ 198ea1e: 41 89 c0                     	mov	r8d, eax
+ 198ea21: e9 0a 01 00 00               	jmp	0x198eb30 <.text+0x575830>
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x198eb30 --stop-address=0x198eb5e artifacts/node/115/hl-node
+ 198eb30: 41 0f b6 e8                  	movzx	ebp, r8b
+ 198eb34: 0f b7 46 22                  	movzx	eax, word ptr [rsi + 0x22]
+ 198eb38: 66 85 c0                     	test	ax, ax
+ 198eb3b: 0f 84 46 07 00 00            	je	0x198f287 <.text+0x575f87>
+ 198eb41: 66 ff c8                     	dec	ax
+ 198eb44: 66 89 46 22                  	mov	word ptr [rsi + 0x22], ax
+ 198eb48: 0f 84 57 03 00 00            	je	0x198eea5 <.text+0x575ba5>
+ 198eb4e: 85 ed                        	test	ebp, ebp
+ 198eb50: 0f 84 7e 06 00 00            	je	0x198f1d4 <.text+0x575ed4>
+ 198eb56: c6 46 20 01                  	mov	byte ptr [rsi + 0x20], 0x1
+ 198eb5a: 48 8b 4e 18                  	mov	rcx, qword ptr [rsi + 0x18]
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x198efe3 --stop-address=0x198f056 artifacts/node/115/hl-node
+ 198efe3: 48 8d 7c 24 30               	lea	rdi, [rsp + 0x30]
+ 198efe8: 49 89 f6                     	mov	r14, rsi
+ 198efeb: ff 15 9f 35 b5 04            	call	qword ptr [rip + 0x4b5359f] # 0x64e2590
+ 198eff1: 0f b6 44 24 30               	movzx	eax, byte ptr [rsp + 0x30]
+ 198eff6: 44 0f b6 7c 24 31            	movzx	r15d, byte ptr [rsp + 0x31]
+ 198effc: 3c 09                        	cmp	al, 0x9
+ 198effe: 75 56                        	jne	0x198f056 <.text+0x575d56>
+ 198f000: 41 80 ff 02                  	cmp	r15b, 0x2
+ 198f004: 48 89 df                     	mov	rdi, rbx
+ 198f007: 0f 84 c7 01 00 00            	je	0x198f1d4 <.text+0x575ed4>
+ 198f00d: 48 89 fb                     	mov	rbx, rdi
+ 198f010: 83 fd 01                     	cmp	ebp, 0x1
+ 198f013: 0f 84 15 02 00 00            	je	0x198f22e <.text+0x575f2e>
+ 198f019: 4c 89 f6                     	mov	rsi, r14
+ 198f01c: 48 8d 7c 24 30               	lea	rdi, [rsp + 0x30]
+ 198f021: e8 2a 72 91 00               	call	0x22a6250 <.text+0xe8cf50>
+ 198f026: 80 7c 24 30 00               	cmp	byte ptr [rsp + 0x30], 0x0
+ 198f02b: 74 6c                        	je	0x198f099 <.text+0x575d99>
+ 198f02d: 0f 10 44 24 38               	movups	xmm0, xmmword ptr [rsp + 0x38]
+ 198f032: 0f 10 4c 24 48               	movups	xmm1, xmmword ptr [rsp + 0x48]
+ 198f037: 0f 11 84 24 96 01 00 00      	movups	xmmword ptr [rsp + 0x196], xmm0
+ 198f03f: 0f 11 8c 24 a6 01 00 00      	movups	xmmword ptr [rsp + 0x1a6], xmm1
+ 198f047: 0f 11 44 24 10               	movups	xmmword ptr [rsp + 0x10], xmm0
+ 198f04c: 0f 11 4c 24 20               	movups	xmmword ptr [rsp + 0x20], xmm1
+ 198f051: e9 f5 01 00 00               	jmp	0x198f24b <.text+0x575f4b>
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x198f099 --stop-address=0x198f147 artifacts/node/115/hl-node
+ 198f099: 0f b6 44 24 31               	movzx	eax, byte ptr [rsp + 0x31]
+ 198f09e: 0f 10 44 24 42               	movups	xmm0, xmmword ptr [rsp + 0x42]
+ 198f0a3: 0f 10 4c 24 32               	movups	xmm1, xmmword ptr [rsp + 0x32]
+ 198f0a8: 0f 29 8c 24 90 01 00 00      	movaps	xmmword ptr [rsp + 0x190], xmm1
+ 198f0b0: 0f 29 84 24 a0 01 00 00      	movaps	xmmword ptr [rsp + 0x1a0], xmm0
+ 198f0b8: 3c 02                        	cmp	al, 0x2
+ 198f0ba: 0f 84 6e 01 00 00            	je	0x198f22e <.text+0x575f2e>
+ 198f0c0: 0f 28 84 24 90 01 00 00      	movaps	xmm0, xmmword ptr [rsp + 0x190]
+ 198f0c8: 0f 28 8c 24 a0 01 00 00      	movaps	xmm1, xmmword ptr [rsp + 0x1a0]
+ 198f0d0: 0f 11 4c 24 1b               	movups	xmmword ptr [rsp + 0x1b], xmm1
+ 198f0d5: 0f 11 44 24 0b               	movups	xmmword ptr [rsp + 0xb], xmm0
+ 198f0da: 41 80 e7 01                  	and	r15b, 0x1
+ 198f0de: 44 88 7c 24 09               	mov	byte ptr [rsp + 0x9], r15b
+ 198f0e3: 88 44 24 0a                  	mov	byte ptr [rsp + 0xa], al
+ 198f0e7: 0f b6 44 24 09               	movzx	eax, byte ptr [rsp + 0x9]
+ 198f0ec: 0f b6 4c 24 0a               	movzx	ecx, byte ptr [rsp + 0xa]
+ 198f0f1: 48 8b 54 24 0b               	mov	rdx, qword ptr [rsp + 0xb]
+ 198f0f6: 8b 74 24 13                  	mov	esi, dword ptr [rsp + 0x13]
+ 198f0fa: 0f b7 7c 24 17               	movzx	edi, word ptr [rsp + 0x17]
+ 198f0ff: 44 0f b7 44 24 29            	movzx	r8d, word ptr [rsp + 0x29]
+ 198f105: 0f 10 44 24 19               	movups	xmm0, xmmword ptr [rsp + 0x19]
+ 198f10a: 0f 29 84 24 b0 00 00 00      	movaps	xmmword ptr [rsp + 0xb0], xmm0
+ 198f112: 66 44 89 84 24 c0 00 00 00   	mov	word ptr [rsp + 0xc0], r8w
+ 198f11b: 88 84 24 a0 00 00 00         	mov	byte ptr [rsp + 0xa0], al
+ 198f122: 88 8c 24 a1 00 00 00         	mov	byte ptr [rsp + 0xa1], cl
+ 198f129: 48 89 94 24 a2 00 00 00      	mov	qword ptr [rsp + 0xa2], rdx
+ 198f131: 89 b4 24 aa 00 00 00         	mov	dword ptr [rsp + 0xaa], esi
+ 198f138: 66 89 bc 24 ae 00 00 00      	mov	word ptr [rsp + 0xae], di
+ 198f140: 83 fd 02                     	cmp	ebp, 0x2
+ 198f143: 75 5e                        	jne	0x198f1a3 <.text+0x575ea3>
+ 198f145: 0f b7 84 24 c0 00 00 00      	movzx	eax, word ptr [rsp + 0xc0]
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x198f184 --stop-address=0x198f1d4 artifacts/node/115/hl-node
+ 198f184: 0f 11 44 24 79               	movups	xmmword ptr [rsp + 0x79], xmm0
+ 198f189: 88 44 24 69                  	mov	byte ptr [rsp + 0x69], al
+ 198f18d: 88 4c 24 6a                  	mov	byte ptr [rsp + 0x6a], cl
+ 198f191: 48 89 54 24 6b               	mov	qword ptr [rsp + 0x6b], rdx
+ 198f196: 89 74 24 73                  	mov	dword ptr [rsp + 0x73], esi
+ 198f19a: 66 89 7c 24 77               	mov	word ptr [rsp + 0x77], di
+ 198f19f: 31 c0                        	xor	eax, eax
+ 198f1a1: eb 0f                        	jmp	0x198f1b2 <.text+0x575eb2>
+ 198f1a3: c6 44 24 70 04               	mov	byte ptr [rsp + 0x70], 0x4
+ 198f1a8: c7 44 24 74 02 00 00 00      	mov	dword ptr [rsp + 0x74], 0x2
+ 198f1b0: b0 01                        	mov	al, 0x1
+ 198f1b2: 48 89 df                     	mov	rdi, rbx
+ 198f1b5: 88 44 24 68                  	mov	byte ptr [rsp + 0x68], al
+ 198f1b9: 41 0f b7 46 22               	movzx	eax, word ptr [r14 + 0x22]
+ 198f1be: 66 83 f8 ff                  	cmp	ax, -0x1
+ 198f1c2: 0f 84 de 00 00 00            	je	0x198f2a6 <.text+0x575fa6>
+ 198f1c8: ff c0                        	inc	eax
+ 198f1ca: 66 41 89 46 22               	mov	word ptr [r14 + 0x22], ax
+ 198f1cf: e9 1c 01 00 00               	jmp	0x198f2f0 <.text+0x575ff0>
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x198f22e --stop-address=0x198f26d artifacts/node/115/hl-node
+ 198f22e: 48 8d 7c 24 10               	lea	rdi, [rsp + 0x10]
+ 198f233: 48 8d 15 76 01 a9 04         	lea	rdx, [rip + 0x4a90176]  # 0x641f3b0
+ 198f23a: 48 8d 0d 4f dc a8 04         	lea	rcx, [rip + 0x4a8dc4f]  # 0x641ce90
+ 198f241: be 01 00 00 00               	mov	esi, 0x1
+ 198f246: e8 f5 c8 e6 ff               	call	0x17fbb40 <.text+0x3e2840>
+ 198f24b: 48 89 df                     	mov	rdi, rbx
+ 198f24e: 0f 10 44 24 10               	movups	xmm0, xmmword ptr [rsp + 0x10]
+ 198f253: 0f 10 4c 24 20               	movups	xmm1, xmmword ptr [rsp + 0x20]
+ 198f258: 0f 11 8c 24 e7 00 00 00      	movups	xmmword ptr [rsp + 0xe7], xmm1
+ 198f260: 0f 11 84 24 d7 00 00 00      	movups	xmmword ptr [rsp + 0xd7], xmm0
+ 198f268: e9 c7 00 00 00               	jmp	0x198f334 <.text+0x576034>
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x198f2f0 --stop-address=0x198f342 artifacts/node/115/hl-node
+ 198f2f0: 48 8b 84 24 88 00 00 00      	mov	rax, qword ptr [rsp + 0x88]
+ 198f2f8: 48 89 47 20                  	mov	qword ptr [rdi + 0x20], rax
+ 198f2fc: 0f b6 44 24 68               	movzx	eax, byte ptr [rsp + 0x68]
+ 198f301: 48 8b 4c 24 69               	mov	rcx, qword ptr [rsp + 0x69]
+ 198f306: 8b 54 24 71                  	mov	edx, dword ptr [rsp + 0x71]
+ 198f30a: 0f b7 74 24 75               	movzx	esi, word ptr [rsp + 0x75]
+ 198f30f: 44 0f b6 44 24 77            	movzx	r8d, byte ptr [rsp + 0x77]
+ 198f315: 0f 10 44 24 78               	movups	xmm0, xmmword ptr [rsp + 0x78]
+ 198f31a: 0f 11 47 10                  	movups	xmmword ptr [rdi + 0x10], xmm0
+ 198f31e: 88 07                        	mov	byte ptr [rdi], al
+ 198f320: 48 89 4f 01                  	mov	qword ptr [rdi + 0x1], rcx
+ 198f324: 89 57 09                     	mov	dword ptr [rdi + 0x9], edx
+ 198f327: 66 89 77 0d                  	mov	word ptr [rdi + 0xd], si
+ 198f32b: 44 88 47 0f                  	mov	byte ptr [rdi + 0xf], r8b
+ 198f32f: 48 89 f8                     	mov	rax, rdi
+ 198f332: eb 0e                        	jmp	0x198f342 <.text+0x576042>
+ 198f334: 0f 11 4f 18                  	movups	xmmword ptr [rdi + 0x18], xmm1
+ 198f338: 0f 11 47 08                  	movups	xmmword ptr [rdi + 0x8], xmm0
+ 198f33c: c6 07 01                     	mov	byte ptr [rdi], 0x1
+ 198f33f: 48 89 f8                     	mov	rax, rdi
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x22a62d2 --stop-address=0x22a6348 artifacts/node/115/hl-node
+ 22a62d2: b2 a0                        	mov	dl, -0x60
+ 22a62d4: 3c c0                        	cmp	al, -0x40
+ 22a62d6: 72 14                        	jb	0x22a62ec <.text+0xe8cfec>
+ 22a62d8: 89 c2                        	mov	edx, eax
+ 22a62da: 3c c0                        	cmp	al, -0x40
+ 22a62dc: 75 0e                        	jne	0x22a62ec <.text+0xe8cfec>
+ 22a62de: 66 c7 03 00 00               	mov	word ptr [rbx], 0x0
+ 22a62e3: 48 89 d8                     	mov	rax, rbx
+ 22a62e6: 48 83 c4 30                  	add	rsp, 0x30
+ 22a62ea: 5b                           	pop	rbx
+ 22a62eb: c3                           	ret
+ 22a62ec: 88 56 20                     	mov	byte ptr [rsi + 0x20], dl
+ 22a62ef: 88 4e 21                     	mov	byte ptr [rsi + 0x21], cl
+ 22a62f2: 48 8d 15 8c 94 35 fe         	lea	rdx, [rip - 0x1ca6b74]  # 0x5ff785
+ 22a62f9: 48 8d 7c 24 08               	lea	rdi, [rsp + 0x8]
+ 22a62fe: b9 0a 00 00 00               	mov	ecx, 0xa
+ 22a6303: e8 98 10 52 ff               	call	0x17c73a0 <.text+0x3ae0a0>
+ 22a6308: 80 7c 24 08 01               	cmp	byte ptr [rsp + 0x8], 0x1
+ 22a630d: 75 1f                        	jne	0x22a632e <.text+0xe8d02e>
+ 22a630f: 0f 10 44 24 10               	movups	xmm0, xmmword ptr [rsp + 0x10]
+ 22a6314: 0f 10 4c 24 20               	movups	xmm1, xmmword ptr [rsp + 0x20]
+ 22a6319: 0f 11 4b 18                  	movups	xmmword ptr [rbx + 0x18], xmm1
+ 22a631d: 0f 11 43 08                  	movups	xmmword ptr [rbx + 0x8], xmm0
+ 22a6321: b0 01                        	mov	al, 0x1
+ 22a6323: 88 03                        	mov	byte ptr [rbx], al
+ 22a6325: 48 89 d8                     	mov	rax, rbx
+ 22a6328: 48 83 c4 30                  	add	rsp, 0x30
+ 22a632c: 5b                           	pop	rbx
+ 22a632d: c3                           	ret
+ 22a632e: 0f 10 44 24 09               	movups	xmm0, xmmword ptr [rsp + 0x9]
+ 22a6333: 0f 10 4c 24 19               	movups	xmm1, xmmword ptr [rsp + 0x19]
+ 22a6338: 0f 11 4b 12                  	movups	xmmword ptr [rbx + 0x12], xmm1
+ 22a633c: 0f 11 43 02                  	movups	xmmword ptr [rbx + 0x2], xmm0
+ 22a6340: c6 43 01 01                  	mov	byte ptr [rbx + 0x1], 0x1
+ 22a6344: 31 c0                        	xor	eax, eax
+ 22a6346: 88 03                        	mov	byte ptr [rbx], al
