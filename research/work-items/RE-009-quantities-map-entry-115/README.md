@@ -58,3 +58,16 @@ Controls: every *executed* conditional jump has its condition inverted and every
 - The mutation battery is a sample of the generated cases, so "detected" means detected by that sample; the full run of each body is the digest in `digests.tsv`.
 
 Next question: what do `0x4221510` and `0x4221f40` write between the two entry calls on `state+0x228`, and what is the unit of the debited total?
+
+## Entry transitions in the integrated base map
+
+The public base map previously promoted on every entry at length 32 or greater, including overwrites, and kept short trees indefinitely. Its entry and insert operations now search the compact representation before promoting on a miss at length 64 or greater. A tree with fewer than 32 rows switches back to compact form on the next entry lookup. The same two thresholds appear in the [schedule-cancel map](../RE-010-schedule-cancel-core-115/README.md) and [raw pending-map insertion](../RE-017-node115-raw-map-insert-transitions/README.md).
+
+The integration comparison uses ordered 20-byte keys and replays the lookup category and initial size of every row in the retained entry file. For rows ending at the native demotion call, it compares only the decision to convert. The public API tests additionally check value preservation and the occupied/vacant boundary across input sizes 0 through 70. Run the check from the repository root.
+
+```sh
+packet=research/work-items/RE-009-quantities-map-entry-115
+rustc --edition=2024 "$packet/compare_integration.rs" -o /tmp/compare-quantity-map
+/tmp/compare-quantity-map | diff - "$packet/integrated-results.txt"
+cargo test --locked --manifest-path src/node115-base/Cargo.toml
+```

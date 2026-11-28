@@ -7,8 +7,10 @@
 
 use std::collections::{btree_map, BTreeMap, VecDeque};
 
-/// Default threshold at which `L1Map` upgrades from sorted `VecDeque` to `BTreeMap`.
-pub const SMALL_CAPACITY_THRESHOLD: usize = 32;
+/// A missing entry in a ring of at least this many rows selects the tree representation.
+pub const SMALL_CAPACITY_THRESHOLD: usize = 64;
+/// An entry lookup in a smaller tree first returns to the sorted ring.
+const MIN_TREE_LEN: usize = 32;
 
 /// Hybrid sorted map backed by `VecDeque<(K, V)>` when small and `BTreeMap<K, V>` when large.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -93,19 +95,12 @@ impl<K: Ord, V> L1Map<K, V> {
     }
 
     pub fn insert(&mut self, key: K, value: V) -> Option<V> {
-        self.maybe_promote();
-        match self {
-            Self::Small(deque) => match deque.binary_search_by(|(k, _)| k.cmp(&key)) {
-                Ok(idx) => {
-                    let slot = deque.get_mut(idx).expect("Out of bounds access");
-                    Some(std::mem::replace(&mut slot.1, value))
-                }
-                Err(idx) => {
-                    deque.insert(idx, (key, value));
-                    None
-                }
-            },
-            Self::Large(map) => map.insert(key, value),
+        match self.entry(key) {
+            Entry::Occupied(entry) => Some(std::mem::replace(entry.into_mut(), value)),
+            Entry::Vacant(entry) => {
+                entry.insert_entry(value);
+                None
+            }
         }
     }
 
@@ -120,33 +115,31 @@ impl<K: Ord, V> L1Map<K, V> {
     }
 
     pub fn entry(&mut self, key: K) -> Entry<'_, K, V> {
-        self.maybe_promote();
-        match self {
-            Self::Small(deque) => match deque.binary_search_by(|(k, _)| k.cmp(&key)) {
-                Ok(idx) => Entry::Occupied(OccupiedEntry::Small { map: deque, idx }),
-                Err(idx) => Entry::Vacant(VacantEntry::Small {
-                    map: deque,
-                    idx,
-                    key,
-                }),
-            },
-            Self::Large(map) => match map.entry(key) {
-                btree_map::Entry::Vacant(v) => Entry::Vacant(VacantEntry::Large(v)),
-                btree_map::Entry::Occupied(o) => Entry::Occupied(OccupiedEntry::Large(o)),
-            },
+        if let Self::Large(tree) = self
+            && tree.len() < MIN_TREE_LEN
+        {
+            *self = Self::Small(std::mem::take(tree).into_iter().collect());
         }
-    }
 
-    fn maybe_promote(&mut self) {
-        if let Self::Small(deque) = self {
-            if deque.len() < SMALL_CAPACITY_THRESHOLD {
-                return;
+        let position = if let Self::Small(rows) = self {
+            let position = rows.binary_search_by(|(k, _)| k.cmp(&key));
+            if position.is_err() && rows.len() >= SMALL_CAPACITY_THRESHOLD {
+                *self = Self::Large(std::mem::take(rows).into_iter().collect());
             }
-            let mut map = BTreeMap::new();
-            while let Some((k, v)) = deque.pop_front() {
-                map.insert(k, v);
-            }
-            *self = Self::Large(map);
+            Some(position)
+        } else {
+            None
+        };
+
+        match self {
+            Self::Small(rows) => match position.expect("compact map was searched") {
+                Ok(idx) => Entry::Occupied(OccupiedEntry::Small { map: rows, idx }),
+                Err(idx) => Entry::Vacant(VacantEntry::Small { map: rows, idx, key }),
+            },
+            Self::Large(tree) => match tree.entry(key) {
+                btree_map::Entry::Vacant(entry) => Entry::Vacant(VacantEntry::Large(entry)),
+                btree_map::Entry::Occupied(entry) => Entry::Occupied(OccupiedEntry::Large(entry)),
+            },
         }
     }
 }
