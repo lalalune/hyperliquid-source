@@ -1,0 +1,5 @@
+# RE-009: snapshot value parent-chain release
+
+The value+0x40 cleanup called by #7210 returns immediately when the descriptor base is null. For a nonnull base and zero remaining count, it follows the leftmost child pointer at +0x68 exactly as many times as the starting depth word before entering the terminal release path. That path follows each first-qword parent pointer. With a valid acyclic chain, it releases the starting leaf with size 0x68 and later ancestors with size 0xc8. The single-node case also uses size 0x68. The parent pointer is captured before releasing each node. This identifies the count-zero ownership path rather than inferring the live-entry traversal or Rust field types.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-value-parent-release/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
