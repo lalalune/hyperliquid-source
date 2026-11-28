@@ -1,5 +1,6 @@
 use node115_replay_completed_payload::{
-    CompletedPayload, CompressionError, REPLAY_LIMIT, ReplayPayload, decode_completed_payload,
+    CompletedPayload, CompressionError, REPLAY_LIMIT, ReplayBlockCheck, ReplayPayload,
+    decode_completed_payload,
 };
 
 fn compress_literals(input: &[u8], declared_capacity: u32) -> Vec<u8> {
@@ -22,6 +23,7 @@ fn tx_uses_the_actual_decoded_span_and_preserves_the_prefix_boundary() {
     assert_eq!(plain.consumed, 5);
     assert_eq!(plain.charged, 15);
     assert_eq!(plain.result, Ok(ReplayPayload::Tx(vec![0x42, 0x43, 0x44])));
+    assert_eq!(plain.check_block_identity([0, 0]), ReplayBlockCheck::Tx);
 }
 
 #[test]
@@ -38,6 +40,16 @@ fn block_and_empty_attachment_option_survive_both_arms() {
     let compressed = decode_completed_payload(CompletedPayload::SizePrefixedLz4(&encoded)).unwrap();
     assert_eq!(compressed, plain);
     assert_eq!(plain.consumed, block.len());
+    assert_eq!(
+        plain.check_block_identity([1, 2]),
+        ReplayBlockCheck::Match { successor: 4 },
+    );
+    for wrong in [[9, 2], [1, 9], [2, 1]] {
+        assert_eq!(
+            compressed.check_block_identity(wrong),
+            ReplayBlockCheck::Mismatch { observed: [1, 2] },
+        );
+    }
     let ReplayPayload::Block { block, attachments } = plain.result.unwrap() else {
         panic!("expected Block");
     };
@@ -49,6 +61,10 @@ fn block_and_empty_attachment_option_survive_both_arms() {
 fn stage_boundaries_preserve_the_inner_result_or_the_compression_error() {
     let empty = decode_completed_payload(CompletedPayload::Plain(&[])).unwrap();
     assert!(empty.result.is_err());
+    assert_eq!(
+        empty.check_block_identity([0, 0]),
+        ReplayBlockCheck::DecodeFailed,
+    );
     assert_eq!((empty.consumed, empty.charged), (0, 4));
 
     let encoded = compress_literals(&[1, 0], REPLAY_LIMIT as u32 + 1);
