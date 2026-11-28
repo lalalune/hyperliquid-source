@@ -1,0 +1,23 @@
+[package]
+name = "thinlto_w5_btree"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+tikv-jemallocator = "=0.6.0"
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = { version = "=1.0.154", features = ["raw_value", "unbounded_depth"] }
+rmp-serde = "=1.3.0"
+hashbrown = "=0.15.2"
+hashbrown_16 = { package = "hashbrown", version = "=0.16.1" }
+indexmap = { version = "=2.5.0", features = ["serde"] }
+primitive-types = { version = "=0.12.2", features = ["serde"] }
+alloy-primitives = { version = "=1.6.1", features = ["serde"] }
+ruint = { version = "=1.18.0", features = ["serde"] }
+ordered-float = { version = "=2.10.1", features = ["serde"] }
+smallvec = { version = "=1.13.2", features = ["serde"] }
+
+[profile.release]
+opt-level = 3
+overflow-checks = true
+lto = "thin"
