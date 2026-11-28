@@ -342,24 +342,41 @@ fn parse_lt_hash_section(src: &str, key: &str) -> Option<LtHash> {
     let obj = &rest[..=obj_end];
     let n_elements = extract_u64_field(obj, "\"n_elements\":")?;
     let n_bytes = extract_u64_field(obj, "\"n_bytes\":")?;
-    let hex_rest = obj.split_once("\"hash\":\"0x")?.1;
-    let hex_end = hex_rest.find('"')?;
-    let hex_str = &hex_rest[..hex_end];
-    if hex_str.len() != LT_HASH_BYTES * 2 {
-        return None;
-    }
-    let mut hash = [0u8; LT_HASH_BYTES];
-    let bytes = hex_str.as_bytes();
-    for (i, slot) in hash.iter_mut().enumerate() {
-        let hi = decode_hex_nibble(bytes[i * 2])?;
-        let lo = decode_hex_nibble(bytes[i * 2 + 1])?;
-        *slot = (hi << 4) | lo;
-    }
+    let payload = obj.split_once("\"hash\":")?.1.trim_start();
+    let hash = parse_lt_hash_bytes(payload)?;
     Some(LtHash {
         hash,
         n_elements,
         n_bytes,
     })
+}
+
+fn parse_lt_hash_bytes(payload: &str) -> Option<[u8; LT_HASH_BYTES]> {
+    let mut hash = [0u8; LT_HASH_BYTES];
+    if let Some(hex) = payload.strip_prefix("\"0x") {
+        let bytes = hex.split_once('"')?.0.as_bytes();
+        if bytes.len() != LT_HASH_BYTES * 2 {
+            return None;
+        }
+        for (slot, pair) in hash.iter_mut().zip(bytes.chunks_exact(2)) {
+            *slot = (decode_hex_nibble(pair[0])? << 4) | decode_hex_nibble(pair[1])?;
+        }
+    } else {
+        let mut values = payload.strip_prefix('[')?.split_once(']')?.0.split(',');
+        for slot in &mut hash {
+            let text = values.next()?.trim();
+            if !text.bytes().all(|byte| byte.is_ascii_digit())
+                || (text.len() > 1 && text.starts_with('0'))
+            {
+                return None;
+            }
+            *slot = text.parse().ok()?;
+        }
+        if values.next().is_some() {
+            return None;
+        }
+    }
+    Some(hash)
 }
 
 fn decode_hex_nibble(b: u8) -> Option<u8> {
