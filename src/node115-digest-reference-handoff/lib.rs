@@ -144,6 +144,15 @@ pub struct ReplayHandoff {
     pub comparisons: Vec<Observation>,
 }
 
+impl ReplayHandoff {
+    /// The comparison prefix ends immediately on a mismatch.
+    pub fn has_mismatch(&self) -> bool {
+        self.comparisons
+            .last()
+            .is_some_and(|row| row.comparison == Comparison::Mismatch)
+    }
+}
+
 /// Ordered logical effects of the selected handoff, assuming all sink calls
 /// return normally. The sink's encoding, clock, and I/O effects are excluded.
 pub fn replay_handoff(

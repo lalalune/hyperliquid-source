@@ -153,7 +153,7 @@ impl AbciEngine {
 
         // 5. Post-comparison local root production (`0x5a05fc9 -> 0x5a07ec0 -> 0x5a03fa0`)
         let post_height = self.state.height();
-        let local_root = if self.root_cadence_matches(post_height) {
+        let local_root = if !handoff.has_mismatch() && self.root_cadence_matches(post_height) {
             if let Some(digest) = block.synthetic_local_root {
                 let trace = select_root_impl(
                     &mut self.selector_cell,
@@ -270,11 +270,12 @@ impl AbciEngine {
         stages.push(ApplyBlockStage::VerifyStateRoot);
 
         // Stage 7: History cutoff prune (`0x5a05ea1..0x5a05fbd -> 0x4de5ad0`)
-        let evicted = match input.prune_watermark {
-            Some(wm) => self.prune_local_history_through(wm),
-            None => 0,
+        let evicted = if report.handoff.has_mismatch() {
+            0
+        } else {
+            stages.push(ApplyBlockStage::PruneHistory);
+            input.prune_watermark.map_or(0, |wm| self.prune_local_history_through(wm))
         };
-        stages.push(ApplyBlockStage::PruneHistory);
 
         Ok(ApplyBlockPipelineReport {
             stages,
