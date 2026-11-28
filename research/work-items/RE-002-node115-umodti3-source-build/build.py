@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import subprocess
 import tarfile
@@ -86,10 +87,12 @@ def tools_for_release(version):
     return cargo, rustc, rust_version.strip(), cargo_version
 
 
-def cargo_job(work, cache, library, version, provision):
+def cargo_job(work, cache, library, version, provision, *, opt_level="3"):
     (work / "src").mkdir(parents=True)
     (work / "src/lib.rs").write_text(PROBE)
-    (work / "Cargo.toml").write_text(MANIFEST)
+    require(opt_level in {"0", "1", "2", "3", "s", "z"}, "unknown Cargo optimization level")
+    setting = opt_level if opt_level.isdecimal() else f'"{opt_level}"'
+    (work / "Cargo.toml").write_text(MANIFEST.replace("opt-level = 3", f"opt-level = {setting}"))
     cargo, rustc, compiler, cargo_version = tools_for_release(version)
     env = {key: os.environ[key] for key in ("PATH", "HOME", "TMPDIR", "SYSTEMROOT") if key in os.environ}
     env.update(
@@ -110,6 +113,8 @@ def cargo_job(work, cache, library, version, provision):
                 and p["target"]["name"] == "compiler_builtins"]
     require(builtin["fresh"] is False and Path(builtin["manifest_path"]).is_relative_to(library),
             "compiler_builtins was not freshly compiled from the authenticated release source")
+    require(builtin["profile"]["opt_level"] == opt_level,
+            f"compiler_builtins did not use the requested optimization level {opt_level}")
     archive, = [Path(path) for path in builtin["filenames"] if path.endswith(".rlib")]
     return archive, compiler, cargo_version
 
@@ -129,7 +134,7 @@ def binutils(directory):
     return result
 
 
-def symbol_bytes(archive, tools, work):
+def symbol_bytes(archive, tools, work, *, require_no_relocations=True):
     symbols = capture([tools["nm"], "-A", "-S", "--defined-only", archive])
     row, = [line.split() for line in symbols.splitlines() if line.split() and line.split()[-1] == SYMBOL]
     label, hex_size, binding, _ = row
@@ -149,14 +154,18 @@ def symbol_bytes(archive, tools, work):
             and int(sym[sym.index(section) + 1], 16) == int(hex_size, 16),
             "ELF symbol is not a whole zero-offset function")
     relocations = capture([tools["objdump"], "-r", "-j", section, obj])
-    require("RELOCATION RECORDS FOR" not in relocations, "function has relocation fields")
+    relocation_count = len(re.findall(r"^\s*[0-9a-fA-F]+\s+R_X86_64_\w+\s+", relocations, re.MULTILINE))
+    require(("RELOCATION RECORDS FOR" in relocations) == bool(relocation_count),
+            "unrecognized objdump relocation output")
+    if require_no_relocations:
+        require(relocation_count == 0, "function has relocation fields")
     body_file = work / "selected.bin"
     subprocess.run([tools["objcopy"], "--dump-section", f"{section}={body_file}", obj], check=True)
     body = body_file.read_bytes()
     require(len(body) == int(hex_size, 16) > 0, "symbol does not occupy its exact section")
     return dict(archive=archive.name, archive_sha256=digest(archive.read_bytes()), member=member,
                 member_sha256=digest(raw), symbol=SYMBOL, section=section, symbol_offset=0,
-                length=len(body), function_sha256=digest(body), relocations_in_section=0), body
+                length=len(body), function_sha256=digest(body), relocations_in_section=relocation_count), body
 
 
 def main():
