@@ -94,3 +94,11 @@ fn visits_more_than_one_small_sort_window() {
         .collect();
     assert_eq!(actual, (0..73).rev().collect::<Vec<_>>());
 }
+
+#[test]
+fn admits_the_node115_uppercase_evm_marker() {
+    let tree = Tree::new();
+    let directory = tree.dir("42");
+    marker(&directory, "CHECKPOINT_COMPLETE_EVMSTATE");
+    assert_eq!(find_checkpoint(&tree.0, 42).unwrap().path, directory);
+}

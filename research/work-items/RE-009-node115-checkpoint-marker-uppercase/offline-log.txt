@@ -1,0 +1,135 @@
+Work item: RE-009-node115-checkpoint-marker-uppercase
+Base: e1528748a34c6ef79736ba16002caadbdff163a4
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+Darwin arm64
+ProductName:		macOS
+ProductVersion:		26.4.1
+BuildVersion:		25E253
+Python 3.12.16
+Command: python3 -B research/work-items/RE-009-node115-checkpoint-marker-uppercase/verify.py
+selector 0: Exchange -> /CHECKPOINT_COMPLETE_EXCHANGE
+selector 1: Rpc -> /CHECKPOINT_COMPLETE_RPC
+selector 2: EvmState -> /CHECKPOINT_COMPLETE_EVMSTATE
+PASS: pinned binary, selector tables, casing instructions, transformed formatter argument
+Before: base implementation with the two regression tests applied. Repository paths abbreviated.
+Fixture filesystem: case-sensitive (confirmed with CASE_PROBE and case_probe).
+rustc 1.95.0 (59807616e 2026-04-14)
+Command: cargo test --offline --locked --manifest-path src/node115-db/Cargo.toml --test integration checkpoint_shard_marker_uses_node115_ascii_uppercase -- --exact
+   Compiling node115-startup-admission v0.1.0 (<repository>/src/node115-startup-admission)
+   Compiling node115-reverse-path-components v0.1.0 (<repository>/src/node115-reverse-path-components)
+   Compiling node115-block-handle-codec v0.1.0 (<repository>/src/node115-block-handle-codec)
+   Compiling node115-restore-copy v0.1.0 (<repository>/src/node115-owned-db-open/restore-copy)
+   Compiling node115-storage-value-decode v0.1.0 (<repository>/src/node115-storage-value-decode)
+   Compiling node115-db-hub-byte-key v0.1.0 (<repository>/src/node115-db-hub-byte-key)
+   Compiling node115-checkpoint-plan v0.1.0 (<repository>/src/node115-owned-db-open/checkpoint-plan)
+   Compiling node115-indexed-artifact-variant v0.1.0 (<repository>/src/node115-indexed-artifact-variant)
+   Compiling node115-owned-db-open v0.1.0 (<repository>/src/node115-owned-db-open)
+   Compiling node115-checkpoint-discovery v0.1.0 (<repository>/src/node115-checkpoint-discovery)
+   Compiling node115-replica-end-height v0.1.0 (<repository>/src/node115-replica-end-height)
+   Compiling node115-db v0.1.0 (<repository>/src/node115-db)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.01s
+     Running tests/integration.rs (work/hl-marker-rust-test/debug/deps/integration-98a29f224e3f155b)
+
+running 1 test
+test checkpoint_shard_marker_uses_node115_ascii_uppercase ... FAILED
+
+failures:
+
+---- checkpoint_shard_marker_uses_node115_ascii_uppercase stdout ----
+
+thread 'checkpoint_shard_marker_uses_node115_ascii_uppercase' (191130223) panicked at tests/integration.rs:470:9:
+assertion `left == right` failed
+  left: "/var/hl/ckpt/42000/CHECKPOINT_COMPLETE_exchange"
+ right: "/var/hl/ckpt/42000/CHECKPOINT_COMPLETE_EXCHANGE"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    checkpoint_shard_marker_uses_node115_ascii_uppercase
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test integration`
+Command: cargo test --offline --locked --manifest-path src/node115-checkpoint-discovery/Cargo.toml --test discovery admits_the_node115_uppercase_evm_marker -- --exact
+   Compiling node115-checkpoint-discovery v0.1.0 (<repository>/src/node115-checkpoint-discovery)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.22s
+     Running tests/discovery.rs (work/hl-marker-rust-test/debug/deps/discovery-1c7bd52179ed610d)
+
+running 1 test
+test admits_the_node115_uppercase_evm_marker ... FAILED
+
+failures:
+
+---- admits_the_node115_uppercase_evm_marker stdout ----
+
+thread 'admits_the_node115_uppercase_evm_marker' (191130389) panicked at tests/discovery.rs:103:45:
+called `Option::unwrap()` on a `None` value
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    admits_the_node115_uppercase_evm_marker
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test discovery`
+After: both full crate suites. Repository paths abbreviated.
+Fixture filesystem: case-sensitive (confirmed with CASE_PROBE and case_probe).
+rustc 1.95.0 (59807616e 2026-04-14)
+Command: cargo test --offline --locked --manifest-path src/node115-db/Cargo.toml
+   Compiling node115-checkpoint-discovery v0.1.0 (<repository>/src/node115-checkpoint-discovery)
+   Compiling node115-db v0.1.0 (<repository>/src/node115-db)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running unittests src/lib.rs (work/hl-marker-rust-test/debug/deps/node115_db-67f71753cdebea54)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration.rs (work/hl-marker-rust-test/debug/deps/integration-98a29f224e3f155b)
+
+running 11 tests
+test owned_db_home_checkpoint_guard_and_live_vs_slow_budgets ... ok
+test checkpoint_shard_marker_uses_node115_ascii_uppercase ... ok
+test db_home_checkpoint_subdir_lt_hashes_and_74_slot_capture_offsets ... ok
+test indexed_block_reader_point_and_range_query_inclusive ... ok
+test db_hub_byte_key_storage_decode_and_snapshot_selectors ... ok
+test db_hub_29_kind_prefix_table_and_3_shard_routing ... ok
+test rocks_db_niche_block_reader_and_indexed_artifact_variants ... ok
+test rocks_db_owned_db_dir_guard ... ok
+test storage_db_closure_latest_checkpoint_loader_db_hub_path_and_single_run_block_query ... ok
+test db_home_guard_discovery_plan_restore_copy_and_replica_height ... ok
+test rocksdb_3_shard_profiles_tcp_ceiling_and_persistent_checkpoint_roundtrip ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+   Doc-tests node115_db
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+Command: cargo test --offline --locked --manifest-path src/node115-checkpoint-discovery/Cargo.toml
+   Compiling node115-checkpoint-discovery v0.1.0 (<repository>/src/node115-checkpoint-discovery)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s
+     Running unittests src/lib.rs (work/hl-marker-rust-test/debug/deps/node115_checkpoint_discovery-6dcc635b41d1db5f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/discovery.rs (work/hl-marker-rust-test/debug/deps/discovery-1c7bd52179ed610d)
+
+running 4 tests
+test admits_the_node115_uppercase_evm_marker ... ok
+test canonical_spelling_precedes_marker_admission_and_preserves_duplicates ... ok
+test selects_an_exact_numeric_height_and_requires_a_regular_marker ... ok
+test visits_more_than_one_small_sort_window ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Doc-tests node115_checkpoint_discovery
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

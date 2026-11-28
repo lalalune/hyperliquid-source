@@ -45,6 +45,8 @@ pub fn candidates(directory: &Path) -> io::Result<Vec<Candidate>> {
         .filter_map(|height| {
             let path = directory.join(height.to_string());
             (path.join("CHECKPOINT_COMPLETE").is_file()
+                || path.join("CHECKPOINT_COMPLETE_EVMSTATE").is_file()
+                // Preserve checkpoints accepted by the earlier reconstruction.
                 || path.join("CHECKPOINT_COMPLETE_EvmState").is_file())
             .then_some(Candidate { height, path })
         })

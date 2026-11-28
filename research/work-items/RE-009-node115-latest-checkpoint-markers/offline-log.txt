@@ -1,0 +1,57 @@
+Work item: RE-009-node115-latest-checkpoint-markers
+Base: e1528748a34c6ef79736ba16002caadbdff163a4
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+Darwin arm64
+Python 3.12.16
+Command: python3 -B research/work-items/RE-009-node115-latest-checkpoint-markers/verify.py
+FDE 0x4468e30..0x44699c0: primary 0x44692a6, alternate 0x4469308, accept 0x446932b, reject 0x4469394
+FDE 0x59ffa30..0x5a007bb: primary 0x59ffed6, alternate 0x59fff38, accept 0x59fff65, reject 0x59fffce
+PASS: both loader branches use one regular-file predicate and selector 2 fallback
+Before and after on the case-sensitive fixture volume. Repository paths abbreviated.
+rustc 1.95.0 (59807616e 2026-04-14)
+Command: cargo test --offline --locked --manifest-path src/node115-db/Cargo.toml --test integration latest_checkpoint_checks_both_regular_marker_forms -- --exact
+   Compiling node115-checkpoint-discovery v0.1.0 (<repository>/src/node115-checkpoint-discovery)
+   Compiling node115-db v0.1.0 (<repository>/src/node115-db)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.64s
+     Running tests/integration.rs (work/hl-marker-rust-test/debug/deps/integration-98a29f224e3f155b)
+
+running 1 test
+test latest_checkpoint_checks_both_regular_marker_forms ... FAILED
+
+failures:
+
+---- latest_checkpoint_checks_both_regular_marker_forms stdout ----
+
+thread 'latest_checkpoint_checks_both_regular_marker_forms' (191143717) panicked at tests/integration.rs:477:5:
+assertion `left == right` failed
+  left: 300
+ right: 200
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    latest_checkpoint_checks_both_regular_marker_forms
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test integration`
+rustc 1.95.0 (59807616e 2026-04-14)
+Command: cargo test --offline --locked --manifest-path src/node115-db/Cargo.toml --test integration
+   Compiling node115-db v0.1.0 (<repository>/src/node115-db)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running tests/integration.rs (work/hl-marker-rust-test/debug/deps/integration-98a29f224e3f155b)
+
+running 11 tests
+test rocks_db_niche_block_reader_and_indexed_artifact_variants ... ok
+test rocks_db_per_shard_checkpoint_marker_and_owned_db_dir_guard ... ok
+test db_home_checkpoint_subdir_lt_hashes_and_74_slot_capture_offsets ... ok
+test owned_db_home_checkpoint_guard_and_live_vs_slow_budgets ... ok
+test db_hub_29_kind_prefix_table_and_3_shard_routing ... ok
+test db_hub_byte_key_storage_decode_and_snapshot_selectors ... ok
+test indexed_block_reader_point_and_range_query_inclusive ... ok
+test storage_db_closure_latest_checkpoint_loader_db_hub_path_and_single_run_block_query ... ok
+test db_home_guard_discovery_plan_restore_copy_and_replica_height ... ok
+test latest_checkpoint_checks_both_regular_marker_forms ... ok
+test rocksdb_3_shard_profiles_tcp_ceiling_and_persistent_checkpoint_roundtrip ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s

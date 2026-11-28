@@ -1,0 +1,81 @@
+Work item: RE-017-node115-replay-delay-rounding
+Base: e1528748a34c6ef79736ba16002caadbdff163a4
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+Darwin arm64
+Python 3.12.16
+Command: python3 -B research/work-items/RE-017-node115-replay-delay-rounding/verify.py
+0x1.12e0be826d695p-32 -> 0 ns
+0x1.9c511dc3a41dfp-31 -> 1 ns
+0x1.0000000000000p-10 -> 976562 ns
+0x1.8000000000000p-9 -> 2929688 ns
+0x1.0040000000000p+0 -> 1000976562 ns
+0x1.00c0000000000p+0 -> 1002929688 ns
+0x1.fffffffdda3e8p-1 -> 1000000000 ns
+0x1.2a05f20000000p+33 -> 9223372036854775807 ns
+PASS: two FDEs, duration relocation, both rounding paths, carry and cap
+Before and after. Repository paths abbreviated.
+rustc 1.95.0 (59807616e 2026-04-14)
+Command: cargo test --offline --locked --manifest-path src/node115-abci/Cargo.toml --test integration tracker_rounds_fractional_delays_to_nearest_nanosecond -- --exact
+   Compiling node115-digest-reference-handoff v0.1.0 (<repository>/src/node115-digest-reference-handoff)
+   Compiling node115-staking-weight-comparison v0.1.0 (<repository>/src/node115-staking-weight-comparison)
+   Compiling node115-digest-vote-admission v0.1.0 (<repository>/src/node115-digest-vote-admission)
+   Compiling node115-abci-blake3 v0.1.0 (<repository>/src/node115-abci-blake3)
+   Compiling node115-db v0.1.0 (<repository>/src/node115-db)
+   Compiling node115-digest-support-gate v0.1.0 (<repository>/src/node115-digest-support-gate)
+   Compiling node115-abci-checkpoint-replay-fixture v0.1.0 (<repository>/src/node115-abci-checkpoint-replay-fixture)
+   Compiling node115-quorum-line v0.1.0 (<repository>/src/node115-digest-reference-handoff/quorum-line)
+   Compiling node115-abci v0.1.0 (<repository>/src/node115-abci)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.95s
+     Running tests/integration.rs (work/hl-marker-rust-test/debug/deps/integration-b3a84e5182e0de50)
+
+running 1 test
+test tracker_rounds_fractional_delays_to_nearest_nanosecond ... FAILED
+
+failures:
+
+---- tracker_rounds_fractional_delays_to_nearest_nanosecond stdout ----
+
+thread 'tracker_rounds_fractional_delays_to_nearest_nanosecond' (191182039) panicked at tests/integration.rs:684:5:
+assertion `left == right` failed
+  left: Some(0)
+ right: Some(1)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tracker_rounds_fractional_delays_to_nearest_nanosecond
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test integration`
+rustc 1.95.0 (59807616e 2026-04-14)
+Command: cargo test --offline --locked --manifest-path src/node115-abci/Cargo.toml
+   Compiling node115-abci v0.1.0 (<repository>/src/node115-abci)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running unittests src/lib.rs (work/hl-marker-rust-test/debug/deps/node115_abci-539c3e8029c114db)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration.rs (work/hl-marker-rust-test/debug/deps/integration-b3a84e5182e0de50)
+
+running 10 tests
+test state_serialize_buffer_elapsed_seconds_and_zip_exact_slices ... ok
+test tracker_rounds_fractional_delays_to_nearest_nanosecond ... ok
+test reduction_tree_preimage_matches_re017_msgpack_vectors ... ok
+test tracker_watermark_seal_prune_window_and_recheck ... ok
+test real_blake3_state_root_and_timer_maturity_end_to_end ... ok
+test apply_block_six_ordered_guards_and_history_split_off_cutoff ... ok
+test tracker_wire_schema_checkpoint_format_and_straggler_filter ... ok
+test engine_offline_replay_freeze_guard_and_checkpoint_maintenance ... ok
+test lthash_big_endian_homomorphic_arithmetic_and_hardfork_version_check ... ok
+test snapshot_hardfork_compat_bundle_roundtrip_and_7_stage_apply_block_pipeline ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Doc-tests node115_abci
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

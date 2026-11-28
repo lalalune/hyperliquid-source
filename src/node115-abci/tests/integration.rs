@@ -675,3 +675,18 @@ fn state_serialize_buffer_elapsed_seconds_and_zip_exact_slices() {
         })
     );
 }
+
+#[test]
+fn tracker_rounds_fractional_delays_to_nearest_nanosecond() {
+    use node115_abci::hash_signature_tracker::delay_secs_to_nanos;
+
+    assert_eq!(delay_secs_to_nanos(0.25e-9), Some(0));
+    assert_eq!(delay_secs_to_nanos(0.75e-9), Some(1));
+    assert_eq!(delay_secs_to_nanos(1.0 / 1024.0), Some(976_562));
+    assert_eq!(delay_secs_to_nanos(3.0 / 1024.0), Some(2_929_688));
+    assert_eq!(delay_secs_to_nanos(0.999_999_999_75), Some(1_000_000_000));
+    assert_eq!(delay_secs_to_nanos(10_000_000_000.0), Some(i64::MAX as u64));
+    assert_eq!(delay_secs_to_nanos(f64::MAX), Some(i64::MAX as u64));
+    assert!(!timer_is_mature(100, 0.75e-9, 100));
+    assert!(timer_is_mature(100, 0.75e-9, 101));
+}
