@@ -3,6 +3,7 @@
 import hashlib
 import json
 import pathlib
+import runpy
 import struct
 import unittest
 
@@ -68,16 +69,22 @@ class TestArtifactAndStreamMsg115(unittest.TestCase):
             self.assertEqual(end - start, fde["size_bytes"])
             self.assertGreater(fde["size_bytes"], 0)
 
+    def test_named_archive_writer_evidence(self) -> None:
+        compare = runpy.run_path(str(PACKET_DIR / "compare_replicas.py"))
+        result = json.loads((PACKET_DIR / "replica-results.json").read_text(encoding="utf-8"))
+        self.assertEqual(compare["check_capture"](), result["native"])
+
     def test_manifest_sha256_integrity(self) -> None:
         lines = [ln.strip() for ln in MANIFEST_PATH.read_text(encoding="utf-8").splitlines() if ln.strip()]
-        self.assertEqual(len(lines), 2)
+        expected_files = {"README.md", "records.json", "compare_replicas.py", "encode_replicas.rs", "replica-results.json"}
+        self.assertEqual(len(lines), len(expected_files))
         seen = set()
         for line in lines:
             expected_hash, rel_name = line.split("  ", 1)
             seen.add(rel_name)
             actual_hash = hashlib.sha256((PACKET_DIR / rel_name).read_bytes()).hexdigest()
             self.assertEqual(actual_hash, expected_hash, f"checksum mismatch for {rel_name}")
-        self.assertEqual(seen, {"README.md", "records.json"})
+        self.assertEqual(seen, expected_files)
 
 
 if __name__ == "__main__":

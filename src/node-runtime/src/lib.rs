@@ -63,6 +63,7 @@ pub use peer_sync::{
 };
 pub use restart::{DEFAULT_RESTART_CAP_SECS, RestartSupervisor, WaitPlan};
 pub use stream_msg::{
-    AbciLatencySampler, EvmKvsPairs, SharedStreamMsg, exchange_abci_stream_greeting,
-    recv_evm_kvs_stream, serve_abci_stream_greeting, serve_evm_kvs_stream,
+    AbciLatencySampler, EvmKvsPairs, ReplicaStreamRecord, SharedStreamMsg,
+    exchange_abci_stream_greeting, recv_evm_kvs_stream, serve_abci_stream_greeting,
+    serve_evm_kvs_stream,
 };
