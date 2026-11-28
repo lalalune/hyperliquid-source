@@ -100,6 +100,29 @@ impl AbciEngine {
     where
         F: FnMut(&mut RootSelectorCell, usize) -> u64,
     {
+        self.apply_block_with_history_pruning(
+            block,
+            support,
+            registry,
+            registry_context,
+            None,
+            fallback_cpuid,
+        )
+        .map(|(report, _)| report)
+    }
+
+    fn apply_block_with_history_pruning<F>(
+        &mut self,
+        block: &EngineBlock,
+        support: &SupportContext,
+        registry: &Registry,
+        registry_context: u64,
+        prune_watermark: Option<u64>,
+        fallback_cpuid: F,
+    ) -> Result<(EngineBlockReport, usize), BlockAdmissionError>
+    where
+        F: FnMut(&mut RootSelectorCell, usize) -> u64,
+    {
         if block.new_round <= block.prev_round {
             return Err(BlockAdmissionError::NonAdvancingRound {
                 prev_round: block.prev_round,
@@ -151,6 +174,9 @@ impl AbciEngine {
         // 4. Sink-before-comparison (`0x5a05c14..0x5a05e3c`) BEFORE `0x5a07ec0`
         let handoff = replay_handoff(&rows, &self.local_raw_history);
 
+        // The native history split precedes the successor root write (0x5a05ee3 -> 0x5a05fc9).
+        let evicted = prune_watermark.map_or(0, |base| self.prune_local_history_through(base));
+
         // 5. Post-comparison local root production (`0x5a05fc9 -> 0x5a07ec0 -> 0x5a03fa0`)
         let post_height = self.state.height();
         let local_root = if self.root_cadence_matches(post_height) {
@@ -176,14 +202,15 @@ impl AbciEngine {
             None
         };
 
-        Ok(EngineBlockReport {
+        let report = EngineBlockReport {
             height: post_height,
             round: self.state.round(),
             vote_results,
             quorum_sink_lines,
             handoff,
             local_root,
-        })
+        };
+        Ok((report, evicted))
     }
 
     /// Prune `local_raw_history` (`ctx + 0x400`) via `BTreeMap::split_off(&watermark.saturating_add(1))`
@@ -256,24 +283,19 @@ impl AbciEngine {
         on_end_block(next_height);
         stages.push(ApplyBlockStage::EndBlock);
 
-        // Stages 5 & 6: Digest quorum update (`0x5a0584e -> 0x4de4a60`) + state-root verification (`0x5a05c5e -> 0x4e3a020`)
-        let report = self
-            .apply_block(
+        // Stages 5–7: compare quorum, prune old history, then publish the eligible local root.
+        let (report, evicted) = self
+            .apply_block_with_history_pruning(
                 input.block,
                 support,
                 registry,
                 registry_context,
+                input.prune_watermark,
                 fallback_cpuid,
             )
             .map_err(ApplyBlockPipelineError::Admission)?;
         stages.push(ApplyBlockStage::UpdateDigestQuorum);
         stages.push(ApplyBlockStage::VerifyStateRoot);
-
-        // Stage 7: History cutoff prune (`0x5a05ea1..0x5a05fbd -> 0x4de5ad0`)
-        let evicted = match input.prune_watermark {
-            Some(wm) => self.prune_local_history_through(wm),
-            None => 0,
-        };
         stages.push(ApplyBlockStage::PruneHistory);
 
         Ok(ApplyBlockPipelineReport {
