@@ -121,6 +121,23 @@ impl DbHome {
         &self,
         required_subdir: Option<&str>,
     ) -> Result<CheckpointCandidate, LoadLatestCheckpointError> {
+        self.load_latest_checkpoint_where(|path| {
+            required_subdir.is_none_or(|subdir| path.join(subdir).exists())
+        })
+    }
+
+    /// Select the newest completed checkpoint containing a regular payload file.
+    pub fn load_latest_checkpoint_with_payload_file(
+        &self,
+        filename: &str,
+    ) -> Result<CheckpointCandidate, LoadLatestCheckpointError> {
+        self.load_latest_checkpoint_where(|path| path.join(filename).is_file())
+    }
+
+    fn load_latest_checkpoint_where(
+        &self,
+        has_payload: impl Fn(&Path) -> bool,
+    ) -> Result<CheckpointCandidate, LoadLatestCheckpointError> {
         let outer = self.checkpoint_subdir();
         if !outer.is_dir() {
             return Err(LoadLatestCheckpointError::OuterDirDoesNotExist { dir: outer });
@@ -150,9 +167,7 @@ impl DbHome {
             {
                 continue;
             }
-            if let Some(sub) = required_subdir
-                && !path.join(sub).exists()
-            {
+            if !has_payload(&path) {
                 continue;
             }
             return Ok(CheckpointCandidate { height, path });

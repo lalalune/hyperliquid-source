@@ -479,7 +479,7 @@ impl NodeEngine {
         fs::create_dir_all(db_home.checkpoint_subdir())?;
         let evm_kv_store = PersistentShardKvStore::open(db_home.root(), RocksDbShard::EvmState)?;
 
-        match db_home.load_latest_checkpoint(Some("checkpoint.bin")) {
+        match db_home.load_latest_checkpoint_with_payload_file("checkpoint.bin") {
             Ok(candidate) => Self::restore_checkpoint(chain, db_home, evm_kv_store, candidate.height),
             Err(
                 LoadLatestCheckpointError::OuterDirDoesNotExist { .. }
