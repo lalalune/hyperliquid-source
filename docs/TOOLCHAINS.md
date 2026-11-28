@@ -20,3 +20,8 @@ for development but cannot establish Linux binary equivalence.
 
 Exact LLD/clang versions above are recorded requirements for a later matched
 build image. Merely matching the Rust release is insufficient for byte identity.
+
+The official Rust 1.95.0 x86-64 Linux compiler package contains a candidate
+linker whose configured default reproduces all text in the node's LLD stamp.
+The same Rust release's Apple Silicon linker includes a different repository
+string when linking Linux ELF. See the [distribution hashes and controlled fixture links](../research/work-items/RE-002-node115-linker-stamp/README.md).
