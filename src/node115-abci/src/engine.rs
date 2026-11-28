@@ -282,6 +282,43 @@ impl AbciEngine {
             pruned_history_entries: evicted,
         })
     }
+
+    /// Apply offline prepared rows, deriving the converted payload count from the rows.
+    /// `input.payload_actions` is the legacy count for the index-only fixture entry point.
+    #[allow(clippy::too_many_arguments)]
+    pub fn apply_block_pipeline_with_rows<T, FBegin, FAction, FEnd, FCpuid>(
+        &mut self,
+        input: &ApplyBlockPipelineInput<'_>,
+        prepared_rows: &[T],
+        support: &SupportContext,
+        registry: &Registry,
+        registry_context: u64,
+        on_begin_block: FBegin,
+        mut on_action: FAction,
+        on_end_block: FEnd,
+        fallback_cpuid: FCpuid,
+    ) -> Result<ApplyBlockPipelineReport, ApplyBlockPipelineError>
+    where
+        FBegin: FnMut(u64),
+        FAction: FnMut(usize, &T),
+        FEnd: FnMut(u64),
+        FCpuid: FnMut(&mut RootSelectorCell, usize) -> u64,
+    {
+        let row_input = ApplyBlockPipelineInput {
+            payload_actions: prepared_rows.len() as u64,
+            ..input.clone()
+        };
+        self.apply_block_pipeline(
+            &row_input,
+            support,
+            registry,
+            registry_context,
+            on_begin_block,
+            |index| on_action(index, &prepared_rows[index]),
+            on_end_block,
+            fallback_cpuid,
+        )
+    }
 }
 
 /// Exact chronological execution stages observed in `AbciEngine::apply_block` (`0x5a04e40..0x5a065f8`).
