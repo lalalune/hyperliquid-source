@@ -3,7 +3,7 @@
 use std::path::Path;
 use std::process::ExitCode;
 
-use hl_node::cli::{CliAction, Subcommand, help_text, parse_args, replica_style_label};
+use hl_node::cli::{CliAction, Subcommand, command_help_text, help_text, parse_args, replica_style_label};
 use hl_node::engine::NodeEngine;
 use hl_node::wiring::workspace_health;
 
@@ -12,6 +12,10 @@ fn main() -> ExitCode {
     match parse_args(args) {
         Ok(CliAction::Help) => {
             print!("{}", help_text());
+            ExitCode::SUCCESS
+        }
+        Ok(CliAction::CommandHelp(sub)) => {
+            print!("{}", command_help_text(sub));
             ExitCode::SUCCESS
         }
         Ok(CliAction::Version) => {

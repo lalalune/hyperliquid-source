@@ -97,6 +97,7 @@ impl Subcommand {
 #[derive(Debug, PartialEq, Eq)]
 pub enum CliAction {
     Help,
+    CommandHelp(Subcommand),
     Version,
     Command(ParsedCommand),
 }
@@ -185,45 +186,28 @@ fn parse_chain(s: &str) -> Option<ChainName> {
     }
 }
 
-fn is_flag_for(sub: Subcommand, opt: &str) -> bool {
-    if sub.uses_common_run_options() && COMMON_FLAGS.contains(&opt) {
-        return true;
-    }
+fn flags_for(sub: Subcommand) -> &'static [&'static str] {
     match sub {
-        Subcommand::Delegate => opt == "undelegate",
-        Subcommand::ComputeL4Snapshots => {
-            matches!(opt, "include-users" | "include-trigger-orders")
-        }
-        Subcommand::ChangeValidatorProfile => opt == "unjailed",
-        _ => false,
+        Subcommand::RunNonValidator | Subcommand::RunValidator => COMMON_FLAGS,
+        Subcommand::Delegate => &["undelegate"],
+        Subcommand::ComputeL4Snapshots => &["include-users", "include-trigger-orders"],
+        Subcommand::ChangeValidatorProfile => &["unjailed"],
+        _ => &[],
     }
 }
 
-fn is_value_for(sub: Subcommand, opt: &str) -> bool {
-    if sub.uses_common_run_options() && COMMON_VALUES.contains(&opt) {
-        return true;
-    }
+fn optional_values_for(sub: Subcommand) -> &'static [&'static str] {
     match sub {
-        Subcommand::TranslateAbciState => matches!(opt, "in-fln" | "out-fln"),
-        Subcommand::SendSignedAction => opt == "action",
-        Subcommand::Delegate => matches!(opt, "validator" | "wei"),
-        Subcommand::StakingDeposit | Subcommand::StakingWithdrawal => opt == "wei",
-        Subcommand::SendSlackAlert => opt == "msg",
-        Subcommand::CheckReachability => opt == "abci-state-fln",
-        Subcommand::ComputeReferrerStates | Subcommand::ComputeL4Snapshots => {
-            matches!(opt, "abci-state-fln" | "out-fln")
-        }
-        Subcommand::ChangeValidatorProfile => matches!(
-            opt,
-            "abci-state-fln"
-                | "node-ip"
-                | "name"
-                | "description"
-                | "disable-delegations"
-                | "commission-bps"
-                | "signer"
-        ),
-        _ => false,
+        Subcommand::RunNonValidator | Subcommand::RunValidator => COMMON_VALUES,
+        Subcommand::ChangeValidatorProfile => &[
+            "node-ip",
+            "name",
+            "description",
+            "disable-delegations",
+            "commission-bps",
+            "signer",
+        ],
+        _ => &[],
     }
 }
 
@@ -262,7 +246,7 @@ where
     while idx < items.len() {
         let tok = &items[idx];
         if tok == "--help" || tok == "-h" {
-            return Ok(CliAction::Help);
+            return Ok(subcommand.map_or(CliAction::Help, CliAction::CommandHelp));
         }
         if tok == "--version" || tok == "-V" {
             return Ok(CliAction::Version);
@@ -283,6 +267,18 @@ where
         }
 
         if subcommand.is_none() {
+            if tok == "help" {
+                return match &items[idx + 1..] {
+                    [] => Ok(CliAction::Help),
+                    [command] => Subcommand::parse(command)
+                        .map(CliAction::CommandHelp)
+                        .ok_or_else(|| CliError::UnknownSubcommand(command.clone())),
+                    [first, extra, ..] => {
+                        let unknown = if Subcommand::parse(first).is_some() { extra } else { first };
+                        Err(CliError::UnknownSubcommand(unknown.clone()))
+                    }
+                };
+            }
             if tok.starts_with('-') {
                 return Err(CliError::UnknownOption(tok.clone()));
             }
@@ -308,10 +304,12 @@ where
             raw_name
         };
 
-        if is_flag_for(sub, name) && inline_val.is_none() {
+        if flags_for(sub).contains(&name) && inline_val.is_none() {
             flags.insert(name.to_string());
             idx += 1;
-        } else if is_value_for(sub, name) {
+        } else if required_options_for(sub).contains(&name)
+            || optional_values_for(sub).contains(&name)
+        {
             let val = match inline_val {
                 Some(v) => v,
                 None => {
@@ -461,5 +459,27 @@ pub fn help_text() -> String {
          \x20   --batch-by-block, --stream-with-block-info, --serve-evm-rpc (alias --serve-eth-rpc),\n\
          \x20   --serve-info, --replica-cmds-style <actions|recent-actions|actions-and-responses>, --dry-run\n",
     );
+    out
+}
+
+/// Show the option scope that the reconstructed parser accepts for this command.
+pub fn command_help_text(sub: Subcommand) -> String {
+    use std::fmt::Write;
+
+    let name = sub.as_str();
+    let mut out = format!("hl-node {name}\n\nUSAGE:\n    hl-node [GLOBAL OPTIONS] {name}");
+    for arg in required_options_for(sub) {
+        write!(out, " --{arg} <VALUE>").unwrap();
+    }
+    out.push_str(" [OPTIONS]\n\nOPTIONS:\n    -h, --help\n    -V, --version\n");
+    for flag in flags_for(sub) {
+        writeln!(out, "    --{flag}").unwrap();
+    }
+    for arg in required_options_for(sub) {
+        writeln!(out, "    --{arg} <VALUE> (required)").unwrap();
+    }
+    for arg in optional_values_for(sub) {
+        writeln!(out, "    --{arg} <VALUE>").unwrap();
+    }
     out
 }
