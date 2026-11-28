@@ -60,7 +60,7 @@ After `call [0x64e0f80]` at `0x15488a3` (result at `rsp+0x60`):
 
 ## Implementation and comparison
 
-No Rust is added. The tool re-derives every address above from instruction bytes, the FDE index, relocations, template and string bytes and the Location record. Negative controls in `tests/test_abci_step_observer_record_115.py` change the hourly offset (`+0xa8` to `+0xa9`), the cached-date offset, the None niche, one template byte, the date pattern, the hour divisor constant, the hour limit, a cache store offset, the writer offset (`+0xe0` to `+0xe8`), the Location line (28 to 29), and turn the observer's slot call into a direct call. Each change fails the check (14 tests pass on the real image, none skipped).
+The original static packet re-derives every address above from instruction bytes, the FDE index, relocations, template and string bytes and the Location record. Negative controls in `tests/test_abci_step_observer_record_115.py` change the hourly offset (`+0xa8` to `+0xa9`), the cached-date offset, the None niche, one template byte, the date pattern, the hour divisor constant, the hour limit, a cache store offset, the writer offset (`+0xe0` to `+0xe8`), the Location line (28 to 29), and turn the observer's slot call into a direct call. Each change fails the check (14 tests pass on the real image, none skipped).
 
 ## Results and limitations
 
@@ -71,3 +71,16 @@ Correction to the third stage: #5841 inferred that `0x1546570` receives the wind
 Unknown: the record layout after `+0x8` and how `0x14c3370` serializes it, the bodies of the open/drop/optional callees, who sets `+0x142`, `+0xa8` and the directory, and what the global byte `0x64ffe50` is. The other 103 sink call sites share the same writer pattern; which loggers they belong to is not traced.
 
 Next question: the write callee `0x14c3370` and the serialized line format of the window record.
+
+## Foundation archive paths
+
+The original static analysis is implemented in `node115_base::runtime_utils::LinerBucket`. Given the registered stream directory and a date already formatted with `%Y%m%d`, it chooses the daily or hourly path. `daily_liner_path` now resolves the registered name under the data root **before** appending the date. For a data root of `/data`, the stream `abci_hashes` and the date `20261128`, the daily path is `/data/abci_hashes/20261128`. The corresponding hour 9 is `/data/abci_hashes/hourly/20261128/9`. [Constructor and directory](../RE-008-abci-step-observer-logdir-115/) · [Writer names](../RE-008-line-writer-owners-115/)
+
+The previous bucket represents the last successfully opened file. Equal buckets reuse that file. Moving backward across a day or hour selects its earlier path again. The helper uses the existing hour calculation at `0x1567ad0`, including its extended-hour result 24 for seconds 86,400 through 89,999. The caller supplies a resolved directory, so the helper also works with a stream name already changed by singleton registration. File-opening, buffer flush scheduling and registration are separate operations.
+
+On the parent commit, the regression assertion for `daily_liner_path` returned `/data/20261127/events.log` when the native template requires `/data/events.log/20261127`. The corrected workspace passes that assertion, compares every second in the native hour helper's admitted domain, and appends five synthetic observations to three real files in a temporary directory, including a return to a previously used hour. The captured node is read only by the static tests. Checked output is in [rotation-validation.txt](rotation-validation.txt).
+
+```sh
+python3 -B -m unittest tests.test_abci_step_observer_logdir_115 tests.test_abci_step_observer_record_115 tests.test_line_writer_owners_115
+cargo test --offline --locked --manifest-path src/node115-base/Cargo.toml
+```

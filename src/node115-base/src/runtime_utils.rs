@@ -189,9 +189,44 @@ impl LinerBuffer {
     }
 }
 
+/// A day or hour in a registered stream directory (`0x1546570..0x15466f3`).
+/// The date is the writer's already-formatted `%Y%m%d` value.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct LinerBucket<'a> {
+    date: &'a str,
+    hour: Option<u8>,
+}
+
+impl<'a> LinerBucket<'a> {
+    pub fn daily(date: &'a str) -> Self {
+        Self { date, hour: None }
+    }
+
+    pub fn hourly(date: &'a str, seconds_of_day: u32) -> Result<Self, crate::time::HourDecodeError> {
+        let hour = crate::time::hour_from_secs_of_day(seconds_of_day)?;
+        Ok(Self { date, hour: Some(hour) })
+    }
+
+    /// Select a new path when the writer changes date or, in hourly mode, hour.
+    /// Supply the bucket of the last successfully opened file as `previous`.
+    #[must_use]
+    pub fn path_if_changed(self, directory: &Path, previous: Option<Self>) -> Option<PathBuf> {
+        (Some(self) != previous).then(|| self.path(directory))
+    }
+
+    #[must_use]
+    pub fn path(self, directory: &Path) -> PathBuf {
+        match self.hour {
+            Some(hour) => directory.join("hourly").join(self.date).join(hour.to_string()),
+            None => directory.join(self.date),
+        }
+    }
+}
+
+/// Path for a daily stream under an already-resolved data root and registered name.
 #[must_use]
-pub fn daily_liner_path(root: &Path, yyyymmdd: &str, name: &str) -> PathBuf {
-    root.join(yyyymmdd).join(name)
+pub fn daily_liner_path(data_root: &Path, yyyymmdd: &str, name: &str) -> PathBuf {
+    LinerBucket::daily(yyyymmdd).path(&data_root.join(name))
 }
 
 /// Bounded generation/TTL cache (`base/src/data_cache.rs`).
