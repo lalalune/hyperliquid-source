@@ -115,6 +115,13 @@ pub enum MetaError {
     ExponentOutOfRange(u8),
 }
 
+/// Typed outcomes of the name scan at node #115 VA 0x421a8b0.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum PerpNameLookupError {
+    UnknownName(String),
+    IndexOverflow,
+}
+
 /// Per-asset perpetual metadata record (fields proven in `#115` `0x22e4810`).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PerpAssetMeta {
@@ -133,6 +140,22 @@ pub struct PerpMeta {
 impl PerpMeta {
     pub fn new(pdi: Pdi, universe: Vec<PerpAssetMeta>) -> Self {
         Self { pdi, universe }
+    }
+
+    /// Resolve a case-sensitive suffix within this PDI's ordered universe.
+    /// A miss returns the original suffix. The native checked-index trap is
+    /// represented as an error before inspecting the unrepresentable row.
+    pub fn asset_by_name(&self, suffix: &str) -> Result<PerpAsset, PerpNameLookupError> {
+        for (local, row) in self.universe.iter().enumerate() {
+            let asset = self
+                .pdi
+                .perp_checked(local as u64)
+                .ok_or(PerpNameLookupError::IndexOverflow)?;
+            if row.name == suffix {
+                return Ok(asset);
+            }
+        }
+        Err(PerpNameLookupError::UnknownName(suffix.to_owned()))
     }
 
     /// Lookup `sz_decimals` for `asset` with the exact `#115` `0x22e485d..0x22e4890` checks.
