@@ -1,0 +1,140 @@
+RE-017-node115-compact-local-restore-input
+Darwin arm64
+rustc 1.95.0 (59807616e 2026-04-14)
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B research/work-items/RE-017-node115-local-hardfork-materialization/verify.py
+PASS: pinned #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 115 spans in 8 FDEs
+PASS: local Context staging pair follows the selected Locus and Exchange returns
+PASS: allocated decoder result retains the pair at +0x18/+0x20
+PASS: local startup materializer copies the same offsets before the optional rewrite
+
+$ python3 -B research/work-items/RE-017-node115-local-scheduled-freeze-option/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 51 spans in 6 FDEs
+PASS: Exchange field 13 identifies scheduled_freeze_height via its duplicate diagnostic
+PASS: omitted and nil yield tag 0; unsigned value yields tag 1 and a payload
+PASS: materializer preserves option offsets tested by local startup
+
+$ python3 -B research/work-items/RE-017-node115-local-replay-hardfork-rewrite/verify.py
+PASS: pinned #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 42 spans in startup FDE
+PASS: startup saves the original pair at future+0x68/+0x70 before the freeze guard
+PASS: equality rewrites materialized +0x18/+0x20; both bypass arms preserve the pair at this boundary
+PASS: stale freeze height reaches a failure arm and ud2 if its helper returns
+PASS: selected replay spawn subsequently reads the materialized object, not the earlier future copy
+
+$ cargo test --offline --locked --manifest-path /tmp/hl-node115-compact-local-restore.WRBvnD/src/node115-abci-checkpoint-replay-fixture/Cargo.toml
+   Compiling node115-startup-admission v0.1.0 (/tmp/hl-node115-compact-local-restore.WRBvnD/src/node115-startup-admission)
+   Compiling node115-staking-weight-comparison v0.1.0 (/tmp/hl-node115-compact-local-restore.WRBvnD/src/node115-staking-weight-comparison)
+   Compiling node115-digest-vote-admission v0.1.0 (/tmp/hl-node115-compact-local-restore.WRBvnD/src/node115-digest-vote-admission)
+   Compiling node115-digest-reference-handoff v0.1.0 (/tmp/hl-node115-compact-local-restore.WRBvnD/src/node115-digest-reference-handoff)
+   Compiling node115-checkpoint-discovery v0.1.0 (/tmp/hl-node115-compact-local-restore.WRBvnD/src/node115-checkpoint-discovery)
+   Compiling node115-digest-support-gate v0.1.0 (/tmp/hl-node115-compact-local-restore.WRBvnD/src/node115-digest-support-gate)
+   Compiling node115-abci-checkpoint-replay-fixture v0.1.0 (/tmp/hl-node115-compact-local-restore.WRBvnD/src/node115-abci-checkpoint-replay-fixture)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.15s
+     Running unittests src/lib.rs (/tmp/hl-node115-compact-local-restore.WRBvnD/target/debug/deps/node115_abci_checkpoint_replay_fixture-5da2772ca1cb7dda)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/compact_local_restore.rs (/tmp/hl-node115-compact-local-restore.WRBvnD/target/debug/deps/compact_local_restore-1a824a476991b8fa)
+
+running 3 tests
+test absent_freeze_ignores_payload_and_tag_padding ... ok
+test shape_height_and_ordinary_discriminant_are_checked ... ok
+test original_hardfork_and_context_round_remain_distinct ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/fixture_contract.rs (/tmp/hl-node115-compact-local-restore.WRBvnD/target/debug/deps/fixture_contract-97e8d45e5d9a329c)
+
+running 6 tests
+test root_selector_all_four_arms_fallback_word_distinction_and_repeated_reads ... ok
+test negative_controls_restore_admission_height_limit_and_conflict ... ok
+test comparison_runs_before_end_root_selector_so_same_block_local_root_is_missing ... ok
+test end_to_end_restore_h_plus_1_and_external_quorum_match ... ok
+test history_pruning_runs_after_comparison_and_before_root_insertion ... ok
+test single_byte_mismatch_preserves_sink_before_comparison_and_stops_prefix ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests node115_abci_checkpoint_replay_fixture
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+$ git -C /tmp/hl-node115-compact-local-restore.WRBvnD apply --include=src/node115-abci-checkpoint-replay-fixture/src/lib.rs /tmp/hl-node115-local-replay.tSx7sN/restore-fixture.patch
+
+$ PYTHONPATH=/tmp/hl-node115-assemble.zpDuLH/RE-017-node115-compact-assemble-fixture FIXTURE_DIR=/tmp/hl-node115-compact-local-restore.WRBvnD python3 -B - <<'PY'
+from hashlib import sha256
+from os import environ
+from pathlib import Path
+from struct import pack_into
+from assemble import assemble, DECODED_SIZE, EVM_BLOCK_SIZE
+
+def digest(data):
+    return sha256(data).hexdigest()
+
+directory = Path(environ["FIXTURE_DIR"])
+marker = directory / "checkpoint" / "41" / "CHECKPOINT_COMPLETE"
+marker.parent.mkdir(parents=True)
+marker.touch()
+evm = bytes(EVM_BLOCK_SIZE)
+for label, tag, payload in [("absent", 0, 1), ("future", 1, 42), ("equal", 1, 41), ("past", 1, 40)]:
+    state = bytearray(DECODED_SIZE)
+    pack_into("<4Q", state, 0x18, (1 << 64) - 1, 99, 41, 105)
+    pack_into("<IIQ", state, 0x10e8, tag, 0xa5a5a5a5, payload)
+    compact = assemble(state, evm, digest(state), digest(evm), 41, bytes(4), bytes(3))
+    (directory / (label + ".compact")).write_bytes(compact)
+    print(label, "compact SHA-256", digest(compact))
+PY
+
+$ mkdir -p /tmp/hl-node115-compact-local-restore.WRBvnD/src/node115-abci-checkpoint-replay-fixture/examples
+
+$ cat > /tmp/hl-node115-compact-local-restore.WRBvnD/src/node115-abci-checkpoint-replay-fixture/examples/check_local_inputs.rs <<'RS'
+use node115_abci_checkpoint_replay_fixture::{
+    CompactLocalRestoreInput, HardforkWords, LocalRestoreError, restore_local_checkpoint,
+};
+use std::path::PathBuf;
+fn main() {
+    let base = PathBuf::from(std::env::args_os().nth(1).unwrap());
+    for (case, expected) in [("absent", Some(99)), ("future", Some(99)), ("equal", Some(105)), ("past", None)] {
+        let bytes = std::fs::read(base.join(format!("{case}.compact"))).unwrap();
+        let restored = CompactLocalRestoreInput::from_checkpoint(&bytes, 41).unwrap();
+        let original = HardforkWords {
+            version: restored.hardfork_version,
+            round: restored.hardfork_round,
+        };
+        let outcome = restore_local_checkpoint(
+            &base.join("checkpoint"), 41, restored.height, restored.context_round,
+            original, restored.scheduled_freeze,
+        );
+        if let Some(round) = expected {
+            let result = outcome.unwrap();
+            assert_eq!(result.startup_pair, original);
+            assert_eq!(result.state.loader_seq, u64::MAX);
+            assert_eq!(result.state.copied_round, round);
+        } else {
+            assert_eq!(outcome, Err(LocalRestoreError::PastFreeze { target: 40, height: 41 }));
+        }
+        println!("PASS: compact checkpoint -> local startup input -> {case} fixture outcome");
+    }
+}
+RS
+
+$ cargo run --offline --locked --manifest-path /tmp/hl-node115-compact-local-restore.WRBvnD/src/node115-abci-checkpoint-replay-fixture/Cargo.toml --example check_local_inputs -- /tmp/hl-node115-compact-local-restore.WRBvnD
+absent compact SHA-256 295b2dbbaacf27c42e0d20561e26e51bf314ca6425561da1ed7aa48396a0b408
+future compact SHA-256 288632ca8ff843812f62d28358c18fd98307a2b13395ea91599a1144f564335c
+equal compact SHA-256 4b95aa88500f81e037ec2db7061c0e9b00ed7ce47c6681debbc0979f4dfef103
+past compact SHA-256 9a22a3f0c211f50b849016a88a8357e5dcebd74c8c1159b01264a7f2ae174159
+   Compiling node115-abci-checkpoint-replay-fixture v0.1.0 (/tmp/hl-node115-compact-local-restore.WRBvnD/src/node115-abci-checkpoint-replay-fixture)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.36s
+     Running `/tmp/hl-node115-compact-local-restore.WRBvnD/target/debug/examples/check_local_inputs /tmp/hl-node115-compact-local-restore.WRBvnD`
+PASS: compact checkpoint -> local startup input -> absent fixture outcome
+PASS: compact checkpoint -> local startup input -> future fixture outcome
+PASS: compact checkpoint -> local startup input -> equal fixture outcome
+PASS: compact checkpoint -> local startup input -> past fixture outcome
