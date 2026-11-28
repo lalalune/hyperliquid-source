@@ -1,4 +1,4 @@
-"""Verify the selected #115 caller origins of the expected replay Block words against the pinned ELF."""
+"""Verify the selected #115 joined startup origin of the expected replay Block words against the pinned ELF."""
 import hashlib
 from pathlib import Path
 import struct
@@ -26,7 +26,7 @@ def main():
     frame = sections[".eh_frame"]
     _, fdes = walk_eh_frame(at(".eh_frame", frame["va"], frame["size"]), frame["va"])
     indexed = {row["entry"]: row["end"] for row in fdes}
-    entries = (0x2AF45F0, 0x2CC1120, 0x5A81ED0, 0x5A82670)
+    entries = (0x2AF45F0, 0x5A81ED0, 0x5A82670)
     bounds = [(entry, indexed[entry]) for entry in entries]
     windows = {}
     for line in (PACKET / "windows.txt").read_text().splitlines():
@@ -64,13 +64,8 @@ def main():
     assert operand(0x2AF57A0, "0f294424") == operand(0x2AF5A38, "0f284424") == 0x60
     caller_one_field = operand(0x2AF5A3D, "0f298424") - operand(0x2AF5AEE, "488dbc24")
 
-    expect(0x2CC202B, "4c8b3c24")
-    assert operand(0x2CC21A1, "4981c7") + operand(0x2CC24B2, "410f1047") == 0x138
-    assert operand(0x2CC24B7, "0f294424") == operand(0x2CC2756, "0f284424") == 0x10
-    caller_two_field = operand(0x2CC275B, "0f298424") - operand(0x2CC280A, "488dbc24")
-
-    assert caller_one_field == caller_two_field == 0x100
-    assert edge(0x2AF5B03, "ff15") == edge(0x2CC281F, "ff15") == 0x64E74D8
+    assert caller_one_field == 0x100
+    assert edge(0x2AF5B03, "ff15") == 0x64E74D8
     assert relative[0x64E74D8] == 0x5A81ED0
     scratch = operand(0x5A81FB3, "488d7c24")
     assert operand(0x5A82002, "488d7424") == scratch == 0x10
@@ -90,7 +85,7 @@ def main():
     assert operand(0x5A874C6, "483bb3") == caller_one_field + 8
 
     print(f"PASS: #115 SHA-256 {TARGET_SHA256}; {len(windows)} spans in {len(bounds)} FDEs")
-    print("PASS: startup result pointer +0x18/+0x20 and other caller's selected +0x138/+0x140 feed input +0x100/+0x108")
+    print("PASS: startup result pointer +0x18/+0x20 feeds input +0x100/+0x108")
     print("PASS: task copy preserves both words and the pinned poll consumes them in order")
 
 
