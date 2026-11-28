@@ -345,3 +345,33 @@ fn meta_scaling_lookups_deployer_fee_share_and_clamped_f64_match_node115() {
     assert!(!node115_assets::is_builtin_margin_table_id(50));
     assert!(!node115_assets::is_builtin_margin_table_id(100));
 }
+
+#[test]
+fn spot_prices_cover_all_byte_indexed_decimal_divisors() {
+    let mut divisor = 1.0_f64;
+    for exponent in 0..=u8::MAX {
+        let meta = SpotMeta::new(
+            vec![SpotPairMeta {
+                base: Token(0),
+                quote: Token(1),
+            }],
+            vec![
+                SpotTokenMeta {
+                    sz_decimals: 0,
+                    wei_decimals: 0,
+                },
+                SpotTokenMeta {
+                    sz_decimals: 0,
+                    wei_decimals: exponent,
+                },
+            ],
+        );
+        assert_eq!(meta.pair_price_decimals(SpotAsset(0)), Ok(exponent));
+        assert_eq!(meta.px_to_f64(SpotAsset(0), Px(7)), Ok(7.0 / divisor));
+        assert_eq!(
+            meta.raw_pair_prices_to_f64(SpotAsset(0), 7, 11),
+            Ok((7.0 / divisor, 11.0 / divisor))
+        );
+        divisor *= 10.0;
+    }
+}
