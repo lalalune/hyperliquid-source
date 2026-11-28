@@ -1,0 +1,59 @@
+RE-017-node115-evm-cache-block-fixture
+Darwin arm64
+Python 3.9.6
+Apple LLVM version 21.0.0
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B /tmp/hl-node115-evm-cache-block.Fh7wwh/RE-017-node115-evm-cache-block-fixture/verify.py
+PASS: #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 94 instruction pins across 4 FDEs
+PASS: seven direct targets, six memcpy slot references, 3 x 0x908 lane writes and final 0x1b20 copy
+
+$ python3 -B /tmp/hl-node115-evm-cache-block.Fh7wwh/RE-017-node115-evm-cache-block-fixture/test_block.py
+test_all_lane_boundaries_counters_and_tail (__main__.CacheBlockFixtureTests) ... ok
+test_cli_emits_only_the_payload_and_rejects_extra_bytes (__main__.CacheBlockFixtureTests) ... ok
+test_files_are_independently_pinned_and_require_exact_lengths (__main__.CacheBlockFixtureTests) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.146s
+
+OK
+
+$ PYTHONPATH=/tmp/hl-node115-evm-cache-block.Fh7wwh/RE-017-node115-evm-cache-block-fixture:/tmp/hl-node115-restore.DQgojW/RE-011-node115-lthash-sidecar-projection:/tmp/hl-node115-assemble.zpDuLH/RE-017-node115-compact-assemble-fixture:/tmp/hl-node115-lthash-inspect.R6Cqz4/RE-017-node115-materialized-lthash-lanes python3 -B - <<'PY'
+from hashlib import sha256
+import json
+from struct import pack_into
+from assemble import assemble, DECODED_SIZE
+from build_block import build_block
+from compare_lanes import compare
+from read_sidecar import LANES, project
+
+def digest(value):
+    return sha256(value).hexdigest()
+
+raw = json.dumps({
+    lane: {"hash": [index] * 2048, "n_elements": index, "n_bytes": index * 2}
+    for index, lane in enumerate(reversed(LANES), 7)
+}).encode()
+records = project(raw, digest(raw))
+concatenated = b"".join(records[name] for name in LANES)
+metadata = b"a" * 0xf8 + b"c" * 0xf8 + b"s" * 0xf8 + b"tail1234"
+block = build_block(concatenated, digest(concatenated), metadata, digest(metadata))
+source = bytearray(DECODED_SIZE)
+pack_into("<Q", source, 0x28, 415)
+compact = assemble(source, block, digest(source), digest(block), 415, bytes(4), bytes(3))
+assert compact[0x1108:0x2c28] == block
+assert compact[0x2c20:0x2c28] == b"tail1234"
+expected = {name: digest(record) for name, record in records.items()}
+assert compare(compact, digest(compact), 415, expected)["matches"]
+changed = bytearray(compact)
+changed[0x1b08 + 0x800] ^= 1
+report = compare(changed, digest(changed), 415, expected)
+assert not report["matches"] and not report["records"]["contracts_hash"]["matches"]
+assert report["records"]["accounts_hash"]["matches"] and report["records"]["storage_hash"]["matches"]
+print("PASS: sidecar JSON -> three native records -> EVM block -> compact state -> independent lane comparator")
+print("PASS: exact descriptor tail copy and one changed contract counter detected")
+PY
+PASS: sidecar JSON -> three native records -> EVM block -> compact state -> independent lane comparator
+PASS: exact descriptor tail copy and one changed contract counter detected
