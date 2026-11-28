@@ -1,0 +1,5 @@
+# RE-009: snapshot sibling value cleanup order
+
+The value cleanup target reached by #7209 begins by calling 0x24722c0 on the value at +0x40. After normal return it reads the first word, skips the release slot when zero and otherwise passes the pointer from +8 and eight times the first word to 0x64df4a0. It then tail-transfers to 0x242dfc0 with value +0x20. The visible landing block at 0x243a28b saves the incoming exception object, repeats the same conditional release, calls the same +0x20 cleanup and resumes unwinding with the saved exception object. The evidence distinguishes the three selected field positions and the remaining cleanup order. It does not identify the Rust field types or map exception-table edges.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-sibling-value-drop/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
