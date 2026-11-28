@@ -1,0 +1,64 @@
+RE-017 node115 source-backed startup height admission
+Artifact: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+Base: 2da45cb0a761cff6b478e40421699857d87a94df
+Darwin arm64
+cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+rustc 1.95.0 (59807616e 2026-04-14)
+
+$ cargo test --offline --locked --manifest-path src/node115-replica-end-height/Cargo.toml
+   Compiling node115-reverse-path-components v0.1.0 (/private/tmp/hl-node115-startup-gate.JO4Z3S/src/node115-reverse-path-components)
+   Compiling node115-startup-admission v0.1.0 (/private/tmp/hl-node115-startup-gate.JO4Z3S/src/node115-startup-admission)
+   Compiling node115-replica-end-height v0.1.0 (/private/tmp/hl-node115-startup-gate.JO4Z3S/src/node115-replica-end-height)
+error[E0432]: unresolved imports `node115_replica_end_height::StartingHeightCheck`, `node115_replica_end_height::check_starting_height`
+ --> tests/files.rs:1:41
+  |
+1 | use node115_replica_end_height::{Error, StartingHeightCheck, check_starting_height, directory_end_height, latest_end_height};
+  |                                         ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^ no `check_starting_height` in the root
+  |                                         |
+  |                                         no `StartingHeightCheck` in the root
+
+For more information about this error, try `rustc --explain E0432`.
+error: could not compile `node115-replica-end-height` (test "files") due to 1 previous error
+
+$ python3 -B /tmp/hl-node115-startup-gate.JO4Z3S/research/work-items/RE-017-node115-starting-height-fixture/verify.py
+PASS: #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 12 exact startup spans and end-height slot
+PASS: disabled mode and tag-1 error bypass; successful result uses unsigned below check
+
+$ python3 -B -m unittest tests.test_startup_initial_box_115
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 0.484s
+
+OK
+startup calls=2
+
+$ cargo test --offline --locked --manifest-path src/node115-replica-end-height/Cargo.toml
+   Compiling node115-replica-end-height v0.1.0 (/private/tmp/hl-node115-startup-gate.JO4Z3S/src/node115-replica-end-height)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s
+     Running unittests src/lib.rs (src/node115-replica-end-height/target/debug/deps/node115_replica_end_height-fbc6f69723541842)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/files.rs (src/node115-replica-end-height/target/debug/deps/files-83e050aa836188fa)
+
+running 7 tests
+test startup_distinguishes_unavailable_end_from_disabled_mode ... ok
+test empty_directories_and_errors_stay_distinct ... ok
+test startup_compares_end_height_as_unsigned ... ok
+test takes_latest_date_and_latest_non_lz4_path_by_bytes ... ok
+test file_scanning_and_saturation ... ok
+test startup_compares_the_observed_end_including_equality ... ok
+test failed_candidates_use_up_slots_in_the_five_directory_window ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests node115_replica_end_height
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+$ rustfmt --edition 2024 --check src/node115-replica-end-height/src/lib.rs src/node115-replica-end-height/tests/files.rs

@@ -95,3 +95,41 @@ pub fn latest_end_height(root: &Path) -> Result<u64, Error> {
         .max()
         .ok_or(Error::NoEndHeights)
 }
+
+/// Selected startup decision after the replica-end-height probe.
+#[derive(Debug)]
+pub enum StartingHeightCheck {
+    /// The mode byte differs from 1, so the replica tree is not read.
+    Disabled,
+    /// Native startup continues without a height comparison on this branch.
+    ReplicaEndUnavailable(Error),
+    AtOrAboveReplicaEnd {
+        last_applied: u64,
+    },
+    BelowReplicaEnd {
+        last_applied: u64,
+    },
+}
+
+/// Check the requested starting height on the selected ordinary startup path.
+///
+/// Supply the local `data/replica_cmds` directory. Probe errors remain observable
+/// to the offline caller as a bypass rather than as a successful comparison.
+pub fn check_starting_height(
+    replica_root: &Path,
+    starting_height: u64,
+    mode: u8,
+) -> StartingHeightCheck {
+    if mode != 1 {
+        return StartingHeightCheck::Disabled;
+    }
+    let last_applied = match latest_end_height(replica_root) {
+        Ok(height) => height,
+        Err(error) => return StartingHeightCheck::ReplicaEndUnavailable(error),
+    };
+    if starting_height < last_applied {
+        StartingHeightCheck::BelowReplicaEnd { last_applied }
+    } else {
+        StartingHeightCheck::AtOrAboveReplicaEnd { last_applied }
+    }
+}

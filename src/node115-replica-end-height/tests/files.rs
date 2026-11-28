@@ -1,4 +1,6 @@
-use node115_replica_end_height::{Error, directory_end_height, latest_end_height};
+use node115_replica_end_height::{
+    Error, StartingHeightCheck, check_starting_height, directory_end_height, latest_end_height,
+};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -111,4 +113,59 @@ fn empty_directories_and_errors_stay_distinct() {
     ));
     f.write("date/+0", b"abc");
     assert_eq!(directory_end_height(f.root()).unwrap(), 0);
+}
+
+#[test]
+fn startup_compares_the_observed_end_including_equality() {
+    let f = Fixture::new();
+    f.write("0000/20261024/400", b"line\n");
+    f.write("0001/20261025/500", b"line\npartial");
+    assert!(matches!(
+        check_starting_height(f.root(), 500, 1),
+        StartingHeightCheck::BelowReplicaEnd { last_applied: 501 }
+    ));
+    for starting in [501, 502] {
+        assert!(matches!(
+            check_starting_height(f.root(), starting, 1),
+            StartingHeightCheck::AtOrAboveReplicaEnd { last_applied: 501 }
+        ));
+    }
+}
+
+#[test]
+fn startup_distinguishes_unavailable_end_from_disabled_mode() {
+    let f = Fixture::new();
+    assert!(matches!(
+        check_starting_height(f.root(), 0, 1),
+        StartingHeightCheck::ReplicaEndUnavailable(Error::NoEndHeights)
+    ));
+    let missing = f.root().join("unavailable");
+    assert!(matches!(
+        check_starting_height(&missing, 0, 1),
+        StartingHeightCheck::ReplicaEndUnavailable(Error::Io(_))
+    ));
+    for mode in [0, 2, u8::MAX] {
+        assert!(matches!(
+            check_starting_height(&missing, 0, mode),
+            StartingHeightCheck::Disabled
+        ));
+    }
+}
+
+#[test]
+fn startup_compares_end_height_as_unsigned() {
+    let f = Fixture::new();
+    f.write("0000/20261025/18446744073709551615", b"line\n");
+    assert!(matches!(
+        check_starting_height(f.root(), i64::MAX as u64, 1),
+        StartingHeightCheck::BelowReplicaEnd {
+            last_applied: u64::MAX
+        }
+    ));
+    assert!(matches!(
+        check_starting_height(f.root(), u64::MAX, 1),
+        StartingHeightCheck::AtOrAboveReplicaEnd {
+            last_applied: u64::MAX
+        }
+    ));
 }
