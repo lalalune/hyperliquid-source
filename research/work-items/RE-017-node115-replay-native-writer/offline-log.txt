@@ -1,0 +1,24 @@
+RE-017-node115-replay-native-writer
+Host: Darwin arm64; native target: Linux x86-64 ELF
+Command (with PACKET set to the staged work-item directory): PYTHONDONTWRITEBYTECODE=1 python3 "$PACKET/verify.py" --repo .
+target=artifacts/node/115/hl-node sha256=a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301 bytes=105896032
+Python 3.9.6
+FDE 0x4fb5ae0..0x4fb5ce0
+FDE 0x4fb5ce0..0x4fb5fa2
+FDE 0x5823480..0x58235c7
+FDE 0x4eff5f0..0x4eff946
+FDE 0x4e052f0..0x4e05482
+.rodata 0x459e6c 00 00 00 00
+.rodata 0x45a05c 01 00 00 00
+PASS control: swap Block and Tx selection rejected
+PASS control: change raw Some tag rejected
+PASS control: use wrong Tx length slot rejected
+PASS control: alter count writer call rejected
+PASS: 94 instruction anchors across 5 FDEs
+PASS: count pass and VecWriter pair match the existing replay reader's Block, Option and Tx boundaries
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+llvm-readelf -r artifacts/node/115/hl-node
+00000000064df480  0000000000000008 R_X86_64_RELATIVE                 6355830
+00000000064df508  0000000700000006 R_X86_64_GLOB_DAT      0000000000000000 memcpy@GLIBC_2.14 + 0
