@@ -2,7 +2,11 @@
 
 Target Linux x86-64 node #115, SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301. Base 2da45cb0a761cff6b478e40421699857d87a94df. Licensed Rust 1.95.0 release source commit 59807616e1fa2540724bfbac14d7976d7e4a3860 and rust-src SHA-256 67b09138c8db96afc4bbfc69ea771ac9a091fd777698acb43f6dfd9fb7dea363.
 
-Rebuilds the 116-byte UTF-8 scalar counting implementation at 0x1689220. The selected fields bind both conversion helper references and the linked locations of the diagnostic text. This packet compares the formatter body and the addresses of the diagnostic text.
+The default-profile counting body reproduces outside source relocation fields. The retained addresses resolve the exact counting and diagnostic references.
+
+| Source selector | Target VA | Equal bytes | Total bytes |
+| --- | --- | ---: | ---: |
+| `5count14do_count_chars` | `0x1681020` | 1444 | 1464 |
 
 Provision the offline cache using RE-002-node115-umodti3-source-build. With Python 3.12+, Rust/Cargo 1.95.0 and GNU binutils 2.42 or equivalent, run from the repository root:
 
