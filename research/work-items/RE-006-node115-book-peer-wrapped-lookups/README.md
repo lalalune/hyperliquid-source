@@ -1,0 +1,9 @@
+# RE-006: wrapped user and order lookup in a book peer link
+
+Target Linux x86-64 node #115, SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301. Addresses are ELF virtual addresses. #5864 leaves these two helpers as stubs. #6022 covers a different caller and the clearing operation. #7346 covers nonwrapped lookup in the TWAP user store.
+
+In a valid wrapped ring, split the logical sequence into a tail at the physical head to the end of capacity and a prefix at physical index zero. Both helpers compare the first prefix key to the needle. Equality returns a match at the tail length. A larger first prefix key selects the tail search. A smaller first prefix key selects the prefix search and adds the tail length to its result. The inner search keeps the rightmost probe no greater than the needle and checks it once at the end. On a miss it returns the insertion position, potentially one past the last entry. The first return register is zero on match and one on miss. These statements assume valid, strictly increasing logical keys.
+
+The user helper at 0x57f7bd0 uses 112-byte records and compares the first 20 bytes through memcmp. The order helper at 0x57fbf50 uses 224-byte records and compares the first unsigned qword. At 0x58e44b6 and 0x58e458f, the selected book peer-link caller checks each returned low bit and index bound separately before adding the corresponding head. Both failures branch to 0x58e45c5. This identifies the concrete match/index semantics consumed by that route, with no claims about tree representation, mutation, malformed containers or duplicate-key behavior.
+
+Run PYTHONPATH=tools python3 -B research/work-items/RE-006-node115-book-peer-wrapped-lookups/verify.py from the root. The verifier checks retained byte windows and FDE boundaries, and compares abstract wrapped lookup against an independent bisect oracle. It reads the target without running or emulating its instructions.
