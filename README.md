@@ -16,7 +16,7 @@ an integrated, runnable node remains in progress.
 
 ![Node #115 progress](docs/assets/research-progress.svg)
 
-**297 active Rust implementation areas · 261 top-level Cargo manifests · 5021 #115 research work items.**
+**298 active Rust implementation areas · 262 top-level Cargo manifests · 5027 #115 research work items.**
 
 These inventory counts describe available work, not completed components.
 
@@ -38,8 +38,8 @@ These inventory counts describe available work, not completed components.
 | First-party .text bytes compared | 546,700/83,719,936 | 0.65301% |
 | Compared windows vs. `.eh_frame_hdr` unwind starts | 16,193/135,313 | 11.96707% |
 | Component work areas with registered Rust paths | 23/23 | 100.00% |
-| Active `src/` Rust areas registered in `components.json` | 297/297 | 100.00% |
-| Research work items with top-level `MANIFEST.sha256` | 4,899/5,021 | 97.57% |
+| Active `src/` Rust areas registered in `components.json` | 298/298 | 100.00% |
+| Research work items with top-level `MANIFEST.sha256` | 4,905/5,027 | 97.57% |
 | Tracked research questions with reviewed evidence | 5/5 | 100.00% |
 
 Gate percentages require acceptance of the full component scope.
@@ -48,7 +48,7 @@ they do not measure whole-node completion or remaining engineering effort.
 Unwind starts (`make index`) are not a complete function census, and inventory/registration percentages do not claim component completion.
 
 Registered bounded Rust work occurs in **23/23 component work areas**
-(**297 implementation paths**, 100.00% of work areas). These are fragment registrations, not completed components.
+(**298 implementation paths**, 100.00% of work areas). These are fragment registrations, not completed components.
 Each fragment keeps its own #115 contract; an integrated node executable remains unaccepted.
 
 <details open>

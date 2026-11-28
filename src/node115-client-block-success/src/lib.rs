@@ -1,9 +1,9 @@
 #![no_std]
 //! Structural decoder for the selected Node115 ClientBlocks success payload.
-//! The outer response and nested Result tags have already been consumed.
+//! Also projects the selected replay payload prefix over the same child readers.
 extern crate alloc;
 
-use alloc::vec::Vec;
+use alloc::{boxed::Box, vec::Vec};
 use node115_signed_scalar::{Cursor as SignedCursor, DecodeError as SignedError};
 use node115_u32_varint::{ReadError as U32Error, read_u32};
 use node115_u64_reader_state::{Error as U64Error, Reader};
@@ -364,8 +364,8 @@ impl<'a> Decoder<'a> {
         })
     }
 
-    fn client(&mut self) -> Result<Client, Error> {
-        let block = Block {
+    fn block(&mut self) -> Result<Block, Error> {
+        Ok(Block {
             signature: self.signature()?,
             header: self.header()?,
             commit_proof: if self.option_tag()? {
@@ -373,7 +373,15 @@ impl<'a> Decoder<'a> {
             } else {
                 None
             },
-        };
+        })
+    }
+
+    fn blob(&mut self) -> Result<Vec<u8>, Error> {
+        let length = usize::try_from(self.u64()?).map_err(|_| Error::LengthDoesNotFitMemory)?;
+        self.bytes(length)
+    }
+
+    fn attachments(&mut self) -> Result<Vec<Attachment>, Error> {
         let count = self.u64()?;
         self.reserve_rows(count, 40)?;
         let mut attachments = Vec::new();
@@ -383,13 +391,35 @@ impl<'a> Decoder<'a> {
                 .try_reserve(1)
                 .map_err(|_| Error::AllocationFailed)?;
             let hash = self.raw::<32>()?;
-            let length = usize::try_from(self.u64()?).map_err(|_| Error::LengthDoesNotFitMemory)?;
             attachments.push(Attachment {
                 hash,
-                bytes: self.bytes(length)?,
+                bytes: self.blob()?,
             });
         }
-        Ok(Client { block, attachments })
+        Ok(attachments)
+    }
+
+    fn client(&mut self) -> Result<Client, Error> {
+        Ok(Client {
+            block: self.block()?,
+            attachments: self.attachments()?,
+        })
+    }
+
+    fn replay(&mut self) -> Result<ReplayPayload, ReplayError> {
+        match self.u32()? {
+            0 => {
+                let block = Box::new(self.block()?);
+                let attachments = if self.option_tag()? {
+                    Some(self.attachments()?)
+                } else {
+                    None
+                };
+                Ok(ReplayPayload::Block { block, attachments })
+            }
+            1 => Ok(ReplayPayload::Tx(self.blob()?)),
+            tag => Err(ReplayError::InvalidTag(tag)),
+        }
     }
 }
 
@@ -453,6 +483,52 @@ pub fn decode_payload_prefix_metered(
     })();
     MeteredOutcome {
         result,
+        remaining: decoder.remaining,
+        charged: decoder.charged,
+    }
+}
+
+/// Replay-specific wire alternatives. An absent attachment list is distinct
+/// from a present empty list. Tx bytes are retained as an opaque payload.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum ReplayPayload {
+    Block {
+        block: Box<Block>,
+        attachments: Option<Vec<Attachment>>,
+    },
+    Tx(Vec<u8>),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ReplayError {
+    Decode(Error),
+    InvalidTag(u32),
+}
+
+impl From<Error> for ReplayError {
+    fn from(error: Error) -> Self {
+        Self::Decode(error)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ReplayOutcome<'a> {
+    pub result: Result<ReplayPayload, ReplayError>,
+    pub remaining: &'a [u8],
+    pub charged: u64,
+}
+
+/// Decode the ClientBlockWireOrTx payload at the selected replay wrapper.
+/// The supplied limit starts a fresh, cumulative reader. The native wrapper
+/// accepts a prefix; the suffix is returned for offline accounting.
+pub fn decode_replay_payload_prefix(input: &[u8], limit: u64) -> ReplayOutcome<'_> {
+    let mut decoder = Decoder {
+        remaining: input,
+        limit: Some(limit),
+        charged: 0,
+    };
+    ReplayOutcome {
+        result: decoder.replay(),
         remaining: decoder.remaining,
         charged: decoder.charged,
     }

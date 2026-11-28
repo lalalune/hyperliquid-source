@@ -1,0 +1,50 @@
+Darwin arm64
+rustc 1.95.0 (59807616e 2026-04-14)
+PASS: calendar table input 02026-01-02 yields 0x00fd402a
+PASS: calendar table input 02000-02-29 yields 0x00fa03c4
+PASS: calendar table input 02016-12-31 yields 0x00fc16e3
+PASS: calendar table input -0001-01-01 yields 0xffffe01b
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 16 checked instruction spans
+PASS: checkpoint date and time formatters are separated by literal 0x54
+Control: use the previous Display separator on the checkpoint path
+   Compiling node115-date-time-display v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-date-time-display)
+   Compiling node115-checkpoint-clock-text v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-checkpoint-clock-text)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running unittests src/lib.rs (work/hl-packed-checkpoint-clock-cargo/debug/deps/node115_checkpoint_clock_text-0439e6395d22cc17)
+
+running 1 test
+test tests::renders_checkpoint_words_with_literal_t ... FAILED
+
+failures:
+
+---- tests::renders_checkpoint_words_with_literal_t stdout ----
+
+thread 'tests::renders_checkpoint_words_with_literal_t' (191429326) panicked at src/lib.rs:61:13:
+assertion `left == right` failed
+  left: "2026-01-02 03:04:05"
+ right: "2026-01-02T03:04:05"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::renders_checkpoint_words_with_literal_t
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+$ cargo test --locked --offline --manifest-path src/node115-checkpoint-clock-text/Cargo.toml
+   Compiling node115-checkpoint-clock-text v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-checkpoint-clock-text)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.08s
+     Running unittests src/lib.rs (work/hl-packed-checkpoint-clock-cargo/debug/deps/node115_checkpoint_clock_text-0439e6395d22cc17)
+
+running 2 tests
+test tests::retains_the_display_domain ... ok
+test tests::renders_checkpoint_words_with_literal_t ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests node115_checkpoint_clock_text
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
