@@ -378,7 +378,7 @@ pub fn daily_evm_checkpoint_tar_path(
 /// Classification of an EVM checkpoint directory by `0x3d5dca0` (`l1/src/abci/engine.rs:557`).
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum EvmCheckpointFilterOutcome {
-    /// Directory contains `MARKED_FOR_DELETION`; skipped from active filter (`0x3d5ddaa`).
+    /// Regular `MARKED_FOR_DELETION` file bypasses the height checks (`0x3d5ddaa`).
     SkippedMarkedForDeletion,
     /// Height `< min_expected`; flagged as `"straggler evm state checkpoint"` (`0x3d5ddf1..0x3d5de14`) and dropped.
     DroppedStraggler,
@@ -396,7 +396,7 @@ pub fn classify_evm_checkpoint_entry(
     upper_exclusive: u64,
     max_inclusive: u64,
 ) -> EvmCheckpointFilterOutcome {
-    if checkpoint_dir.join(MARKED_FOR_DELETION_MARKER).exists() {
+    if checkpoint_dir.join(MARKED_FOR_DELETION_MARKER).is_file() {
         return EvmCheckpointFilterOutcome::SkippedMarkedForDeletion;
     }
     if height < min_expected {

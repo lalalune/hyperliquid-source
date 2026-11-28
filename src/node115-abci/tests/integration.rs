@@ -690,3 +690,36 @@ fn tracker_rounds_fractional_delays_to_nearest_nanosecond() {
     assert!(!timer_is_mature(100, 0.75e-9, 100));
     assert!(timer_is_mature(100, 0.75e-9, 101));
 }
+
+#[test]
+fn evm_deletion_marker_requires_regular_file_before_bypassing_height_checks() {
+    use node115_abci::engine::{
+        EvmCheckpointFilterOutcome, MARKED_FOR_DELETION_MARKER, classify_evm_checkpoint_entry,
+    };
+
+    let dir = unique_tmp("deletion-marker");
+    let marker = dir.join(MARKED_FOR_DELETION_MARKER);
+    std::fs::create_dir_all(&marker).unwrap();
+    let outcomes = |height| classify_evm_checkpoint_entry(&dir, height, 150, 300, 250);
+    let directory_results = [149, 150, 250, 251, 300].map(outcomes);
+
+    std::fs::remove_dir(&marker).unwrap();
+    std::fs::write(&marker, b"").unwrap();
+    let file_results = [149, 150, 250, 251, 300].map(outcomes);
+    std::fs::remove_dir_all(&dir).unwrap();
+
+    assert_eq!(
+        directory_results,
+        [
+            EvmCheckpointFilterOutcome::DroppedStraggler,
+            EvmCheckpointFilterOutcome::Retained,
+            EvmCheckpointFilterOutcome::Retained,
+            EvmCheckpointFilterOutcome::DroppedOutOfWindow,
+            EvmCheckpointFilterOutcome::DroppedOutOfWindow,
+        ],
+    );
+    assert_eq!(
+        file_results,
+        [EvmCheckpointFilterOutcome::SkippedMarkedForDeletion; 5],
+    );
+}
