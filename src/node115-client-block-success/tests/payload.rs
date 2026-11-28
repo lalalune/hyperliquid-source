@@ -311,6 +311,11 @@ fn replay_block_distinguishes_absent_empty_and_populated_attachments() {
         panic!("expected Block with absent attachments");
     };
     assert_eq!(block.header.address, [0x11; 20]);
+    let projected = node115_client_block_success::replay_parent_projection(&block.header.parent);
+    assert_eq!(
+        (projected.comparison_words, projected.successor),
+        ([1, 2], 4)
+    );
 
     let mut empty = replay_block(1);
     empty.extend([0, 0xee]);
@@ -386,4 +391,60 @@ fn replay_rejects_unknown_variants_options_and_incomplete_blobs() {
         Err(ReplayError::Decode(Error::U64(_)))
     ));
     assert_eq!((limit.remaining, limit.charged), (&[0x55][..], 15));
+}
+
+#[test]
+fn replay_parent_projection_selects_each_certificate_path() {
+    use node115_client_block_success::{
+        QuorumCertificate, ReplayParentProjection, TimeoutCertificate, replay_parent_projection,
+    };
+
+    let direct = QuorumCertificate {
+        fields: [101, 102, 103, 104, 105],
+        hash: [0; 32],
+        votes: vec![],
+    };
+    let nested = QuorumCertificate {
+        fields: [201, 202, 203, 204, 205],
+        ..direct.clone()
+    };
+    let certificate = TimeoutCertificate {
+        field: 300,
+        quorum_certificate: direct.clone(),
+        votes: vec![],
+    };
+
+    assert_eq!(
+        replay_parent_projection(&Parent::QuorumCertificate(direct.clone())),
+        ReplayParentProjection {
+            comparison_words: [101, 102],
+            successor: 104
+        },
+    );
+    assert_eq!(
+        replay_parent_projection(&Parent::Timeout {
+            certificate: certificate.clone(),
+            quorum_certificate: None
+        }),
+        ReplayParentProjection {
+            comparison_words: [101, 102],
+            successor: 301
+        },
+    );
+    assert_eq!(
+        replay_parent_projection(&Parent::Timeout {
+            certificate,
+            quorum_certificate: Some(nested)
+        }),
+        ReplayParentProjection {
+            comparison_words: [201, 202],
+            successor: 301
+        },
+    );
+    let mut maximum = direct;
+    maximum.fields[2] = u64::MAX;
+    assert_eq!(
+        replay_parent_projection(&Parent::QuorumCertificate(maximum)).successor,
+        u64::MAX
+    );
 }
