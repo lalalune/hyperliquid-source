@@ -1,0 +1,34 @@
+PASS: SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 94 spans in indexed FDEs and worker entry
+PASS: present B survives unchanged; absent B and zero count construct owner (1,1,0,8,0)
+PASS: tag 0x2e pair survives the equality continuation into worker input
+PASS: changed instruction and swapped owner controls
+0x4fad710..0x4fadcbf 0x4fad72b 48897708 mov qword ptr [rdi + 0x8], rsi
+0x4fad710..0x4fadcbf 0x4fad74b 488b5e20 mov rbx, qword ptr [rsi + 0x20]
+0x4fad710..0x4fadcbf 0x4fadad7 4c897708 mov qword ptr [rdi + 0x8], r14
+0x4fadcc0..0x4fae0fb 0x4fade3d 0f1000 movups xmm0, xmmword ptr [rax]
+0x4fadcc0..0x4fae0fb 0x4fade40 0f104810 movups xmm1, xmmword ptr [rax + 0x10]
+0x4fadcc0..0x4fae0fb 0x4fade4e 4b8b443420 mov rax, qword ptr [r12 + r14 + 0x20]
+0x4fadcc0..0x4fae0fb 0x4fade53 488b7018 mov rsi, qword ptr [rax + 0x18]
+0x4fadcc0..0x4fae0fb 0x4fade57 488b5020 mov rdx, qword ptr [rax + 0x20]
+0x4fadcc0..0x4fae0fb 0x4faded0 48c784245001000088000000 mov qword ptr [rsp + 0x150], 0x88
+0x4fadcc0..0x4fae0fb 0x4fadedc 66c78424580100000100 mov word ptr [rsp + 0x158], 0x1
+0x4fadcc0..0x4fae0fb 0x4fadee9 ff1559225301 call qword ptr [rip + 0x1532259] # 0x64e0148
+0x4fadcc0..0x4fae0fb 0x4fadf3c 4983c628 add r14, 0x28
+0x4fadcc0..0x4fae0fb 0x4fadf45 0f84e5feffff je 0x4fade30 <.text+0x3b94b30>
+0x4fadcc0..0x4fae0fb 0x4fadfc2 488b4a20 mov rcx, qword ptr [rdx + 0x20]
+0x4fadcc0..0x4fae0fb 0x4fadfc6 498b4720 mov rax, qword ptr [r15 + 0x20]
+0x4fadcc0..0x4fae0fb 0x4fadfca 4839c1 cmp rcx, rax
+0x4fadcc0..0x4fae0fb 0x4fadfde 488b7218 mov rsi, qword ptr [rdx + 0x18]
+0x4fadcc0..0x4fae0fb 0x4fadfe2 498b5718 mov rdx, qword ptr [r15 + 0x18]
+0x4fadcc0..0x4fae0fb 0x4fae013 4883c628 add rsi, 0x28
+0x4fadcc0..0x4fae0fb 0x4fae024 4883c220 add rdx, 0x20
+0x4fadcc0..0x4fae0fb 0x4fae042 74bc je 0x4fae000 <.text+0x3b94d00>
+fixture payload empty keccak256 c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+fixture payload 616263 keccak256 4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45
+verified 21 attachment instruction spans and both content vectors
+     Locking 5 packages to latest Rust 1.95.0 compatible versions
+{"source_wire_sha256": "399d8d1b071074a0b47ab64300705c33d82fa7324619126ac41006f4e3b3956e", "wire_attachment_owner": "absent", "derived_rows": [{"index": 0, "content_key": "0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45", "path": "attachment-0.bin", "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "source_path": "raw-0.bin", "bytes": 3}, {"index": 1, "content_key": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470", "path": "attachment-1.bin", "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "source_path": "raw-1.bin", "bytes": 0}, {"index": 2, "content_key": "0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45", "path": "attachment-2.bin", "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "source_path": "raw-0.bin", "bytes": 3}]}
+rejected missing-body: missing independently supplied attachment 0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45
+rejected repinned-wrong-body: raw attachment differs from decoded key 0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45
+rejected present-owner: decoded Block already carries an attachment owner
+verified separately pinned raw objects, empty and repeated bodies, exact header order and unchanged wire
