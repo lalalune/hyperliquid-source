@@ -1,0 +1,84 @@
+RE-017 node115 offline local restore replay hardfork pair
+Artifact: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+Base: 2da45cb0a761cff6b478e40421699857d87a94df
+Darwin arm64
+cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+rustc 1.95.0 (59807616e 2026-04-14)
+
+$ cargo test --locked --offline --manifest-path src/node115-abci-checkpoint-replay-fixture/Cargo.toml --test local_restore
+   Compiling node115-staking-weight-comparison v0.1.0 (/private/tmp/hl-node115-local-replay.tSx7sN/src/node115-staking-weight-comparison)
+   Compiling node115-startup-admission v0.1.0 (/private/tmp/hl-node115-local-replay.tSx7sN/src/node115-startup-admission)
+   Compiling node115-digest-reference-handoff v0.1.0 (/private/tmp/hl-node115-local-replay.tSx7sN/src/node115-digest-reference-handoff)
+   Compiling node115-digest-vote-admission v0.1.0 (/private/tmp/hl-node115-local-replay.tSx7sN/src/node115-digest-vote-admission)
+   Compiling node115-checkpoint-discovery v0.1.0 (/private/tmp/hl-node115-local-replay.tSx7sN/src/node115-checkpoint-discovery)
+   Compiling node115-digest-support-gate v0.1.0 (/private/tmp/hl-node115-local-replay.tSx7sN/src/node115-digest-support-gate)
+   Compiling node115-abci-checkpoint-replay-fixture v0.1.0 (/private/tmp/hl-node115-local-replay.tSx7sN/src/node115-abci-checkpoint-replay-fixture)
+error[E0432]: unresolved imports `node115_abci_checkpoint_replay_fixture::HardforkWords`, `node115_abci_checkpoint_replay_fixture::LocalRestoreError`, `node115_abci_checkpoint_replay_fixture::restore_local_checkpoint`
+ --> tests/local_restore.rs:7:26
+  |
+7 |     BlockAdmissionError, HardforkWords, LocalRestoreError, ReplayBlock, ReplayEngineFixture,
+  |                          ^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^ no `LocalRestoreError` in the root
+  |                          |
+  |                          no `HardforkWords` in the root
+8 |     RestoreError, SupportContext, restore_local_checkpoint,
+  |                                   ^^^^^^^^^^^^^^^^^^^^^^^^ no `restore_local_checkpoint` in the root
+  |
+help: a similar name exists in the module
+  |
+7 -     BlockAdmissionError, HardforkWords, LocalRestoreError, ReplayBlock, ReplayEngineFixture,
+7 +     BlockAdmissionError, HardforkWords, RestoreError, ReplayBlock, ReplayEngineFixture,
+  |
+help: a similar name exists in the module
+  |
+8 -     RestoreError, SupportContext, restore_local_checkpoint,
+8 +     RestoreError, SupportContext, restore_checkpoint,
+  |
+
+For more information about this error, try `rustc --explain E0432`.
+error: could not compile `node115-abci-checkpoint-replay-fixture` (test "local_restore") due to 1 previous error
+
+$ python3 -B research/work-items/RE-017-node115-local-replay-hardfork-rewrite/verify.py
+PASS: pinned #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 42 spans in startup FDE
+PASS: startup saves the original pair at future+0x68/+0x70 before the freeze guard
+PASS: equality rewrites materialized +0x18/+0x20; both bypass arms preserve the pair at this boundary
+PASS: stale freeze height reaches a failure arm and ud2 if its helper returns
+PASS: selected replay spawn subsequently reads the materialized object, not the earlier future copy
+
+$ cargo test --locked --offline --manifest-path src/node115-abci-checkpoint-replay-fixture/Cargo.toml
+   Compiling node115-abci-checkpoint-replay-fixture v0.1.0 (/private/tmp/hl-node115-local-replay.tSx7sN/src/node115-abci-checkpoint-replay-fixture)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.53s
+     Running unittests src/lib.rs (src/node115-abci-checkpoint-replay-fixture/target/debug/deps/node115_abci_checkpoint_replay_fixture-ae9ec197be500a4b)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/fixture_contract.rs (src/node115-abci-checkpoint-replay-fixture/target/debug/deps/fixture_contract-5fe36885cc39fcbb)
+
+running 6 tests
+test root_selector_all_four_arms_fallback_word_distinction_and_repeated_reads ... ok
+test negative_controls_restore_admission_height_limit_and_conflict ... ok
+test end_to_end_restore_h_plus_1_and_external_quorum_match ... ok
+test comparison_runs_before_end_root_selector_so_same_block_local_root_is_missing ... ok
+test history_pruning_runs_after_comparison_and_before_root_insertion ... ok
+test single_byte_mismatch_preserves_sink_before_comparison_and_stops_prefix ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/local_restore.rs (src/node115-abci-checkpoint-replay-fixture/target/debug/deps/local_restore-3d241a5b293ec44b)
+
+running 3 tests
+test rejects_past_freeze_and_mismatched_checkpoint_height ... ok
+test preserves_disk_pair_without_an_exact_freeze ... ok
+test first_replay_reads_the_rewritten_pair_with_saturation ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests node115_abci_checkpoint_replay_fixture
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+$ rustfmt --edition 2024 --check src/node115-abci-checkpoint-replay-fixture/tests/local_restore.rs
