@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import sys
 import unittest
 from pathlib import Path
 
@@ -19,7 +20,12 @@ def load_verify_module():
     spec = importlib.util.spec_from_file_location("re008_staking_wq_verify", VERIFY_PY)
     assert spec is not None and spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    write_bytecode = sys.dont_write_bytecode
+    sys.dont_write_bytecode = True
+    try:
+        spec.loader.exec_module(mod)
+    finally:
+        sys.dont_write_bytecode = write_bytecode
     return mod
 
 
