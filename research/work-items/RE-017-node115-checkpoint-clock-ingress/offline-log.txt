@@ -1,0 +1,125 @@
+RE-017-node115-checkpoint-clock-ingress
+Darwin arm64
+rustc 1.95.0 (59807616e 2026-04-14)
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B research/work-items/RE-009-node115-msgpack-clock-text-path/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 41 spans in three FDEs
+PASS: fixstr and three explicit length markers converge on the MessagePack Time conversion
+PASS: MessagePack and JSON use the same format table, interpreter, and time constructor
+
+$ python3 -B research/work-items/RE-009-node115-time-component-projection/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 44 spans in two FDEs
+PASS: model 00:00:00 -> 0 seconds of day
+PASS: model 12:34:56 -> 45296 seconds of day
+PASS: model 23:59:59 -> 86399 seconds of day
+PASS: model 23:59:60.123 -> seconds 86399, fractional word 1123000000
+
+$ python3 -B research/work-items/RE-009-node115-positional-context-clock-pair/verify.py
+PASS: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 66 instruction spans in two #115 FDEs
+PASS: positional clock projection output +0x60/+0x6c; formatter operands 5/6/7/8
+
+$ python3 -B research/work-items/RE-009-node115-render-checkpoint-clock/verify.py
+PASS: calendar table input 02026-01-02 yields 0x00fd402a
+PASS: calendar table input 02000-02-29 yields 0x00fa03c4
+PASS: calendar table input 02016-12-31 yields 0x00fc16e3
+PASS: calendar table input -0001-01-01 yields 0xffffe01b
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 16 checked instruction spans
+PASS: checkpoint date and time formatters are separated by literal 0x54
+
+$ cargo test --offline --locked --manifest-path /tmp/hl-node115-clock-ingress.chI3n5/src/node115-checkpoint-clock-text/Cargo.toml
+   Compiling node115-date-time-display v0.1.0 (/tmp/hl-node115-clock-ingress.chI3n5/src/node115-date-time-display)
+   Compiling node115-time-producer v0.1.0 (/tmp/hl-node115-clock-ingress.chI3n5/src/node115-time-producer)
+   Compiling node115-checkpoint-clock-text v0.1.0 (/tmp/hl-node115-clock-ingress.chI3n5/src/node115-checkpoint-clock-text)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running unittests src/lib.rs (/tmp/hl-node115-clock-ingress.chI3n5/target/debug/deps/node115_checkpoint_clock_text-453b49e8d094532e)
+
+running 2 tests
+test tests::retains_the_display_domain ... ok
+test tests::renders_checkpoint_words_with_literal_t ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/ingress.rs (/tmp/hl-node115-clock-ingress.chI3n5/target/debug/deps/ingress-b4260fd9c5541410)
+
+running 3 tests
+test unsupported_text_has_no_clock_projection ... ok
+test text_maps_to_native_clock_words_on_selected_paths ... ok
+test decoded_stage_checks_height_and_updates_both_clocks_together ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests node115_checkpoint_clock_text
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+$ PYTHONPATH=/tmp/hl-node115-pos-context.mSkSW6/RE-017-node115-positional-context-fixture FIXTURE_DIR=/tmp/hl-node115-clock-ingress.chI3n5 /tmp/hl-context-rmp-venv/bin/python -B - <<'PY'
+from hashlib import sha256
+from os import environ
+from pathlib import Path
+from struct import pack_into
+from project import DECODED_SIZE, project
+from test_project import checkpoint, context, HEIGHT
+
+directory = Path(environ["FIXTURE_DIR"])
+data = checkpoint(context())
+source = directory / "sample.rmp"
+source.write_bytes(data)
+fields = project(source, sha256(data).hexdigest(), HEIGHT)
+(directory / "clocks.txt").write_text(fields["time"] + "\n" + fields["prev_time"] + "\n")
+decoded = bytearray(DECODED_SIZE)
+pack_into("<Q", decoded, 0x28, HEIGHT)
+(directory / "decoded.bin").write_bytes(decoded)
+print("Extracted positional time and previous time:", fields["time"], fields["prev_time"])
+PY
+
+$ mkdir -p /tmp/hl-node115-clock-ingress.chI3n5/src/node115-checkpoint-clock-text/examples
+
+$ cat > /tmp/hl-node115-clock-ingress.chI3n5/src/node115-checkpoint-clock-text/examples/stage_clocks.rs <<'RS'
+use node115_checkpoint_clock_text::stage_decoded_clock_pair;
+use std::io::Write;
+fn main() {
+    let mut args = std::env::args_os().skip(1);
+    let mut decoded = std::fs::read(args.next().unwrap()).unwrap();
+    let texts = std::fs::read_to_string(args.next().unwrap()).unwrap();
+    let mut clocks = texts.lines();
+    stage_decoded_clock_pair(&mut decoded, 41, clocks.next().unwrap(), clocks.next().unwrap()).unwrap();
+    std::io::stdout().lock().write_all(&decoded).unwrap();
+}
+RS
+
+$ cargo run --offline --locked --manifest-path /tmp/hl-node115-clock-ingress.chI3n5/src/node115-checkpoint-clock-text/Cargo.toml --example stage_clocks -- /tmp/hl-node115-clock-ingress.chI3n5/decoded.bin /tmp/hl-node115-clock-ingress.chI3n5/clocks.txt > /tmp/hl-node115-clock-ingress.chI3n5/staged.bin
+
+$ PYTHONPATH=/tmp/hl-node115-assemble.zpDuLH/RE-017-node115-compact-assemble-fixture FIXTURE_DIR=/tmp/hl-node115-clock-ingress.chI3n5 python3 -B - <<'PY'
+from datetime import date
+from hashlib import sha256
+from os import environ
+from pathlib import Path
+from struct import unpack_from
+from assemble import assemble, EVM_BLOCK_SIZE
+
+def digest(data):
+    return sha256(data).hexdigest()
+
+directory = Path(environ["FIXTURE_DIR"])
+decoded = (directory / "staged.bin").read_bytes()
+initial = (directory / "decoded.bin").read_bytes()
+evm = bytes(EVM_BLOCK_SIZE)
+compact = assemble(decoded, evm, digest(decoded), digest(evm), 41, bytes(4), bytes(3))
+packed = (2026 << 13) | (date(2026, 11, 28).timetuple().tm_yday << 4) | 10
+assert decoded[:0x60] == initial[:0x60] and decoded[0x78:] == initial[0x78:]
+assert unpack_from("<6I", compact, 0x60) == (
+    packed, 49_628, 123_456_789, packed, 49_627, 999_999_999,
+)
+print("PASS: paired RMP clock texts -> Rust decoded clock region -> exact compact clock words")
+PY
+Extracted positional time and previous time: 2026-11-28T13:47:08.123456789 2026-11-28T13:47:07.999999999
+   Compiling node115-checkpoint-clock-text v0.1.0 (/tmp/hl-node115-clock-ingress.chI3n5/src/node115-checkpoint-clock-text)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running `/tmp/hl-node115-clock-ingress.chI3n5/target/debug/examples/stage_clocks /tmp/hl-node115-clock-ingress.chI3n5/decoded.bin /tmp/hl-node115-clock-ingress.chI3n5/clocks.txt`
+PASS: paired RMP clock texts -> Rust decoded clock region -> exact compact clock words
