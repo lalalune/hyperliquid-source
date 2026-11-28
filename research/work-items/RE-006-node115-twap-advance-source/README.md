@@ -73,3 +73,36 @@ test discovery includes captured-instruction emulation.
 
 Implementation and GitHub work: OpenAI `gpt-6.1-terra` / `codex-desktop`.
 Independent native review: OpenAI `gpt-6-astra` / `codex-desktop`.
+
+## Selecting due keys before slice execution
+
+The six 1,165-byte dispatchers in `due-batch.json` inspect the earliest heap
+entry before passing a batch of live keys to a slice iterator. In the copy at
+`0x5a16040`, the user and order lookups precede the timestamp comparison. A
+missing user goes to the pop at `0x5a160d0`; a missing order reaches the pop
+at `0x5a1638b`. Both paths return to the heap without emitting a key. The
+first live future entry ends the scan, so stale keys behind it stay queued.
+
+At `0x5a16291..0x5a162c6`, the dispatcher compares the date as signed, then
+the within-day second and nanosecond as unsigned. Equality on the final
+component follows the due path. That path pops the root at `0x5a163a4` and
+appends its 20-byte user and 8-byte ID in a 32-byte batch element. It reads
+the deadline from the heap entry, and emits each qualifying entry separately.
+The final call at `0x5a1648d` passes the collected batch to the iterator at
+`0x5b2f650`; its calls at `0x5b2f6bd` and `0x5b2f89e` lead to the slice
+function at `0x5a305e0`.
+
+The logical `Tracker::take_due` uses the existing canonical non-leap-second
+`Moment` domain and heap ordering. `TwapEngine::take_due` exposes the batch
+to the caller before any `execute_slice` changes the tracker. Allocation
+layout, slice-result filtering and block-level order-ID assignment are outside
+this reconstruction.
+
+To reproduce the selector evidence from the repository root with Capstone 5.0.7:
+
+```sh
+packet=research/work-items/RE-006-node115-twap-advance-source
+python3 "$packet/verify_due_batch.py" | diff - "$packet/due-batch.json"
+cargo test --locked --manifest-path src/node115-twap-advance/Cargo.toml
+cargo test --locked --manifest-path src/node115-orderbook/Cargo.toml
+```

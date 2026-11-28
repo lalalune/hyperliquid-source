@@ -77,6 +77,26 @@ pub struct Tracker {
     pub users: BTreeMap<[u8; 20], BTreeMap<u64, Order>>,
     pub queue: BinaryHeap<Reverse<QueueEntry>>,
 }
+impl Tracker {
+    /// Collect live heap keys due at or before `now`, before any slice is executed.
+    /// Unregistered keys are discarded as the selector encounters them.
+    pub fn take_due(&mut self, now: Moment) -> Vec<([u8; 20], u64)> {
+        let mut batch = Vec::new();
+        while let Some(&Reverse(head)) = self.queue.peek() {
+            let live = self.users.get(&head.user)
+                .is_some_and(|orders| orders.contains_key(&head.order_id));
+            if live && (head.days, head.seconds, head.nanos) > now.fields() {
+                break;
+            }
+            self.queue.pop();
+            if live {
+                batch.push((head.user, head.order_id));
+            }
+        }
+        batch
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Outcome {
     MissingOrder { inserted_user: bool },
