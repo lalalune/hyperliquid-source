@@ -1,0 +1,5 @@
+# Node #115 Zstandard Huffman table assessment
+
+This RE-002 packet links Huffman compression-table size estimation and symbol-coverage validation to released zstd 1.5.7 source. The former sums symbol frequencies multiplied by code lengths, then converts bits to bytes; the latter checks whether used symbols have nonzero codes. Two complete catalogued node bodies match compiled references outside relocation fields. This evidence addresses table assessment, separate from existing Huffman encoding linkage, and does not establish exact production library version or complete runtime equivalence.
+
+Base `2da45cb0a761cff6b478e40421699857d87a94df`; node #115 SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. The verifier checks the released source archive checksum and reads the ELF as data. Run from repository root: `python3 -B research/work-items/RE-002-node115-zstd-huffman-table-assessment/verify.py /path/to/vendor-source`. Log is actual offline output; manifest covers the packet.
