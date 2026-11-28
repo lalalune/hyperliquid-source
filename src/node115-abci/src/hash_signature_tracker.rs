@@ -9,6 +9,7 @@
 //! - Quorum sink JSON serialization (`node115-quorum-line`)
 
 use std::collections::{BTreeMap, BTreeSet};
+use std::time::Duration;
 
 use node115_abci_checkpoint_replay_fixture::{
     ACTION_TAG_ABCI_DIGEST_VOTE, ExternalDigestVote, SupportContext, VOTE_HEIGHT_EXCLUSIVE_LIMIT,
@@ -67,18 +68,16 @@ pub struct RecordVoteResult {
 }
 
 /// Convert an `f64` delay in seconds (`[tracker + 0x88]`, `0x515218d..0x51521da`)
-/// into nanoseconds saturated to `i64::MAX` (`0x7fff_ffff_ffff_ffff`).
+/// into nanoseconds rounded to nearest, ties to even, then saturated to `i64::MAX`.
 pub fn delay_secs_to_nanos(delay_secs: f64) -> Option<u64> {
     if !delay_secs.is_finite() || delay_secs < 0.0 {
         return None;
     }
-    let nanos_f = delay_secs * 1_000_000_000.0;
-    let max_i64 = i64::MAX as u64;
-    if nanos_f >= max_i64 as f64 {
-        Some(max_i64)
-    } else {
-        Some(nanos_f as u64)
-    }
+    let cap = i64::MAX as u128;
+    let nanos = Duration::try_from_secs_f64(delay_secs)
+        .map(|duration| duration.as_nanos())
+        .unwrap_or(cap);
+    Some(nanos.min(cap) as u64)
 }
 
 /// Timer eligibility predicate observed at `0x515218d..0x51522cd`:
