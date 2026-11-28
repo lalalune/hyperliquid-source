@@ -1,0 +1,44 @@
+Darwin arm64
+Python 3.9.6
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+GNU objdump (GNU Binutils) 2.45
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+
+$ python3 -B research/work-items/RE-017-node115-replay-gap-bootstrap-query/verify.py
+PASS: SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 102 ranges in indexed FDE 0x5a82670..0x5a89535
+PASS: positive parent gap binds baseline+1 and raw parent to established range builder
+PASS: node_bootstrap_query descriptor carries both bounds through copied frame and selected state-0 read
+PASS: synthetic short, capped and high-round bounds; reversed, truncated and altered byte controls
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x5a88165 --stop-address=0x5a8819d artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 5a88165: 48 8b 8b 00 02 00 00         	mov	rcx, qword ptr [rbx + 0x200]
+ 5a8816c: 48 ff c1                     	inc	rcx
+ 5a8816f: 48 c7 c0 ff ff ff ff         	mov	rax, -0x1
+ 5a88176: 48 0f 45 c1                  	cmovne	rax, rcx
+ 5a8817a: 48 8b 93 28 02 00 00         	mov	rdx, qword ptr [rbx + 0x228]
+ 5a88181: 48 8b b3 e8 01 00 00         	mov	rsi, qword ptr [rbx + 0x1e8]
+ 5a88188: 48 8b 8b f8 01 00 00         	mov	rcx, qword ptr [rbx + 0x1f8]
+ 5a8818f: 48 89 83 58 02 00 00         	mov	qword ptr [rbx + 0x258], rax
+ 5a88196: 48 89 8b 60 02 00 00         	mov	qword ptr [rbx + 0x260], rcx
+
+$ objdump -d -M intel --insn-width=16 --start-address=0x5a8306c --stop-address=0x5a83093 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000005a8306c <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x2c53c4>:
+ 5a8306c:	4c 8d 35 f0 8a eb fa                            	lea    r14,[rip+0xfffffffffaeb8af0]        # 93bb63 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x540c8cd>
+ 5a83073:	4c 89 b3 d0 02 00 00                            	mov    QWORD PTR [rbx+0x2d0],r14
+ 5a8307a:	48 c7 83 d8 02 00 00 14 00 00 00                	mov    QWORD PTR [rbx+0x2d8],0x14
+ 5a83085:	48 89 8b e0 02 00 00                            	mov    QWORD PTR [rbx+0x2e0],rcx
+ 5a8308c:	48 89 93 e8 02 00 00                            	mov    QWORD PTR [rbx+0x2e8],rdx
