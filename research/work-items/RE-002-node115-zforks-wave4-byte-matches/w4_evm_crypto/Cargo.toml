@@ -1,0 +1,37 @@
+[package]
+name = "zforks_w4_evm_crypto"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+tikv-jemallocator = "=0.6.0"
+revm = { version = "=40.0.3", default-features = false, features = ["std", "blst", "secp256k1", "portable", "serde", "c-kzg", "dev"] }
+alloy-primitives = { version = "=1.5.2", features = ["serde", "rlp", "k256"] }
+alloy-eip7928 = "=0.4.1"
+alloy-consensus = { version = "=1.7.3", features = ["serde", "k256"] }
+alloy-eips = { version = "=1.8.3", features = ["serde"] }
+alloy-rpc-types-eth = "=1.7.3"
+alloy-sol-types = "=1.5.2"
+alloy-trie = "=0.9.4"
+alloy-rlp = "=0.3.17"
+ark-bn254 = "=0.5.0"
+ark-bls12-381 = "=0.5.0"
+ark-ec = "=0.5.0"
+ark-ff = "=0.5.0"
+ark-serialize = "=0.5.0"
+k256 = { version = "=0.13.4", features = ["ecdsa", "sha256", "schnorr", "arithmetic"] }
+p256 = { version = "=0.13.2", features = ["ecdsa", "sha256", "arithmetic"] }
+secp256k1 = { version = "=0.30.0", features = ["recovery", "global-context", "serde"] }
+secp256k1_29 = { package = "secp256k1", version = "=0.29.0", features = ["recovery", "global-context", "serde"] }
+curve25519-dalek-ng = "=4.1.1"
+sha2 = "=0.9.9"
+sha2_10 = { package = "sha2", version = "=0.10.9" }
+hmac = "=0.12.1"
+tiny-keccak = { version = "=2.0.2", features = ["keccak", "sha3"] }
+c-kzg = "=2.1.8"
+serde_json = "=1.0.140"
+
+[profile.release]
+opt-level = 3
+overflow-checks = true
+lto = "thin"
