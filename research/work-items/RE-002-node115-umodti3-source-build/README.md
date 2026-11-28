@@ -41,3 +41,25 @@ The script accepts `--binutils-dir` for a non-default GNU installation. It rebui
 ## Scope
 
 The recorded compiler flags are one sufficient recipe for this function. The result upgrades the provenance of a previously counted dependency window. It adds no unique covered target bytes, first-party implementation bytes, or component gates. It establishes neither the historical node build invocation nor equivalence of the entire library or node. A bounded follow-up would test whether the same recipe reproduces a different previously identified arithmetic routine.
+
+## Which optimization levels reproduce this function?
+
+The [build plan](../RE-002-node115-build-plan/README.md) leaves the optimization level open and calls for comparison with a known function. Its fixed-source, fixed-compiler control for this leaf gives the following results. All six builds used the recipe above and fresh target directories. The builder verifies the optimization level Cargo actually reports for the freshly compiled `compiler_builtins` artifact.
+
+| Cargo opt-level | Source body bytes | Relocation fields | Whole-body match |
+| --- | ---: | ---: | --- |
+| 0 | 12 | 1 | No |
+| 1 | 171 | 0 | No |
+| 2 | 192 | 0 | No |
+| 3 | 197 | 0 | Yes |
+| s | 42 | 1 | No |
+| z | 5 | 1 | No |
+
+Only level 3 reproduced the 197-byte linked function under these fixed inputs. Each alternative had a different whole-symbol length, including the three bodies with relocations. The result narrows the recipe for this library function. Cargo supports profile overrides per package, and changes to other compiler inputs could change the comparison.
+
+Using the provisioned cache from the preceding section, replay the matrix from this directory. The JSON records the full source-body digest and exact target for each comparison.
+
+```sh
+python3 -B opt_profiles.py --cache "$workdir/cache" > "$workdir/profiles.json"
+diff -u opt-profiles.json "$workdir/profiles.json"
+```
