@@ -86,7 +86,65 @@ pub fn timer_is_mature(inserted_nanos: u64, delay_secs: f64, current_nanos: u64)
     let Some(delay_nanos) = delay_secs_to_nanos(delay_secs) else {
         return false;
     };
+    timer_has_elapsed(inserted_nanos, delay_nanos, current_nanos)
+}
+
+fn timer_has_elapsed(inserted_nanos: u64, delay_nanos: u64, current_nanos: u64) -> bool {
     current_nanos >= inserted_nanos.saturating_add(delay_nanos)
+}
+
+/// Invalid input to the #115 compact checkpoint timer projection.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum CompactTimerFixtureError {
+    WrongSize { actual: usize },
+    HeightMismatch { expected: u64, actual: u64 },
+    InvalidDelay { bits: u64 },
+}
+
+/// The validated timer delay from a caller-pinned compact checkpoint fixture.
+///
+/// This read-only projection accepts the #115 compact state layout at restored height
+/// H. Entry and comparison timestamps remain caller-supplied linear nanoseconds.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct RestoredTimerDelay {
+    nanos: u64,
+}
+
+impl RestoredTimerDelay {
+    pub fn from_compact_checkpoint(
+        image: &[u8],
+        expected_height: u64,
+    ) -> Result<Self, CompactTimerFixtureError> {
+        const IMAGE_SIZE: usize = 0x42c8;
+        const HEIGHT_OFFSET: usize = 0x28;
+        const DELAY_OFFSET: usize = 0x3ed8;
+
+        let image: &[u8; IMAGE_SIZE] =
+            image
+                .try_into()
+                .map_err(|_| CompactTimerFixtureError::WrongSize {
+                    actual: image.len(),
+                })?;
+        let actual = u64::from_le_bytes(image[HEIGHT_OFFSET..][..8].try_into().unwrap());
+        if actual != expected_height {
+            return Err(CompactTimerFixtureError::HeightMismatch {
+                expected: expected_height,
+                actual,
+            });
+        }
+        let bits = u64::from_le_bytes(image[DELAY_OFFSET..][..8].try_into().unwrap());
+        delay_secs_to_nanos(f64::from_bits(bits))
+            .map(|nanos| Self { nanos })
+            .ok_or(CompactTimerFixtureError::InvalidDelay { bits })
+    }
+
+    pub const fn nanos(self) -> u64 {
+        self.nanos
+    }
+
+    pub fn is_mature(self, inserted_nanos: u64, current_nanos: u64) -> bool {
+        timer_has_elapsed(inserted_nanos, self.nanos, current_nanos)
+    }
 }
 
 /// Complete offline logical model of `HashSignatureTracker` (`S + 0x3e50`).

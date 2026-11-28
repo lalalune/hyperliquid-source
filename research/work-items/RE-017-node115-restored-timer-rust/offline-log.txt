@@ -1,0 +1,98 @@
+RE-017-node115-restored-timer-rust
+Darwin arm64
+rustc 1.95.0 (59807616e 2026-04-14)
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B research/work-items/RE-017-node115-replay-delay-word-materialization/verify.py
+Historical input 0x23b8; copied state 0x3ed8; replay consumer 0x3ed8
+PASS: 4 FDEs, memcpy import, width and pointer anchors, 9 rejected mutations
+
+$ python3 -B research/work-items/RE-017-node115-replay-delay-rounding/verify.py
+0x1.12e0be826d695p-32 -> 0 ns
+0x1.9c511dc3a41dfp-31 -> 1 ns
+0x1.0000000000000p-10 -> 976562 ns
+0x1.8000000000000p-9 -> 2929688 ns
+0x1.0040000000000p+0 -> 1000976562 ns
+0x1.00c0000000000p+0 -> 1002929688 ns
+0x1.fffffffdda3e8p-1 -> 1000000000 ns
+0x1.2a05f20000000p+33 -> 9223372036854775807 ns
+PASS: two FDEs, duration relocation, both rounding paths, carry and cap
+
+$ cargo test --offline --locked --manifest-path /tmp/hl-node115-compact-timer.mlMFVZ/src/node115-abci/Cargo.toml
+   Compiling node115-abci v0.1.0 (/tmp/hl-node115-compact-timer.mlMFVZ/src/node115-abci)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.81s
+     Running unittests src/lib.rs (/tmp/hl-node115-compact-timer.mlMFVZ/target/debug/deps/node115_abci-a9dded038d860d6c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration.rs (/tmp/hl-node115-compact-timer.mlMFVZ/target/debug/deps/integration-d7ee03b170a2abdb)
+
+running 12 tests
+test tracker_rounds_fractional_delays_to_nearest_nanosecond ... ok
+test restored_compact_timer_fixture_checks_layout_height_and_delay ... ok
+test restored_compact_timer_fixture_uses_materialized_delay_word ... ok
+test reduction_tree_preimage_matches_re017_msgpack_vectors ... ok
+test state_serialize_buffer_elapsed_seconds_and_zip_exact_slices ... ok
+test tracker_watermark_seal_prune_window_and_recheck ... ok
+test real_blake3_state_root_and_timer_maturity_end_to_end ... ok
+test apply_block_six_ordered_guards_and_history_split_off_cutoff ... ok
+test tracker_wire_schema_checkpoint_format_and_straggler_filter ... ok
+test engine_offline_replay_freeze_guard_and_checkpoint_maintenance ... ok
+test lthash_big_endian_homomorphic_arithmetic_and_hardfork_version_check ... ok
+test snapshot_hardfork_compat_bundle_roundtrip_and_7_stage_apply_block_pipeline ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+   Doc-tests node115_abci
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+$ PYTHONPATH=/tmp/hl-node115-assemble.zpDuLH/RE-017-node115-compact-assemble-fixture:/tmp/hl-node115-tracker-delay.xqcRJV/RE-017-node115-tracker-delay-fixture COMPACT_OUTPUT=/tmp/hl-node115-compact-timer.mlMFVZ/checkpoint.bin python3 -B - <<'PY'
+from hashlib import sha256
+from pathlib import Path
+from struct import pack, pack_into
+from os import environ
+from assemble import assemble, EVM_BLOCK_SIZE
+from project import project_delay, DECODED_SIZE
+
+def digest(image):
+    return sha256(image).hexdigest()
+
+source = bytearray(DECODED_SIZE)
+pack_into("<Q", source, 0x28, 412)
+token = b"\xcb" + pack(">d", 0.75e-9)
+decoded = project_delay(bytes(source), digest(source), 412, token)
+evm = bytes(EVM_BLOCK_SIZE)
+result = assemble(decoded, evm, digest(decoded), digest(evm), 412, bytes(4), bytes(3))
+Path(environ["COMPACT_OUTPUT"]).write_bytes(result)
+print("Synthetic compact checkpoint SHA-256:", digest(result))
+PY
+
+$ mkdir -p /tmp/hl-node115-compact-timer.mlMFVZ/src/node115-abci/examples
+
+$ cat > /tmp/hl-node115-compact-timer.mlMFVZ/src/node115-abci/examples/check_restored_timer.rs <<'RS'
+use node115_abci::hash_signature_tracker::RestoredTimerDelay;
+fn main() {
+    let path = std::env::args_os().nth(1).unwrap();
+    let image = std::fs::read(path).unwrap();
+    let delay = RestoredTimerDelay::from_compact_checkpoint(&image, 412).unwrap();
+    assert_eq!(delay.nanos(), 1);
+    assert!(!delay.is_mature(100, 100));
+    assert!(delay.is_mature(100, 101));
+    println!("PASS: MessagePack token -> compact bytes -> Rust timer maturity at 101 ns");
+}
+RS
+
+$ cargo run --offline --locked --manifest-path /tmp/hl-node115-compact-timer.mlMFVZ/src/node115-abci/Cargo.toml --example check_restored_timer -- /tmp/hl-node115-compact-timer.mlMFVZ/checkpoint.bin
+Synthetic compact checkpoint SHA-256: cb88ab8af72a0d85176c333084767a5b005cf7eb37cf777d7f6f5d136afe54b5
+   Compiling node115-abci v0.1.0 (/tmp/hl-node115-compact-timer.mlMFVZ/src/node115-abci)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running `/tmp/hl-node115-compact-timer.mlMFVZ/target/debug/examples/check_restored_timer /tmp/hl-node115-compact-timer.mlMFVZ/checkpoint.bin`
+PASS: MessagePack token -> compact bytes -> Rust timer maturity at 101 ns
