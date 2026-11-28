@@ -1,0 +1,30 @@
+[package]
+name = "w5_http_h2_tokio_rpc"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+tikv-jemallocator = "=0.6.0"
+tokio = { version = "=1.54.1", features = ["full"] }
+tokio-util = { version = "=0.7.15", features = ["full"] }
+h2 = "=0.3.26"
+http = "=0.2.12"
+hyper = { version = "=0.14.29", features = ["full"] }
+hyper-tls = "=0.5.0"
+native-tls = "=0.2.14"
+tokio-native-tls = "=0.3.1"
+axum = { version = "=0.6.20", features = ["ws", "headers", "macros", "multipart", "matched-path", "original-uri", "query", "tokio", "tower-log", "http1", "http2", "json"] }
+tower = { version = "=0.4.13", features = ["full"] }
+jsonrpsee-core = { version = "=0.26.1", features = ["server", "client"] }
+jsonrpsee-types = "=0.26.1"
+bytes = "=1.11.1"
+futures-util = { version = "=0.3.31", features = ["io", "sink", "channel"] }
+futures-channel = { version = "=0.3.31", features = ["sink"] }
+want = "=0.3.2"
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.154"
+
+[profile.release]
+opt-level = 3
+overflow-checks = true
+lto = "thin"
