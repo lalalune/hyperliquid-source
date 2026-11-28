@@ -17,6 +17,8 @@ Clean-room MIT Rust integration crate for Hyperliquid node #115's `info_server` 
 - **Position integer prefix & liquidation candidate scan** (`f_types/position.rs`) integrating `node115-position-integer` semantics with `node115-risk-candidate-scan`.
 - **Replica JSON response emission & L4 snapshot options** wrapping `node115-replica-response-json` and `save_l4_snapshots.rs`.
 
+- **Delegator summary response** serializes three supplied amounts with ten decimal places before trimming and writes the pending count as an unsigned JSON number. [Captured serializer and compiler comparison](../../research/work-items/RE-015-node115-delegator-summary-json/README.md).
+
 ## Verification
 
 ```sh
