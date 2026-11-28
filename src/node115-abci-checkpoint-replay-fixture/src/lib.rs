@@ -516,13 +516,14 @@ impl ReplayEngineFixture {
 
         // The selected branch removes old local entries after this block's comparison
         // and before the end selector can insert the next root.
-        if let Some(base) = history_prune_base {
+        let comparison_completed = !handoff.has_mismatch();
+        if comparison_completed && let Some(base) = history_prune_base {
             self.local_raw_history = self.local_raw_history.split_off(&base.saturating_add(1));
         }
 
         // Step 6: Post-comparison local root production (`0x5a05fc9 -> 0x5a07ec0 -> 0x5a03fa0`).
         let post_height = self.state.height;
-        let local_root_recorded = if self.root_cadence_matches(post_height) {
+        let local_root_recorded = if comparison_completed && self.root_cadence_matches(post_height) {
             if let Some(local_digest) = block.synthetic_local_root {
                 let trace = select_root_impl(
                     &mut self.selector_cell,
