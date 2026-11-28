@@ -1,0 +1,25 @@
+[package]
+name = "w6_alloy_revm_deep"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+tikv-jemallocator = "=0.6.0"
+revm = { version = "=41.0.0", features = ["std", "blst", "secp256k1"] }
+alloy-primitives = { version = "=1.7.3", features = ["serde", "rlp", "k256"] }
+alloy-rlp = "=0.3.17"
+alloy-trie = "=0.9.5"
+alloy-consensus = { version = "=2.1.1", features = ["serde"] }
+alloy-eips = { version = "=2.1.1", features = ["serde"] }
+alloy-eip2930 = { version = "=0.2.4", features = ["serde"] }
+alloy-eip7702 = { version = "=0.6.4", features = ["serde"] }
+alloy-eip7928 = "=0.4.5"
+alloy-sol-types = "=1.7.3"
+ruint = { version = "=1.18.0", features = ["serde", "rlp"] }
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.140"
+
+[profile.release]
+opt-level = 3
+overflow-checks = true
+lto = "thin"
