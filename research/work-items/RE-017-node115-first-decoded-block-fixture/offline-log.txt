@@ -1,0 +1,66 @@
+$ python3 -B research/work-items/RE-017-node115-first-decoded-block-fixture/verify.py
+0x4eff5f0..0x4eff946 0x4eff60c e83f1b9200 call 0x5821150 <.text+0x4407e50>
+0x4eff5f0..0x4eff946 0x4eff624 0f84a6000000 je 0x4eff6d0 <.text+0x3ae63d0>
+0x4eff5f0..0x4eff946 0x4eff62a 83f801 cmp eax, 0x1
+0x4eff5f0..0x4eff946 0x4eff642 e819559200 call 0x5824b60 <.text+0x440b860>
+0x4eff5f0..0x4eff946 0x4eff692 48c7430800000000 mov qword ptr [rbx + 0x8], 0x0
+0x4eff5f0..0x4eff946 0x4eff69a e9a9010000 jmp 0x4eff848 <.text+0x3ae6548>
+0x4eff5f0..0x4eff946 0x4eff6db e880800b00 call 0x4fb7760 <.text+0x3b9e460>
+0x4eff5f0..0x4eff946 0x4eff848 48894310 mov qword ptr [rbx + 0x10], rax
+0x5a82670..0x5a89535 0x5a8728d 488983682d0000 mov qword ptr [rbx + 0x2d68], rax
+0x5a82670..0x5a89535 0x5a8729e 0f84f9130000 je 0x5a8869d <.text+0x466f39d>
+0x5a82670..0x5a89535 0x5a874b9 483bbb00010000 cmp rdi, qword ptr [rbx + 0x100]
+0x5a82670..0x5a89535 0x5a874c0 0f8539160000 jne 0x5a88aff <.text+0x466f7ff>
+0x5a82670..0x5a89535 0x5a874c6 483bb308010000 cmp rsi, qword ptr [rbx + 0x108]
+0x5a82670..0x5a89535 0x5a874cd 0f852c160000 jne 0x5a88aff <.text+0x466f7ff>
+0x5a82670..0x5a89535 0x5a874e9 48ffc0 inc rax
+0x5a82670..0x5a89535 0x5a874f3 480f45c8 cmovne rcx, rax
+0x5a82670..0x5a89535 0x5a874f7 48898bb0010000 mov qword ptr [rbx + 0x1b0], rcx
+0x5a6e1e0..0x5a70656 0x5a6e328 e8c38a0400 call 0x5ab6df0 <.text+0x469daf0>
+0x5a6e1e0..0x5a70656 0x5a6e34b 4885ed test rbp, rbp
+0x5a6e1e0..0x5a70656 0x5a6e34e 7430 je 0x5a6e380 <.text+0x4655080>
+0x5a6e1e0..0x5a70656 0x5a6e385 48c744246000000000 mov qword ptr [rsp + 0x60], 0x0
+0x5a6e1e0..0x5a70656 0x5a6e397 ba01000000 mov edx, 0x1
+0x5a6e1e0..0x5a70656 0x5a6e39c e85f4dffff call 0x5a63100 <.text+0x4649e00>
+0x5a6e1e0..0x5a70656 0x5a6e3a6 0f856cffffff jne 0x5a6e318 <.text+0x4655018>
+0x5a6e1e0..0x5a70656 0x5a6e3b7 e95cffffff jmp 0x5a6e318 <.text+0x4655018>
+verified 25 decoder, consumer and replay worker instruction spans
+$ cargo test --locked --offline --manifest-path src/node115-replay-completed-payload/Cargo.toml
+   Compiling node115-u32-varint v0.1.0 (/private/tmp/hl-records-115-source/first-block-build/src/node115-u32-varint)
+   Compiling node115-u64-reader-state v0.1.0 (/private/tmp/hl-records-115-source/first-block-build/src/node115-gossip-response-record/reader)
+   Compiling node115-daycount-date v0.1.0 (/private/tmp/hl-records-115-source/first-block-build/src/node115-daycount-date)
+   Compiling node115-signed-scalar v0.1.0 (/private/tmp/hl-records-115-source/first-block-build/src/node115-signed-scalar)
+   Compiling node115-lz4-decode v0.1.0 (/private/tmp/hl-records-115-source/first-block-build/src/node115-lz4-decode)
+   Compiling node115-lz4-literal-encoder v0.1.0 (/private/tmp/hl-records-115-source/first-block-build/src/node115-lz4-literal-encoder)
+   Compiling node115-client-block-success v0.1.0 (/private/tmp/hl-records-115-source/first-block-build/src/node115-client-block-success)
+   Compiling node115-replay-completed-payload v0.1.0 (/private/tmp/hl-records-115-source/first-block-build/src/node115-replay-completed-payload)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.29s
+     Running unittests src/lib.rs (/tmp/hl-records-115-source/archive-header-build/target/debug/deps/node115_replay_completed_payload-324a02245984a06c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/completed.rs (/tmp/hl-records-115-source/archive-header-build/target/debug/deps/completed-e8da7f864251b9f0)
+
+running 3 tests
+test stage_boundaries_preserve_the_inner_result_or_the_compression_error ... ok
+test tx_uses_the_actual_decoded_span_and_preserves_the_prefix_boundary ... ok
+test block_and_empty_attachment_option_survive_both_arms ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/first_block.rs (/tmp/hl-records-115-source/archive-header-build/target/debug/deps/first_block-d290b44c463887b6)
+
+running 3 tests
+test opaque_only_fixture_contains_no_block ... ok
+test selection_reports_the_first_block_mismatch_without_using_a_later_candidate ... ok
+test mixed_capture_preserves_record_position_and_decoder_boundary ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests node115_replay_completed_payload
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
