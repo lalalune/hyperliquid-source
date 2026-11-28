@@ -330,3 +330,33 @@ fn runtime_utils_cover_remaining_foundation_subsystems() {
     );
     assert!(WalletAddress::parse_hex("0x1234").is_err());
 }
+
+#[test]
+fn hybrid_map_changes_shape_only_at_the_entry_thresholds() {
+    use node115_base::l1_map::{Entry, L1Map};
+    use std::collections::{BTreeMap, VecDeque};
+
+    for size in 0..=70_u64 {
+        let rows = (0..size).map(|k| (k, k + 100));
+        let ring = L1Map::Small(rows.clone().collect::<VecDeque<_>>());
+        let tree = L1Map::Large(rows.collect::<BTreeMap<_, _>>());
+        for (initially_large, starting) in [(false, ring), (true, tree)] {
+            if size > 0 {
+                let mut map = starting.clone();
+                assert_eq!(map.insert(0, 777), Some(100));
+                assert_eq!(map.get(&0), Some(&777));
+                assert_eq!(map.is_large(), initially_large && size >= 32, "update at {size}");
+            }
+            let mut map = starting;
+            let entry = map.entry(size);
+            assert!(matches!(entry, Entry::Vacant(_)));
+            entry.or_insert(999);
+            let expected_large = if initially_large { size >= 32 } else { size >= 64 };
+            assert_eq!(map.is_large(), expected_large, "miss at {size}");
+            assert_eq!(map.len(), size as usize + 1);
+            for k in 0..size {
+                assert_eq!(map.get(&k), Some(&(k + 100)));
+            }
+        }
+    }
+}
