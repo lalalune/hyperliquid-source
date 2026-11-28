@@ -8,15 +8,16 @@ import copy
 import glob
 import hashlib
 import json
-import os
 import struct
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
+sys.path.insert(0, str(REPO / "tools"))
+from node115_thinlto import RUSTC, build_objects
+
 SRC_PATH = HERE / "main.rs"
 RECORDS_PATH = HERE / "records.json"
 BIN_PATH = REPO / "artifacts" / "node" / "115" / "hl-node"
@@ -138,22 +139,10 @@ def load_fde_map() -> dict[int, int]:
 
 
 def compile_source(src_path: Path, flags: list[str]) -> dict[str, tuple[bytes, list[int]]]:
-    with tempfile.TemporaryDirectory(prefix="node115-e2-dbg-") as td:
-        out_bin = Path(td) / "stream_e2_dbg"
-        subprocess.run(
-            ["rustc", *flags, str(src_path), "-o", str(out_bin)],
-            cwd=td,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        objs = sorted(glob.glob(os.path.join(td, "stream_e2_dbg.stream_e2_dbg.*.rcgu.o")))
-        if not objs:
-            raise AssertionError("ThinLTO compile produced no rcgu.o object")
-        by_name: dict[str, tuple[bytes, list[int]]] = {}
-        for op in objs:
-            by_name.update(parse_obj_sections(Path(op).read_bytes()))
-        return by_name
+    by_name = {}
+    for obj in build_objects(src_path, flags):
+        by_name.update(parse_obj_sections(obj))
+    return by_name
 
 
 def extract_interval(w: dict, fdes: dict[int, int]) -> tuple[int, int] | None:
@@ -243,7 +232,7 @@ def generate_records() -> dict:
     text_va, text_off, _ = secs[".text"]
     fdes = load_fde_map()
     by_name = compile_source(SRC_PATH, COMPILE_FLAGS)
-    rustc_ver = subprocess.check_output(["rustc", "+1.95.0", "--version"], text=True).strip()
+    rustc_ver = subprocess.check_output([*RUSTC, "--version"], text=True).strip()
 
     windows = []
     by_comp: dict[str, dict[str, int]] = {}
