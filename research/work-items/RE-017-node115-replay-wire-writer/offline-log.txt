@@ -1,0 +1,32 @@
+Darwin arm64
+Python 3.12.16
+rustc 1.95.0 (59807616e 2026-04-14)
+python3 -B research/work-items/RE-017-node115-replay-wire-writer/verify.py
+Target SHA-256: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 18 witness spans in 3 FDEs
+PASS: replay tag, option byte and child calls match the codec composition
+PASS: Block writer child calls, raw attachment 0/1, Block/Tx enum tags and call mutations
+cargo test --locked --offline --manifest-path src/node115-replay-wire-encoder/Cargo.toml
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running unittests src/lib.rs (work/target/node115-replay-wire-writer/debug/deps/node115_replay_wire_encoder-f6855334ad966bcb)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/prefix.rs (work/target/node115-replay-wire-writer/debug/deps/prefix-fc073caf6c288a05)
+
+running 2 tests
+test replay_writer_reproduces_timeout_commit_proof_and_attachment_bytes ... ok
+test replay_writer_reproduces_fixed_outer_prefix_fixtures ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests node115_replay_wire_encoder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+cargo clippy --locked --offline --all-targets --manifest-path src/node115-replay-wire-encoder/Cargo.toml -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
