@@ -1,0 +1,53 @@
+RE-017-node115-tx-index-context-fixture
+Darwin arm64
+Python 3.9.6
+Apple LLVM version 21.0.0
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B /tmp/hl-node115-tx-index-ingress.Q7trwc/RE-017-node115-tx-index-context-fixture/verify.py
+PASS: #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 67 spans across 5 FDEs
+PASS: named omission default, nil/write distinction, positional copy, integer table and replay reset
+
+$ python3 -B /tmp/hl-node115-tx-index-ingress.Q7trwc/RE-017-node115-tx-index-context-fixture/test_project.py
+test_bad_scalar_and_image_coordinates (__main__.TransactionIndexFixtureTests) ... ok
+test_cli_emits_one_local_staged_image (__main__.TransactionIndexFixtureTests) ... ok
+test_distinct_omission_nil_and_explicit_zero (__main__.TransactionIndexFixtureTests) ... ok
+test_native_unsigned_widths_and_nonnegative_signed_widths (__main__.TransactionIndexFixtureTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.025s
+
+OK
+
+$ PYTHONPATH=/tmp/hl-node115-tx-index-ingress.Q7trwc/RE-017-node115-tx-index-context-fixture:/tmp/hl-node115-assemble.zpDuLH/RE-017-node115-compact-assemble-fixture:/tmp/hl-node115-begin-writes.3AcjQl/RE-017-node115-begin-replay-stores python3 -B - <<'PY'
+from hashlib import sha256
+from struct import pack_into, unpack_from
+from apply_begin import apply
+from assemble import assemble, EVM_BLOCK_SIZE
+from project import DECODED_SIZE, stage
+
+def digest(value):
+    return sha256(value).hexdigest()
+
+evm = bytes(EVM_BLOCK_SIZE)
+for label, token, tag, payload in (
+    ("named omission", None, 1, 0), ("nil", b"\xc0", 0, 0xa5a5a5a5a5a5a5a5),
+    ("explicit zero", b"\x00", 1, 0), ("uint16", b"\xcd\x01\x02", 1, 258),
+):
+    image = bytearray(b"\xa5" * DECODED_SIZE)
+    pack_into("<Q", image, 0x28, 41)
+    decoded = stage(image, digest(image), 41, token)
+    compact = assemble(decoded, evm, digest(decoded), digest(evm), 41, bytes(4), bytes(3))
+    assert unpack_from("<QQ", compact) == (tag, payload)
+    begun = apply(compact, digest(compact), "compact", 41, "after-clock", 107)
+    assert unpack_from("<QQ", begun) == (0, payload)
+    final = apply(begun, digest(begun), "compact", 42, "before-action-initializer")
+    assert unpack_from("<QQ", final) == (1, 0)
+    print("PASS:", label, "through materializer, tag clear, and transaction-index reset")
+PY
+PASS: named omission through materializer, tag clear, and transaction-index reset
+PASS: nil through materializer, tag clear, and transaction-index reset
+PASS: explicit zero through materializer, tag clear, and transaction-index reset
+PASS: uint16 through materializer, tag clear, and transaction-index reset
