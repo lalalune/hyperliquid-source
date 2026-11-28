@@ -8,6 +8,25 @@ The function takes signed `initial` (RCX) and `delta` (RDX), adds them with a si
 
 At the join `0x44adce7`, the helper overwrites the accumulator register `r12` with `0x8000000000000000`, restores the original `initial` from `[rsp+8]`, the original signed sum from `[rsp+0xa0]`, and its nonnegative clamp from `[rsp+0x98]`. The snapshot then converts the restored `initial` at `0x44add34`. Therefore the prepass aggregate does not feed the later weight calculation; the observed remaining effects are the helper calls and any overflow diagnostics. The prepass's motivation and any side effects inside its callees remain unknown. The owned model's input map represents the state at the snapshot boundary. Signed overflow and non-returning helpers are explicit stop boundaries.
 
+### Raw-byte witnesses for the prepass boundary
+
+These selected rows are copied from the pinned ELF's `.text` bytes (addresses are ELF virtual addresses). They make the branch, call, accumulation, and join claims reviewable without relying on the retained JSON instruction table. They are local witnesses, not a substitute for the complete-window verifier or the case results.
+
+| Address | Bytes | Decoding / role |
+| --- | --- | --- |
+| `0x44ada21` | `4d 85 ed` | `test r13,r13` — signed delta is checked at `0x44ada24`; `jle` at `0x44ada29` bypasses the prepass for nonpositive delta. |
+| `0x44ada49` | `49 8d b7 8c 00 00 00` | `lea rsi,[r15+0x8c]` — owner key passed to the first amount call. |
+| `0x44ada53` | `e8 d8 b9 ff ff` | direct call to `0x44a9430`. |
+| `0x44ada58` | `41 83 3f 02` | `cmp DWORD PTR [r15],2` — mode check before child traversal. |
+| `0x44ada6a` | `48 8b 41 08` | load child collection root from `owner+8`; the following instructions also require nonzero root and count. |
+| `0x44adc47` | `48 8d 04 92` | `lea rax,[rdx+rdx*4]`; followed by `mov edx,[rcx+rax*4+0x18]` and `movupd xmm0,[rcx+rax*4+8]` to copy the selected 20-byte key. |
+| `0x44adc67` | `e8 c4 b7 ff ff` | direct call to `0x44a9430` for the copied child key. |
+| `0x44adc6c` | `4c 89 e1` | `mov rcx,r12`; next `add rcx,rax` at `0x44adc6f`, with `jo` at `0x44adc72` selecting the overflow diagnostic. |
+| `0x44adce7` | `4c 8b 7c 24 68` | join reloads owner, then `movabs r12,0x8000000000000000`; original inputs are reloaded at `0x44adcfb`, `0x44add00`, and `0x44add08`. |
+| `0x44add34` | `f2 48 0f 2a c1` | `cvtsi2sd xmm0,rcx` — snapshot converts the restored original `initial`, not the prepass aggregate. |
+
+The bytes can be checked directly against the target with `objdump -d -Mintel --start-address=0x44ada21 --stop-address=0x44add39 artifacts/node/115/hl-node`; the verifier independently checks the target digest and all selected windows.
+
 `0x3bcc440` calls the collector `0x3dda220`, which maps the existing 72-byte keyed rows to 32-byte rows: 20 key bytes and a binary64 value equal to the existing row value at +0x18 multiplied by `initial / 1e6`. The flat path uses a 72-byte stride; helper entry and comparator windows identify 20-byte key comparisons and 32-byte temporary rows. The selected entry call `0x3cd3dd0` / `0x3f170d0` obtains or inserts the target in this temporary map with zero on vacancy, then adds `delta / 1e6` to its stored value. Normal allocation, logical key uniqueness and native tree/ring iteration are premises; physical balancing and unwind are outside scope.
 
 For every temporary value, the original emits zero if it is strictly less than `1e-7` (equality passes this threshold), is nonfinite, or the denominator is below `1e-15`. Otherwise it divides by the denominator and replaces a positive-infinite quotient with zero. The denominator is derived from a nonnegative signed integer divided by `1e6`, so a positive value is at least `1e-6` in this modeled domain; the native denominator test is therefore equivalent to checking for zero. Exact constants and both branches are retained in the packet. Normal binary64 rounding and a standard floating-point environment are premises.
