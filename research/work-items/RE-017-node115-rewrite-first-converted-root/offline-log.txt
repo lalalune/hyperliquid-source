@@ -1,0 +1,183 @@
+test_absent_and_future_freezes_preserve_input_image (__main__.LocalStartupRewriteTests) ... ok
+test_cli_binary_and_report (__main__.LocalStartupRewriteTests) ... ok
+test_equality_changes_only_replay_pair_and_retains_original_copy (__main__.LocalStartupRewriteTests) ... ok
+test_past_and_invalid_fixture_coordinates (__main__.LocalStartupRewriteTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.129s
+
+OK
+PASS: pinned #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 42 spans in startup FDE
+PASS: startup saves the original pair at future+0x68/+0x70 before the freeze guard
+PASS: equality rewrites materialized +0x18/+0x20; both bypass arms preserve the pair at this boundary
+PASS: stale freeze height reaches a failure arm and ud2 if its helper returns
+PASS: selected replay spawn subsequently reads the materialized object, not the earlier future copy
+0x5a6e1e0..0x5a70656 0x5a6e2d3 4989ef mov r15, rbp
+0x5a6e1e0..0x5a70656 0x5a6e2d6 4889ac2468010000 mov qword ptr [rsp + 0x168], rbp
+0x5a6e1e0..0x5a70656 0x5a6e3e2 483b842468010000 cmp rax, qword ptr [rsp + 0x168]
+0x5a6e1e0..0x5a70656 0x5a6e3ea 0f85081d0000 jne 0x5a700f8 <.text+0x4656df8>
+0x5a6e1e0..0x5a70656 0x5a6e45d 488b4910 mov rcx, qword ptr [rcx + 0x10]
+0x5a6e1e0..0x5a70656 0x5a6e461 48ffc1 inc rcx
+0x5a6e1e0..0x5a70656 0x5a6e46b 480f44c8 cmove rcx, rax
+0x5a6e1e0..0x5a70656 0x5a6e46f 48898c2468010000 mov qword ptr [rsp + 0x168], rcx
+0x5a6e1e0..0x5a70656 0x5a6e48a 4c89fa mov rdx, r15
+0x5a6e1e0..0x5a70656 0x5a6e48d ff155592a700 call qword ptr [rip + 0xa79255] # 0x64e76e8
+0x5a6e1e0..0x5a70656 0x5a6e49d 48398424f8040000 cmp qword ptr [rsp + 0x4f8], rax
+0x5a6e1e0..0x5a70656 0x5a6e4a5 0f8535010000 jne 0x5a6e5e0 <.text+0x46552e0>
+0x5a6e1e0..0x5a70656 0x5a6e4cb 488b942428010000 mov rdx, qword ptr [rsp + 0x128]
+0x5a6e1e0..0x5a70656 0x5a6e5b9 0f8541fdffff jne 0x5a6e300 <.text+0x4655000>
+0x5a6e1e0..0x5a70656 0x5a6e5cd e92efdffff jmp 0x5a6e300 <.text+0x4655000>
+0x5a6e1e0..0x5a70656 0x5a6e609 660f108c2408050000 movupd xmm1, xmmword ptr [rsp + 0x508]
+0x5a6e1e0..0x5a70656 0x5a6e636 660f298c2430030000 movapd xmmword ptr [rsp + 0x330], xmm1
+0x5a6e1e0..0x5a70656 0x5a6fd24 4c8bbc2438030000 mov r15, qword ptr [rsp + 0x338]
+0x5a6e1e0..0x5a70656 0x5a6ff8f 0f8436e5ffff je 0x5a6e4cb <.text+0x46551cb>
+0x4fad300..0x4fad70a 0x4fad351 498b4910 mov rcx, qword ptr [r9 + 0x10]
+0x4fad300..0x4fad70a 0x4fad355 48ffc1 inc rcx
+0x4fad300..0x4fad70a 0x4fad35f 4c0f45c9 cmovne r9, rcx
+0x4fad300..0x4fad70a 0x4fad388 488b4e08 mov rcx, qword ptr [rsi + 0x8]
+0x4fad300..0x4fad70a 0x4fad38c 488b4120 mov rax, qword ptr [rcx + 0x20]
+0x4fad300..0x4fad70a 0x4fad390 4885c0 test rax, rax
+0x4fad300..0x4fad70a 0x4fad398 0f8439020000 je 0x4fad5d7 <.text+0x3b942d7>
+0x4fad300..0x4fad70a 0x4fad5d7 4889d1 mov rcx, rdx
+0x4fad300..0x4fad70a 0x4fad5e3 4883c00a add rax, 0xa
+0x4fad300..0x4fad70a 0x4fad5ee 480f43c8 cmovae rcx, rax
+0x4fad300..0x4fad70a 0x4fad5f2 4939c9 cmp r9, rcx
+0x4fad300..0x4fad70a 0x4fad5f5 7310 jae 0x4fad607 <.text+0x3b94307>
+0x4fad300..0x4fad70a 0x4fad5ff 4c8900 mov qword ptr [rax], r8
+0x4fad300..0x4fad70a 0x4fad60c 4c894c2420 mov qword ptr [rsp + 0x20], r9
+0x4fad300..0x4fad70a 0x4fad679 488b4c2420 mov rcx, qword ptr [rsp + 0x20]
+0x4fad300..0x4fad70a 0x4fad67e 48894818 mov qword ptr [rax + 0x18], rcx
+verified 35 replay conversion cursor instruction spans and selected edges
+PASS: node #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+example_length=147 leaf_calls=40
+node_calls=2 element_calls=2 example_len=141
+height advance runs=['0x54838d3', '0x5483fd3']
+0x59d5ea0..0x59d6516 0x59d63b7 89932c010000 mov dword ptr [rbx + 0x12c], edx
+0x59d5ea0..0x59d6516 0x59d63c5 0f11831c010000 movups xmmword ptr [rbx + 0x11c], xmm0
+0x59d5ea0..0x59d6516 0x59d63ef 4889b310010000 mov qword ptr [rbx + 0x110], rsi
+0x59d5ea0..0x59d6516 0x59d63f9 899318010000 mov dword ptr [rbx + 0x118], edx
+0x4fb7760..0x4fb7b56 0x4fb77f4 488dbc2430040000 lea rdi, [rsp + 0x430]
+0x4fb7760..0x4fb7b56 0x4fb77ff e89ce6a100 call 0x59d5ea0 <.text+0x45bcba0>
+0x4fb7760..0x4fb7b56 0x4fb786f 488db42458040000 lea rsi, [rsp + 0x458]
+0x4fb7760..0x4fb7b56 0x4fb7877 488dbc24d8000000 lea rdi, [rsp + 0xd8]
+0x4fb7760..0x4fb7b56 0x4fb7886 ba08010000 mov edx, 0x108
+0x4fb7760..0x4fb7b56 0x4fb78e6 488dbc24e0020000 lea rdi, [rsp + 0x2e0]
+0x4fb7760..0x4fb7b56 0x4fb78ee ba48010000 mov edx, 0x148
+0x4fb7760..0x4fb7b56 0x4fb78f3 488db424d8000000 lea rsi, [rsp + 0xd8]
+0x4fb7760..0x4fb7b56 0x4fb7ab2 488db424b8020000 lea rsi, [rsp + 0x2b8]
+0x4fb7760..0x4fb7b56 0x4fb7aba ba78010000 mov edx, 0x178
+0x4fb7760..0x4fb7b56 0x4fb7ac2 41ffd6 call r14
+0x4eff5f0..0x4eff946 0x4eff6d0 488dbc2490030000 lea rdi, [rsp + 0x390]
+0x4eff5f0..0x4eff946 0x4eff6db e880800b00 call 0x4fb7760 <.text+0x3b9e460>
+0x4eff5f0..0x4eff946 0x4eff798 488db424b8030000 lea rsi, [rsp + 0x3b8]
+0x4eff5f0..0x4eff946 0x4eff7a0 488d7c2460 lea rdi, [rsp + 0x60]
+0x4eff5f0..0x4eff946 0x4eff7ad ba30030000 mov edx, 0x330
+0x4eff5f0..0x4eff946 0x4eff80f 488d742428 lea rsi, [rsp + 0x28]
+0x4eff5f0..0x4eff946 0x4eff814 ba68030000 mov edx, 0x368
+0x4eff5f0..0x4eff946 0x4eff81c ff15e6fc5d01 call qword ptr [rip + 0x15dfce6] # 0x64df508
+0x4fad300..0x4fad70a 0x4fad316 4c8b16 mov r10, qword ptr [rsi]
+0x4fad300..0x4fad70a 0x4fad319 498d4a50 lea rcx, [r10 + 0x50]
+0x4fad300..0x4fad70a 0x4fad31d 4d8d8aa0000000 lea r9, [r10 + 0xa0]
+0x4fad300..0x4fad70a 0x4fad324 418b823c010000 mov eax, dword ptr [r10 + 0x13c]
+0x4fad300..0x4fad70a 0x4fad32f 410f10822c010000 movups xmm0, xmmword ptr [r10 + 0x12c]
+0x4fad300..0x4fad70a 0x4fad34d 4c0f44c9 cmove r9, rcx
+0x4fad300..0x4fad70a 0x4fad351 498b4910 mov rcx, qword ptr [r9 + 0x10]
+0x4fad300..0x4fad70a 0x4fad355 48ffc1 inc rcx
+0x4fad300..0x4fad70a 0x4fad35f 4c0f45c9 cmovne r9, rcx
+0x4fad300..0x4fad70a 0x4fad368 498d4a30 lea rcx, [r10 + 0x30]
+0x4fad300..0x4fad70a 0x4fad36e 498d4228 lea rax, [r10 + 0x28]
+0x4fad300..0x4fad70a 0x4fad372 498d8ab8000000 lea rcx, [r10 + 0xb8]
+0x4fad300..0x4fad70a 0x4fad380 480f44c8 cmove rcx, rax
+0x4fad300..0x4fad70a 0x4fad384 0f104120 movups xmm0, xmmword ptr [rcx + 0x20]
+0x4fad300..0x4fad70a 0x4fad393 4c89542438 mov qword ptr [rsp + 0x38], r10
+0x4fad300..0x4fad70a 0x4fad3a3 4c894c2420 mov qword ptr [rsp + 0x20], r9
+0x4fad300..0x4fad70a 0x4fad3a8 4889542428 mov qword ptr [rsp + 0x28], rdx
+0x4fad300..0x4fad70a 0x4fad60c 4c894c2420 mov qword ptr [rsp + 0x20], r9
+0x4fad300..0x4fad70a 0x4fad611 4889542428 mov qword ptr [rsp + 0x28], rdx
+0x4fad300..0x4fad70a 0x4fad631 488b542438 mov rdx, qword ptr [rsp + 0x38]
+0x4fad300..0x4fad70a 0x4fad636 8b8a28010000 mov ecx, dword ptr [rdx + 0x128]
+0x4fad300..0x4fad70a 0x4fad641 894840 mov dword ptr [rax + 0x40], ecx
+0x4fad300..0x4fad70a 0x4fad644 488b8a20010000 mov rcx, qword ptr [rdx + 0x120]
+0x4fad300..0x4fad70a 0x4fad64b 48894838 mov qword ptr [rax + 0x38], rcx
+0x4fad300..0x4fad70a 0x4fad669 8b4c2450 mov ecx, dword ptr [rsp + 0x50]
+0x4fad300..0x4fad70a 0x4fad66d 894854 mov dword ptr [rax + 0x54], ecx
+0x4fad300..0x4fad70a 0x4fad675 0f114044 movups xmmword ptr [rax + 0x44], xmm0
+0x4fad300..0x4fad70a 0x4fad67e 48894818 mov qword ptr [rax + 0x18], rcx
+0x4fad300..0x4fad70a 0x4fad687 48894820 mov qword ptr [rax + 0x20], rcx
+0x4fad300..0x4fad70a 0x4fad690 0f114028 movups xmmword ptr [rax + 0x28], xmm0
+0x5a6e1e0..0x5a70656 0x5a6e47a 488dbc24f8040000 lea rdi, [rsp + 0x4f8]
+0x5a6e1e0..0x5a70656 0x5a6e48a 4c89fa mov rdx, r15
+0x5a6e1e0..0x5a70656 0x5a6e48d ff155592a700 call qword ptr [rip + 0xa79255] # 0x64e76e8
+0x5a6e1e0..0x5a70656 0x5a6e5e0 488b842448050000 mov rax, qword ptr [rsp + 0x548]
+0x5a6e1e0..0x5a70656 0x5a6e5e8 4889842470030000 mov qword ptr [rsp + 0x370], rax
+0x5a6e1e0..0x5a70656 0x5a6e5f0 0f10842438050000 movups xmm0, xmmword ptr [rsp + 0x538]
+0x5a6e1e0..0x5a70656 0x5a6e5f8 0f29842460030000 movaps xmmword ptr [rsp + 0x360], xmm0
+0x5a6e1e0..0x5a70656 0x5a6e609 660f108c2408050000 movupd xmm1, xmmword ptr [rsp + 0x508]
+0x5a6e1e0..0x5a70656 0x5a6e612 660f10942418050000 movupd xmm2, xmmword ptr [rsp + 0x518]
+0x5a6e1e0..0x5a70656 0x5a6e61b 660f109c2428050000 movupd xmm3, xmmword ptr [rsp + 0x528]
+0x5a6e1e0..0x5a70656 0x5a6e624 660f299c2450030000 movapd xmmword ptr [rsp + 0x350], xmm3
+0x5a6e1e0..0x5a70656 0x5a6e62d 660f29942440030000 movapd xmmword ptr [rsp + 0x340], xmm2
+0x5a6e1e0..0x5a70656 0x5a6e636 660f298c2430030000 movapd xmmword ptr [rsp + 0x330], xmm1
+0x5a6e1e0..0x5a70656 0x5a6eafc 488d942458030000 lea rdx, [rsp + 0x358]
+0x5a6e1e0..0x5a70656 0x5a6eb04 8b4208 mov eax, dword ptr [rdx + 0x8]
+0x5a6e1e0..0x5a70656 0x5a6eb07 488d8c24b8010000 lea rcx, [rsp + 0x1b8]
+0x5a6e1e0..0x5a70656 0x5a6eb0f 894138 mov dword ptr [rcx + 0x38], eax
+0x5a6e1e0..0x5a70656 0x5a6eb12 488b02 mov rax, qword ptr [rdx]
+0x5a6e1e0..0x5a70656 0x5a6eb15 48894130 mov qword ptr [rcx + 0x30], rax
+0x5a6e1e0..0x5a70656 0x5a6ec22 8b421c mov eax, dword ptr [rdx + 0x1c]
+0x5a6e1e0..0x5a70656 0x5a6ec2d 89414c mov dword ptr [rcx + 0x4c], eax
+0x5a6e1e0..0x5a70656 0x5a6ec30 0f10420c movups xmm0, xmmword ptr [rdx + 0xc]
+0x5a6e1e0..0x5a70656 0x5a6ec34 0f11413c movups xmmword ptr [rcx + 0x3c], xmm0
+0x5a6e1e0..0x5a70656 0x5a6ec38 660f10842438030000 movupd xmm0, xmmword ptr [rsp + 0x338]
+0x5a6e1e0..0x5a70656 0x5a6ec41 660f108c2448030000 movupd xmm1, xmmword ptr [rsp + 0x348]
+0x5a6e1e0..0x5a70656 0x5a6ec4a 660f118424c8010000 movupd xmmword ptr [rsp + 0x1c8], xmm0
+0x5a6e1e0..0x5a70656 0x5a6ec53 660f118c24d8010000 movupd xmmword ptr [rsp + 0x1d8], xmm1
+0x5a6e1e0..0x5a70656 0x5a6ec8c 488b842400020000 mov rax, qword ptr [rsp + 0x200]
+0x5a6e1e0..0x5a70656 0x5a6ec94 48898424b0000000 mov qword ptr [rsp + 0xb0], rax
+0x5a6e1e0..0x5a70656 0x5a6ec9c 0f108424f0010000 movups xmm0, xmmword ptr [rsp + 0x1f0]
+0x5a6e1e0..0x5a70656 0x5a6eca4 0f298424a0000000 movaps xmmword ptr [rsp + 0xa0], xmm0
+0x5a6e1e0..0x5a70656 0x5a6ecb4 0f108c24c0010000 movups xmm1, xmmword ptr [rsp + 0x1c0]
+0x5a6e1e0..0x5a70656 0x5a6ecbc 0f109424d0010000 movups xmm2, xmmword ptr [rsp + 0x1d0]
+0x5a6e1e0..0x5a70656 0x5a6ecc4 0f109c24e0010000 movups xmm3, xmmword ptr [rsp + 0x1e0]
+0x5a6e1e0..0x5a70656 0x5a6eccc 0f299c2490000000 movaps xmmword ptr [rsp + 0x90], xmm3
+0x5a6e1e0..0x5a70656 0x5a6ecd4 0f29942480000000 movaps xmmword ptr [rsp + 0x80], xmm2
+0x5a6e1e0..0x5a70656 0x5a6ecdc 0f294c2470 movaps xmmword ptr [rsp + 0x70], xmm1
+0x5a6e1e0..0x5a70656 0x5a6ee6f 48898424e0020000 mov qword ptr [rsp + 0x2e0], rax
+0x5a6e1e0..0x5a70656 0x5a6ee7f 0f298424d0020000 movaps xmmword ptr [rsp + 0x2d0], xmm0
+0x5a6e1e0..0x5a70656 0x5a6ee8c 0f284c2470 movaps xmm1, xmmword ptr [rsp + 0x70]
+0x5a6e1e0..0x5a70656 0x5a6ee91 660f28942480000000 movapd xmm2, xmmword ptr [rsp + 0x80]
+0x5a6e1e0..0x5a70656 0x5a6ee9a 660f289c2490000000 movapd xmm3, xmmword ptr [rsp + 0x90]
+0x5a6e1e0..0x5a70656 0x5a6eea3 660f299c24c0020000 movapd xmmword ptr [rsp + 0x2c0], xmm3
+0x5a6e1e0..0x5a70656 0x5a6eeac 660f299424b0020000 movapd xmmword ptr [rsp + 0x2b0], xmm2
+0x5a6e1e0..0x5a70656 0x5a6eeb5 0f298c24a0020000 movaps xmmword ptr [rsp + 0x2a0], xmm1
+0x5a6e1e0..0x5a70656 0x5a6f989 488d942490020000 lea rdx, [rsp + 0x290]
+0x5a6e1e0..0x5a70656 0x5a6f991 e81aadeeff call 0x595a6b0 <.text+0x45413b0>
+0x4d6d5c0..0x4d6d73d 0x4d6d5f7 488d4b38 lea rcx, [rbx + 0x38]
+0x4d6d5c0..0x4d6d73d 0x4d6d5fb 488d358ac86efb lea rsi, [rip - 0x4913776] # 0x459e8c
+0x4d6d5c0..0x4d6d73d 0x4d6d652 488d4b18 lea rcx, [rbx + 0x18]
+0x4d6d5c0..0x4d6d73d 0x4d6d656 488d35a28abafb lea rsi, [rip - 0x445755e] # 0x9160ff
+0x4d6d5c0..0x4d6d73d 0x4d6d67c 488d4b20 lea rcx, [rbx + 0x20]
+0x4d6d5c0..0x4d6d73d 0x4d6d680 488d359e92bafb lea rsi, [rip - 0x4456d62] # 0x916925
+0x4d6d5c0..0x4d6d73d 0x4d6d69b 488d7328 lea rsi, [rbx + 0x28]
+0x4d6d5c0..0x4d6d73d 0x4d6d6ae 4883c344 add rbx, 0x44
+0x4d6d5c0..0x4d6d73d 0x4d6d6ba e891cf0900 call 0x4e0a650 <.text+0x39f1350>
+0x4e0b070..0x4e0b0a7 0x4e0b078 488d3501e164fb lea rsi, [rip - 0x49b1eff] # 0x459180
+0x4e0a650..0x4e0a687 0x4e0a658 488d3571f464fb lea rsi, [rip - 0x49b0b8f] # 0x459ad0
+0x4fb7760..0x4fb7b56 0x4fb78fb 41ffd4 call r12
+0x4eff5f0..0x4eff946 0x4eff7b2 ff1550fd5d01 call qword ptr [rip + 0x15dfd50] # 0x64df508
+0x595a6b0..0x595ac25 0x595ab43 e8388478ff call 0x50e2f80 <.text+0x3cc9c80>
+0x50e2f80..0x50e3104 0x50e2fce e86da7c8ff call 0x4d6d740 <.text+0x3954440>
+0x4d6d740..0x4d6d886 0x4d6d777 488d35b391bafb lea rsi, [rip - 0x4456e4d] # 0x916931
+0x4d6d740..0x4d6d886 0x4d6d78b e860413100 call 0x50818f0 <.text+0x3c685f0>
+0x50818f0..0x5081a70 0x50819aa e911bcceff jmp 0x4d6d5c0 <.text+0x39542c0>
+0x5a6e1e0..0x5a70656 0x5a6ece8 e97a010000 jmp 0x5a6ee67 <.text+0x4655b67>
+Pinned #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 119 selected header witnesses
+Decoded fields retain clock and proposer bytes through converter and archive staging
+compile completed-payload projection e86354ccddec0b517ac5d239280d70adf520f355 offline
+     Locking 7 packages to latest Rust 1.95.0 compatible versions
+compiling conversion cursor snapshot e9c51eacd8d19b0462b2d31b83c48caf613715cb offline
+     Locking 7 packages to latest Rust 1.95.0 compatible versions
+{"original_hardfork_pair": [5, 17], "materialized_replay_pair": [6, 40], "restored_context_round": 40, "scheduled_freeze_height": 42, "rewritten": true, "materialized_image_sha256": "516f3697fdc9e6103212d4ff3aba7d22e263ea30aa654b3ee99b0dd1d602e902", "successor_hardfork": {"version": true, "round": true}, "selected_checks_pass": true, "selected_wire_header": {"height": 43, "round": 50, "time": {"unix_seconds": 0, "subsec_nanos": 120000000}}, "selected_root_comparison": {"clock_rotated": true, "checkpoint_context": {"height": 42, "reference_raw_digest": "0x1448046ebd49b0fde0f0639a82a19e506351189b889c79eadcf4b3ee89aa3df5", "all_context_fields_match": true, "different_context_fields": [], "ordered_context_slots": true}, "successor_begin": {"height": 43, "reference_raw_digest": "0x04e0abf9141ea716504a46806c27e9c8d52fc415ca7a0edc8609da5a328904c1", "matched": {"height": true, "round": true, "time": true, "prev_time": true}}, "selected_checks_pass": true}}
+{"original_hardfork_pair": [5, 17], "materialized_replay_pair": [6, 40], "restored_context_round": 40, "scheduled_freeze_height": 42, "rewritten": true, "materialized_image_sha256": "516f3697fdc9e6103212d4ff3aba7d22e263ea30aa654b3ee99b0dd1d602e902", "successor_hardfork": {"version": false, "round": false}, "selected_checks_pass": false, "selected_wire_header": {"height": 43, "round": 50, "time": {"unix_seconds": 0, "subsec_nanos": 120000000}}, "selected_root_comparison": {"clock_rotated": true, "checkpoint_context": {"height": 42, "reference_raw_digest": "0x1448046ebd49b0fde0f0639a82a19e506351189b889c79eadcf4b3ee89aa3df5", "all_context_fields_match": true, "different_context_fields": [], "ordered_context_slots": true}, "successor_begin": {"height": 43, "reference_raw_digest": "0x67b61eedb6c9f81969249aa1a6e0b144575a207ab81440c02b70a665e825926e", "matched": {"height": true, "round": true, "time": true, "prev_time": true}}, "selected_checks_pass": true}}
+rejected original pair in archive: archive hardfork pair differs from materialized replay pair
+verified original H pair, rewritten successor and H+1 hardfork children; stale H+1/root controls rejected
