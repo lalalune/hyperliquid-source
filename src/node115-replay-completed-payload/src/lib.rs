@@ -1,6 +1,7 @@
 //! Offline projection of the selected #115 completed reader-to-decoder handoff.
 #![forbid(unsafe_code)]
 
+pub use node115_checkpoint_clock_text::CheckpointClockText as ReplicaClockText;
 pub use node115_client_block_success::{ReplayError, ReplayPayload};
 pub use node115_lz4_decode::DecodeError as CompressionError;
 
@@ -36,6 +37,20 @@ pub enum ReplayBlockCheck {
 }
 
 impl DecodedPrefix {
+    /// Render the decoded Block's clock with the native replica spelling.
+    /// Returns no text when the prefix does not contain a renderable Block.
+    pub fn render_replica_time(&self) -> Option<ReplicaClockText> {
+        let ReplayPayload::Block { block, .. } = self.result.as_ref().ok()? else {
+            return None;
+        };
+        let time = block.header.timestamp;
+        node115_checkpoint_clock_text::render_checkpoint_clock(
+            time.packed_date,
+            time.second_of_day,
+            time.nanoseconds,
+        )
+    }
+
     /// Use the caller-supplied startup pair in the observed comparison order.
     /// The successor is available only on the matching Block continuation.
     pub fn check_block_identity(&self, expected: [u64; 2]) -> ReplayBlockCheck {
