@@ -23,10 +23,15 @@ calendar stub, external Cargo dependency or whole-node claim is supplied.
 `heartbeat::classify` implements the separately recovered RE-008 per-row
 ratio/age decision. It preserves the positive-zero denominator path, ratio
 raw-bit sanitization, configured threshold, unnamed configuration byte and
-strict 180-second age branch as logical tags 0 through 3. Negative and NaN
+strict 180-second age branch as logical tags 0 through 3. For callers with
+calendar inputs, `heartbeat::classify_at` derives the age from the current
+`HeartbeatTime` and the optional row's recorded time. Convert a clock result
+with `HeartbeatTime::from_datetime`. The calendar comparison and its leap-second
+and fractional threshold controls are in
+`research/work-items/RE-008-node115-heartbeat-calendar-age`. Negative and NaN
 denominators become a safe error because the native diagnostic path has no
-established successful return. The API does not claim map layout, the time
-helper, logging, exception state, output padding or wire format.
+established successful return. Map lookup, logging, exception state, output
+padding and wire format remain outside these APIs.
 
 ```sh
 cargo +1.95.0 build --offline --locked --manifest-path src/node115-time-producer/Cargo.toml
