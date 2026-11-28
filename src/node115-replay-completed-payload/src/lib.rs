@@ -1,6 +1,9 @@
 //! Offline projection of the selected #115 completed reader-to-decoder handoff.
 #![forbid(unsafe_code)]
 
+mod gate;
+pub use gate::{ReceiveOrder, ReceivedRounds};
+
 pub use node115_client_block_success::{ReplayError, ReplayPayload};
 pub use node115_lz4_decode::DecodeError as CompressionError;
 
