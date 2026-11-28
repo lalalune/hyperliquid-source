@@ -3,7 +3,9 @@
 //! `match-sequence`, `literal-encoder`, and `lz4-decode`).
 
 use node115_lz4_decode::{self as decoder, DecodeError};
-use node115_lz4_dictionary_kernel::{Verdict, large_probe, small_probe};
+use node115_lz4_dictionary_kernel::{
+    BeforeProbe, Probe, Verdict, large_bucket, large_probe, small_bucket, small_probe,
+};
 use node115_lz4_literal_encoder as literal_encoder;
 use node115_lz4_match_extension as match_extension;
 use node115_lz4_match_sequence as match_sequence;
@@ -45,111 +47,85 @@ pub fn compress_prepend_size(input: &[u8]) -> Result<Vec<u8>, Lz4Error> {
     out[..4].copy_from_slice(&raw_len.to_le_bytes());
 
     let mut used = 4usize;
-    if input.len() < 12 {
+    if input.len() <= 12 {
         literal_encoder::encode(input, 0, input.len(), &mut out, &mut used)
             .map_err(|_| Lz4Error::SinkOverflow)?;
         out.truncate(used);
         return Ok(out);
     }
 
-    let use_small = input.len() < 65_535;
-    if use_small {
-        let mut table = [0u16; 4096];
-        compress_loop_small(input, &mut table, &mut out, &mut used)?;
+    if input.len() < 65_535 {
+        compress_block(
+            input,
+            &mut [0u16; 4096],
+            &mut out,
+            &mut used,
+            small_probe,
+            |bytes| small_bucket(bytes[..4].try_into().unwrap()),
+        )?;
     } else {
-        let mut table = [0u32; 4096];
-        compress_loop_large(input, &mut table, &mut out, &mut used)?;
+        compress_block(
+            input,
+            &mut [0u32; 4096],
+            &mut out,
+            &mut used,
+            large_probe,
+            |bytes| large_bucket(bytes[..8].try_into().unwrap()),
+        )?;
     }
 
     out.truncate(used);
     Ok(out)
 }
 
-fn compress_loop_small(
+fn compress_block<T: TryFrom<usize>>(
     input: &[u8],
-    table: &mut [u16; 4096],
+    table: &mut [T; 4096],
     sink: &mut [u8],
     used: &mut usize,
+    probe: impl Fn(&mut [T; 4096], &[u8], usize, u64) -> Result<Probe, BeforeProbe>,
+    bucket: impl Fn(&[u8]) -> usize,
 ) -> Result<(), Lz4Error> {
     let limit = input.len() - 12;
-    let mut anchor = 0usize;
-    let mut pos = 0usize;
-
-    // Seed position 0 without matching against itself (distance 0 is invalid in LZ4).
-    let _ = small_probe(table, input, 0, 0);
-    pos += 1;
-
+    let mut anchor = 0;
+    // The native first seed stores offset zero into an already zeroed table.
+    let mut pos = 1;
+    let mut step = 32;
     while pos <= limit {
-        let probe = small_probe(table, input, pos, 0).map_err(|_| Lz4Error::SinkOverflow)?;
-        if let Verdict::Match {
-            candidate,
-            distance,
-        } = probe.verdict
-            && distance > 0
-            && distance <= u64::from(u16::MAX)
-        {
-            let mut cursor = pos + 4;
-            let extra = match_extension::extend(input, input, &mut cursor, candidate + 4)
-                .map_err(|_| Lz4Error::SinkOverflow)?;
-            match_sequence::emit(
-                &input[anchor..pos],
-                extra as u64,
-                distance as u16,
-                sink,
-                used,
-            )
-            .map_err(|_| Lz4Error::SinkOverflow)?;
-            anchor = cursor;
-            pos = cursor;
-            continue;
+        let entry = probe(table, input, pos, 0).map_err(|_| Lz4Error::SinkOverflow)?;
+        let (mut candidate, distance) = match entry.verdict {
+            Verdict::Match {
+                candidate,
+                distance,
+            } if distance != 0 => (candidate, distance),
+            _ => {
+                pos += step >> 5;
+                step += 1;
+                continue;
+            }
+        };
+        while pos > anchor && candidate > 0 && input[pos - 1] == input[candidate - 1] {
+            pos -= 1;
+            candidate -= 1;
         }
-        pos += 1;
-    }
-
-    literal_encoder::encode(input, anchor, input.len(), sink, used)
-        .map_err(|_| Lz4Error::SinkOverflow)
-}
-
-fn compress_loop_large(
-    input: &[u8],
-    table: &mut [u32; 4096],
-    sink: &mut [u8],
-    used: &mut usize,
-) -> Result<(), Lz4Error> {
-    let limit = input.len() - 12;
-    let mut anchor = 0usize;
-    let mut pos = 0usize;
-
-    let _ = large_probe(table, input, 0, 0);
-    pos += 1;
-
-    while pos <= limit {
-        let probe = large_probe(table, input, pos, 0).map_err(|_| Lz4Error::SinkOverflow)?;
-        if let Verdict::Match {
-            candidate,
-            distance,
-        } = probe.verdict
-            && distance > 0
-            && distance <= u64::from(u16::MAX)
-        {
-            let mut cursor = pos + 4;
-            let extra = match_extension::extend(input, input, &mut cursor, candidate + 4)
-                .map_err(|_| Lz4Error::SinkOverflow)?;
-            match_sequence::emit(
-                &input[anchor..pos],
-                extra as u64,
-                distance as u16,
-                sink,
-                used,
-            )
+        let mut end = pos + 4;
+        let extra = match_extension::extend(input, input, &mut end, candidate + 4)
             .map_err(|_| Lz4Error::SinkOverflow)?;
-            anchor = cursor;
-            pos = cursor;
-            continue;
-        }
-        pos += 1;
+        // The extension stops at len - 6, leaving an eight-byte hash load at end - 2.
+        let seed = end - 2;
+        table[bucket(&input[seed..])] = T::try_from(seed).map_err(|_| Lz4Error::InputTooLarge)?;
+        match_sequence::emit(
+            &input[anchor..pos],
+            extra as u64,
+            distance as u16,
+            sink,
+            used,
+        )
+        .map_err(|_| Lz4Error::SinkOverflow)?;
+        anchor = end;
+        pos = end;
+        step = 32;
     }
-
     literal_encoder::encode(input, anchor, input.len(), sink, used)
         .map_err(|_| Lz4Error::SinkOverflow)
 }
