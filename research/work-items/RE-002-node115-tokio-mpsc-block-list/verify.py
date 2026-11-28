@@ -1,0 +1,83 @@
+"""Verify full data tables in the pinned node #115 ELF against released native-library sources."""
+from hashlib import sha256
+from pathlib import Path
+import json
+import re
+import struct
+import sys
+import tarfile
+
+TARGET_SHA = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+CACHE = Path(sys.argv[1])
+TARGET = Path("artifacts/node/115/hl-node")
+sys.path.insert(0, str(Path.cwd() / "tools"))
+from elf_index import sections
+
+data = TARGET.read_bytes()
+assert sha256(data).hexdigest() == TARGET_SHA
+layout = {section["name"]: section for section in sections(data)}
+
+
+def read(section, address, size):
+    row = layout[section]
+    delta = address - row["address"]
+    assert 0 <= delta <= row["size"] - size
+    start = row["offset"] + delta
+    return data[start:start + size]
+
+
+def from_archive(name, digest, files):
+    path = CACHE / f"{name}.crate"
+    assert sha256(path.read_bytes()).hexdigest() == digest
+    print(name, digest)
+    with tarfile.open(path) as archive:
+        return [archive.extractfile(f"{name}/{part}").read().decode() for part in files]
+
+
+def rip_target(address, prefix):
+    instruction = read(".text", address, len(prefix) + 4)
+    assert instruction.startswith(prefix)
+    return address + len(instruction) + struct.unpack_from("<i", instruction, len(prefix))[0]
+
+
+print("node #115", TARGET_SHA)
+
+
+
+def compare_catalogued(address, expected_end):
+    catalog = json.loads(Path("research/byte-windows.json").read_text())
+    entry, = [item for item in catalog["windows"] if item["start"] == address]
+    assert entry["end"] == expected_end
+    source = entry["source"]
+    original = Path(source["path"]).read_bytes()[source["offset"]:source["offset"] + expected_end - address]
+    actual = read(".text", address, expected_end - address)
+    assert sha256(original).hexdigest() == source["body_sha256"]
+    assert sha256(actual).hexdigest() == entry["target_body_sha256"]
+    fields = []
+    if entry["relocations"] is not None:
+        fields = json.loads(Path(entry["relocations"]["path"]).read_text())
+        for item in entry["relocations"]["pointer"]:
+            fields = fields[item]
+    masked = {i for row in fields for i in range(row["offset"], row["offset"] + row["width"])}
+    verified = [i for i, (a, b) in enumerate(zip(original, actual)) if i not in masked and a == b]
+    assert len(verified) == len(actual) - len(masked)
+    print("catalogued and target bytes", len(verified), "/", len(actual))
+    return {address + row["offset"]: row for row in fields}
+
+def selected(fields, ip, prefix, target):
+    field = ip + len(prefix)
+    assert fields[field]["width"] == 4
+    assert rip_target(ip, prefix) == target
+    print("linked reference", hex(ip), "->", hex(target))
+
+
+source, = from_archive("tokio-1.45.1", "75ef51a33ef1da925cea3e4eb122833cb377c61439ca401b770f54902b806779", ["src/sync/mpsc/list.rs"])
+pop = re.search(r"pub\(crate\) fn pop\(&mut self, tx: &Tx<T>\).*?^    \}",source,re.S|re.M)[0]
+close = re.search(r"pub\(crate\) fn close\(&self\).*?^    \}",source,re.S|re.M)[0]
+for fragment in ('self.try_advancing_head()', 'self.reclaim_blocks(tx)', 'block.read(self.index)', 'self.index.wrapping_add(1)'):
+    assert fragment in pop
+for fragment in ('self.tail_position.fetch_add(1, Acquire)', 'self.find_block(slot_index)', 'block.as_ref().tx_close()'):
+    assert fragment in close
+for start,end in ((0x2e99a10,0x2e99bf5),(0x2e99c00,0x2e99dbb),(0x14e2430,0x14e2612)):
+    compare_catalogued(start,end)
+print('MPSC receiver pop and sender close instantiations match compiled references')
