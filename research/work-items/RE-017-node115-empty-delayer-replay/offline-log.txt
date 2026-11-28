@@ -1,0 +1,46 @@
+RE-017-node115-empty-delayer-replay
+Darwin arm64
+Python 3.9.6
+Apple LLVM version 21.0.0
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B /tmp/hl-node115-empty-extractor.LHVrzg/RE-017-node115-empty-delayer-replay/verify.py
+PASS: #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 118 pinned spans in 7 FDEs
+PASS: 24 direct targets, extractor relocation and zero-length memcpy binding
+
+$ python3 -B /tmp/hl-node115-empty-extractor.LHVrzg/RE-017-node115-empty-delayer-replay/test_project.py
+test_cli_reports_normalized_fixture_and_empty_descriptor (__main__.EmptyExtractorTests) ... ok
+test_exact_image_delta_preserves_counter_and_every_other_byte (__main__.EmptyExtractorTests) ... ok
+test_fixture_coordinates_and_nearby_unsupported_shapes (__main__.EmptyExtractorTests) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.057s
+
+OK
+
+$ DELAYER_LOADER=/tmp/hl-node115-empty-delayer.KDQ9Um/RE-017-node115-empty-delayer-fixture/project.py PYTHONPATH=/tmp/hl-node115-empty-extractor.LHVrzg/RE-017-node115-empty-delayer-replay python3 -B - <<'PY'
+from hashlib import sha256
+from importlib.util import module_from_spec, spec_from_file_location
+import os
+from struct import pack_into, unpack_from
+from project import project_empty_replay
+from test_project import synthetic, HEIGHT
+
+def digest(value):
+    return sha256(value).hexdigest()
+
+spec = spec_from_file_location("delayer_loader", os.environ["DELAYER_LOADER"])
+loader = module_from_spec(spec)
+spec.loader.exec_module(loader)
+before = synthetic()
+pack_into("<Q", before, 0x40e0, 0)
+restored = loader.project_empty_delayer(before, digest(before), HEIGHT)
+replayed, result, consumer = project_empty_replay(restored, digest(restored), HEIGHT)
+assert unpack_from("<8Q", replayed, 0x40c0) == (0, 8, 0, 0, 0, 8, 0, 0)
+assert unpack_from("<Q", replayed, 0x4120) == (0,)
+assert result == (0, 8, 0) and consumer == (8, 8, 0, 8)
+print("PASS: composed #7417 empty loader with empty replay extractor and consumer boundary")
+PY
+PASS: composed #7417 empty loader with empty replay extractor and consumer boundary
