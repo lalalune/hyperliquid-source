@@ -286,17 +286,12 @@ impl OrderSlab {
 
     /// Collect all order slots in a level in FIFO (head -> tail) order.
     pub fn level_slots(&self, level: &Level) -> Vec<SlabIndex> {
-        let mut out = Vec::new();
-        let mut cur = level.head;
-        let mut steps = 0;
-        while let Some(idx) = cur {
-            if steps > self.entries.len() {
-                break;
-            }
-            out.push(idx);
-            cur = self.get(idx).and_then(|r| r.next);
-            steps += 1;
-        }
-        out
+        self.iter_level_slots(level).collect()
+    }
+
+    /// Visit FIFO links on demand with the same bound as the collected view.
+    pub(crate) fn iter_level_slots(&self, level: &Level) -> impl Iterator<Item = SlabIndex> {
+        std::iter::successors(level.head, |&idx| self.get(idx).and_then(|order| order.next))
+            .take(self.entries.len().saturating_add(1))
     }
 }

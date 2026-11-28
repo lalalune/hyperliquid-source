@@ -16,6 +16,22 @@ Closes the previously "not yet implemented in Rust" specifications in `RE-014-bo
    - Reference/stop selection, amount vs fraction (`±100_000.0` at `0x459510`/`0x458f20`) move, `1.1` (`0x459400`) / `0.9` (`0x459788`) limit factor, tick-grid snap (`q + 1` for Ask, `q` for Bid), max notional `0x1999_9999_9999_9999` (`0x6d`), available notional (`0x6c`, `/ 1_000_000.0` at `0x4599a0`), `$10.00` min-notional (`> 9_999_999`, `0xc8`) with system users `[0xff; 20]` (`0x93e30b`) & `[0xee; 20]` (`0x93eb11`), rate-limit alert (`0x78`, `+5000 ms`), and price-band ratio test (`0x63`, `* 100.0` at `0x459498`).
 3. **`LevelSummary` serializer (`0x241e9b0..0x241ea8d`, 221 B)**: anchored for L2 level summary representation (`px`, `sz`, `n`).
 
+## Visited levels in the integrated book
+
+The ordinary threshold comparison at `0x46a65f8` branches at `0x46a65fb` to
+the partial fill at `0x46a670c` when the running notional reaches the target.
+Only the below-target path falls through to the level advance at
+`0x46a6612..0x46a662e`. The integrated `Book::impact_px` therefore sums FIFO
+orders only for the levels the walk requests. A size overflow in a worse
+level is observable only when the quote actually visits that level.
+
+The regression `impact_quote_only_reports_overflow_from_a_level_it_visits`
+places five units at 100 and a second ask level whose individually accepted
+orders sum past the unsigned limit. Targets 300 and 500 return 100 with no
+overflow event. Target 501 visits the second level and emits one event. Run
+`cargo test --locked --manifest-path src/node115-orderbook/Cargo.toml` to
+check the integrated book alongside its existing arithmetic and matching tests.
+
 ## Scope Boundary
 
 - `aggregate_l2_levels` / `bucket_l2_px` implement conservative `n_sig_figs`/`mantissa` L2 bucketing on top of `Book::l2_levels`; exact RPC JSON wire formatting of `L2Book` remains in `info-api`.

@@ -773,3 +773,32 @@ fn book_not_crossed_invariant_and_books_bounds_closure() {
     assert!(books.get(&PerpAsset(2)).is_none());
     assert!(books.get_mut(&PerpAsset(99)).is_none());
 }
+
+#[test]
+fn impact_quote_only_reports_overflow_from_a_level_it_visits() {
+    use node115_assets::qtys::{Ntl, OverflowKind};
+    use node115_orderbook::matching::MAX_ORDER_CAP;
+
+    let mut book = Book::new();
+    let mut risk = UnboundedRiskOracle::default();
+    let mut setup = NoopOverflowSink;
+    let best = order_req(1, user(1), Side::Ask, 100, 5, Tif::Gtc, false);
+    book.insert_order(best, &mut risk, &mut setup).unwrap();
+
+    // Each resting size is admissible. Their sum on the second level overflows once.
+    for i in 0..=u64::MAX / MAX_ORDER_CAP {
+        let oid = i + 2;
+        let mut owner = [0; 20];
+        owner[12..].copy_from_slice(&oid.to_be_bytes());
+        let req = order_req(oid, owner, Side::Ask, 105, MAX_ORDER_CAP, Tif::Gtc, false);
+        book.insert_order(req, &mut risk, &mut setup).unwrap();
+    }
+
+    let mut observed = RecordingOverflowSink::default();
+    for target in [300, 500] {
+        assert_eq!(book.impact_px(Side::Ask, Ntl(target), &mut observed), Some(Px(100)));
+        assert!(observed.events.is_empty());
+    }
+    assert_eq!(book.impact_px(Side::Ask, Ntl(501), &mut observed), None);
+    assert_eq!(observed.events, [OverflowKind::UnsignedAdd]);
+}
