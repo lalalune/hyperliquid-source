@@ -35,6 +35,32 @@ pub fn render_checkpoint_clock(
     Some(CheckpointClockText { bytes, length })
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum CompactClockError {
+    WrongSize { actual: usize },
+    HeightMismatch { expected: u64, actual: u64 },
+}
+
+/// Read current then previous date/second/nanosecond words from a caller-pinned
+/// materialized checkpoint. Reading preserves the packed date flags.
+pub fn read_compact_checkpoint_clocks(
+    image: &[u8],
+    expected_height: u64,
+) -> Result<[[u32; 3]; 2], CompactClockError> {
+    if image.len() != 0x42c8 {
+        return Err(CompactClockError::WrongSize { actual: image.len() });
+    }
+    let height = u64::from_le_bytes(image[0x28..0x30].try_into().unwrap());
+    if height != expected_height {
+        return Err(CompactClockError::HeightMismatch { expected: expected_height, actual: height });
+    }
+    let words = |base| core::array::from_fn(|index| {
+        let offset = base + 4 * index;
+        u32::from_le_bytes(image[offset..offset + 4].try_into().unwrap())
+    });
+    Ok([words(0x60), words(0x6c)])
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
