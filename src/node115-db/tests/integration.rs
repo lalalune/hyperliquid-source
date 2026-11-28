@@ -341,7 +341,7 @@ fn rocksdb_3_shard_profiles_tcp_ceiling_and_persistent_checkpoint_roundtrip() {
     }
 
     assert!(ckpt_dir.join("CHECKPOINT_COMPLETE").is_file());
-    assert!(ckpt_dir.join("CHECKPOINT_COMPLETE_evmstate").is_file());
+    assert!(ckpt_dir.join("CHECKPOINT_COMPLETE_EVMSTATE").is_file());
     let reloaded = PersistentShardKvStore::open(&live_home, RocksDbShard::EvmState).unwrap();
     assert_eq!(reloaded.get("EvmStateAccounts", b"0x01"), Some(b"bal=100".as_slice()));
     assert_eq!(reloaded.get("EvmStateContracts", b"0x02"), Some(b"bytecode".as_slice()));
@@ -419,28 +419,12 @@ fn storage_db_closure_latest_checkpoint_loader_db_hub_path_and_single_run_block_
 }
 
 #[test]
-fn rocks_db_per_shard_checkpoint_marker_and_owned_db_dir_guard() {
+fn rocks_db_owned_db_dir_guard() {
     use node115_db::rocks_db::{
-        CHECKPOINT_COMPLETE_SHARD_PREFIX, OWNED_DB_DIR_FORBIDDEN_SUBSTR, OwnedDbDirInvalidError,
-        RocksDbShard, validate_owned_db_dir,
+        OWNED_DB_DIR_FORBIDDEN_SUBSTR, OwnedDbDirInvalidError, validate_owned_db_dir,
     };
 
-    assert_eq!(CHECKPOINT_COMPLETE_SHARD_PREFIX, "CHECKPOINT_COMPLETE_");
     assert_eq!(OWNED_DB_DIR_FORBIDDEN_SUBSTR, "checkpoint");
-
-    let ckpt = Path::new("/var/hl/ckpt/42000");
-    assert_eq!(
-        RocksDbShard::Exchange.checkpoint_complete_marker_path(ckpt),
-        Path::new("/var/hl/ckpt/42000/CHECKPOINT_COMPLETE_exchange")
-    );
-    assert_eq!(
-        RocksDbShard::Rpc.checkpoint_complete_marker_path(ckpt),
-        Path::new("/var/hl/ckpt/42000/CHECKPOINT_COMPLETE_rpc")
-    );
-    assert_eq!(
-        RocksDbShard::EvmState.checkpoint_complete_marker_path(ckpt),
-        Path::new("/var/hl/ckpt/42000/CHECKPOINT_COMPLETE_evmstate")
-    );
 
     assert!(validate_owned_db_dir("/var/hl/live_db").is_ok());
     assert!(validate_owned_db_dir("/var/hl/checkpoin").is_ok());
@@ -455,4 +439,21 @@ fn rocks_db_per_shard_checkpoint_marker_and_owned_db_dir_guard() {
         err.to_string(),
         "OwnedDbDir invalid dir /var/hl/checkpoint/42000"
     );
+}
+
+#[test]
+fn checkpoint_shard_marker_uses_node115_ascii_uppercase() {
+    use node115_db::rocks_db::RocksDbShard;
+
+    let root = Path::new("/var/hl/ckpt/42000");
+    for (shard, expected) in [
+        (RocksDbShard::Exchange, "CHECKPOINT_COMPLETE_EXCHANGE"),
+        (RocksDbShard::Rpc, "CHECKPOINT_COMPLETE_RPC"),
+        (RocksDbShard::EvmState, "CHECKPOINT_COMPLETE_EVMSTATE"),
+    ] {
+        assert_eq!(
+            shard.checkpoint_complete_marker_path(root),
+            root.join(expected)
+        );
+    }
 }

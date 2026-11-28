@@ -1,0 +1,9 @@
+# RE-009: recover checkpoint completion marker casing
+
+The prior checkpoint packets decoded selector 2's raw `EvmState` string and the shard marker format record. The integrated store writes a lowercase suffix, and the discovery crate currently looks for mixed case. The missing step is the transform between the selector table and final formatting.
+
+In `0x1696b90`, selector values 0 through 2 select raw `Exchange`, `Rpc` and `EvmState`. The call at `0x1696c34` passes the formatted string's pointer and length to slot `0x64df678`, relocated to `0x141d8f0`. These ASCII inputs are all shorter than sixteen bytes and reach the scalar loop. For each ASCII byte the loop sets mask `0x20` when unsigned byte subtraction by `0x61` yields a value below `0x1a`, then XORs that mask with the original byte. This changes lowercase ASCII letters to uppercase. The second final-format argument points to the output of that call. Its adapter at `0x155c6e0` forwards that output's pointer and length, and the format record retains the literal `/CHECKPOINT_COMPLETE_`.
+
+Consequently the reconstructed store writes `CHECKPOINT_COMPLETE_EXCHANGE`, `CHECKPOINT_COMPLETE_RPC` and `CHECKPOINT_COMPLETE_EVMSTATE`. Discovery tests the uppercase EVM marker after the global marker. It still accepts the earlier reconstruction's mixed-case EVM marker for compatibility. The underlying shard directory names retain their existing spelling.
+
+Run `python3 -B research/work-items/RE-009-node115-checkpoint-marker-uppercase/verify.py` from the root. The verifier re-derives the three names from the authenticated selector tables, resolved calls and scalar instructions. [The log](offline-log.txt) includes the failing Rust regressions on the base implementation and passing crate suites after the fix on a case-sensitive temporary filesystem. No retained node code was executed. This evidence covers marker names and admission, with checkpoint payload validity and durability out of scope.

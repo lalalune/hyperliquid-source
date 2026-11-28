@@ -71,12 +71,12 @@ impl RocksDbShard {
         }
     }
 
-    /// Lowercase shard marker filename matching `0x1696b90..0x1696d23`:
-    /// `format!("{dir}/CHECKPOINT_COMPLETE_{}", shard.to_string().to_lowercase())`.
+    /// Uppercase shard marker filename matching `0x1696b90..0x1696d23`:
+    /// `format!("{dir}/CHECKPOINT_COMPLETE_{}", shard.to_string().to_uppercase())`.
     pub fn checkpoint_complete_marker_path(self, checkpoint_root: &Path) -> PathBuf {
         checkpoint_root.join(format!(
             "{CHECKPOINT_COMPLETE_SHARD_PREFIX}{}",
-            self.dir_name().to_ascii_lowercase()
+            self.dir_name().to_ascii_uppercase()
         ))
     }
 
@@ -274,7 +274,7 @@ impl PersistentShardKvStore {
     }
 
     /// Create an atomic on-disk checkpoint under `<checkpoint_root>/<shard.dir_name()>`
-    /// and write both `CHECKPOINT_COMPLETE` and the per-shard `CHECKPOINT_COMPLETE_<shard_lower>`
+    /// and write both `CHECKPOINT_COMPLETE` and the per-shard `CHECKPOINT_COMPLETE_<SHARD>`
     /// marker (`0x1696b90..0x1696d23`) in `<checkpoint_root>` once all CF files are durable.
     pub fn create_checkpoint(&self, checkpoint_root: &Path) -> io::Result<PathBuf> {
         let shard_ckpt = checkpoint_root.join(self.shard.dir_name());
