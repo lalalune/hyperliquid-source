@@ -1,0 +1,61 @@
+Darwin arm64
+Python 3.9.6
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+GNU objdump (GNU Binutils) 2.45
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+
+$ python3 -B research/work-items/RE-017-node115-replay-full-response-height/verify.py
+PASS: authenticated a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 136 spans in 9 indexed FDEs
+PASS: Block result height is staged for both replica sink argument and JSON field
+PASS: selected tag-0 lane restores all three original response words into Full writer
+PASS: synthetic distinct-byte overlap control retains count and distinct height
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x5a6f8c3 --stop-address=0x5a6f916 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 5a6f8c3: 45 0f b6 b7 b8 06 00 00      	movzx	r14d, byte ptr [r15 + 0x6b8]
+ 5a6f8cb: 41 80 fe 01                  	cmp	r14b, 0x1
+ 5a6f8cf: 0f 94 c3                     	sete	bl
+ 5a6f8d2: 75 42                        	jne	0x5a6f916 <.text+0x4656616>
+ 5a6f8d4: 48 8b 84 24 90 01 00 00      	mov	rax, qword ptr [rsp + 0x190]
+ 5a6f8dc: 48 8d 8c 24 88 00 00 00      	lea	rcx, [rsp + 0x88]
+ 5a6f8e4: 48 89 41 ef                  	mov	qword ptr [rcx - 0x11], rax
+ 5a6f8e8: 0f 28 84 24 80 01 00 00      	movaps	xmm0, xmmword ptr [rsp + 0x180]
+ 5a6f8f0: 0f 11 41 df                  	movups	xmmword ptr [rcx - 0x21], xmm0
+ 5a6f8f4: 0f 10 44 24 60               	movups	xmm0, xmmword ptr [rsp + 0x60]
+ 5a6f8f9: 66 0f 10 4c 24 6f            	movupd	xmm1, xmmword ptr [rsp + 0x6f]
+ 5a6f8ff: 0f 29 84 24 40 02 00 00      	movaps	xmmword ptr [rsp + 0x240], xmm0
+ 5a6f907: 66 0f 11 8c 24 4f 02 00 00   	movupd	xmmword ptr [rsp + 0x24f], xmm1
+ 5a6f910: 31 ed                        	xor	ebp, ebp
+ 5a6f912: 31 c9                        	xor	ecx, ecx
+ 5a6f914: eb 33                        	jmp	0x5a6f949 <.text+0x4656649>
+
+$ objdump -d -M intel --insn-width=16 --start-address=0x4d6d7a0 --stop-address=0x4d6d7e3 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004d6d7a0 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xfdac90>:
+ 4d6d7a0:	48 8d 4b 58                                     	lea    rcx,[rbx+0x58]
+ 4d6d7a4:	48 8d 35 90 91 ba fb                            	lea    rsi,[rip+0xfffffffffbba9190]        # 91693b <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x5431af5>
+ 4d6d7ab:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 4d6d7b0:	ba 05 00 00 00                                  	mov    edx,0x5
+ 4d6d7b5:	e8 76 0a 30 00                                  	call   506e230 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xcda200>
+ 4d6d7ba:	48 85 c0                                        	test   rax,rax
+ 4d6d7bd:	75 75                                           	jne    4d6d834 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xfdabfc>
+ 4d6d7bf:	80 7c 24 08 00                                  	cmp    BYTE PTR [rsp+0x8],0x0
+ 4d6d7c4:	75 56                                           	jne    4d6d81c <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xfdac14>
+ 4d6d7c6:	48 83 eb 80                                     	sub    rbx,0xffffffffffffff80
+ 4d6d7ca:	48 8d 35 28 89 ba fb                            	lea    rsi,[rip+0xfffffffffbba8928]        # 9160f9 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x5432337>
+ 4d6d7d1:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 4d6d7d6:	ba 06 00 00 00                                  	mov    edx,0x6
+ 4d6d7db:	48 89 d9                                        	mov    rcx,rbx
+ 4d6d7de:	e8 2d 9a 30 00                                  	call   5077210 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xcd1220>
