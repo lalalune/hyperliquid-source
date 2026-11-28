@@ -1,0 +1,9 @@
+# RE-009 #115 combined named checkpoint Exchange parity report
+
+Run five known native comparisons together at one height on a pinned named MessagePack checkpoint and a pinned raw ABCI Exchange export. The report combines 22 distinct ordered slots, associates them with the exact input hashes, and preserves all group-level detail. It checks that every comparison binds to the same height and the same rehashed reference. This saves preparing separate input sets and makes it possible to identify multiple disagreeing slot groups in one report.
+
+Each comparator continues to authenticate the input bytes and raw reduction under its pinned behavior. It currently streams the checkpoint once per comparison group. The aggregate is scoped to those 22 slots and does not replay the successor block, compute a full checkpoint root, or establish measured network parity. No real fixture is included.
+
+Use the exact helper files listed in `report.py` from [direct leaves #7529](https://github.com/lalalune/hyperliquid-source/pull/7529), [bucket guards #7533](https://github.com/lalalune/hyperliquid-source/pull/7533), [time leaves #7549](https://github.com/lalalune/hyperliquid-source/pull/7549), [limit leaves #7565](https://github.com/lalalune/hyperliquid-source/pull/7565) and [quantity subtrees #7584](https://github.com/lalalune/hyperliquid-source/pull/7584). Supply their transitive byte-pinned helper files in the same directory layout.
+
+From the checkout root, run `python -B research/work-items/RE-009-node115-rmp-exchange-parity-report/verify.py --helpers PATH --rustc PATH`. The verifier builds the repository BLAKE3 reference and the byte-pinned driver. The synthetic complete case, two-group mismatch, stale reference and wrong pin exercise the CLI. Status 0 means all scoped groups match. Status 1 preserves results when one or more groups differ. Status 2 means validation failed before the report could be issued.
