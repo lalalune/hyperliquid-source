@@ -1,0 +1,54 @@
+RE-017-node115-tracker-delay-fixture
+Darwin arm64
+Python 3.9.6
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B research/work-items/RE-017-node115-replay-delay-checkpoint-read/verify.py
+PASS: 4 FDEs; Exchange index 57, tracker index 4, shared output +0x23b8
+PASS: absent tracker constructor writes binary64 +0.0; omitted adu takes its own field path
+
+$ python3 -B /tmp/hl-node115-tracker-delay.xqcRJV/RE-017-node115-tracker-delay-fixture/verify.py
+PASS: #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 39 ELF spans across 4 FDEs
+PASS: float64 dispatch, three direct targets, relocation, copy and 4105 bit-pattern controls
+
+$ python3 -B /tmp/hl-node115-tracker-delay.xqcRJV/RE-017-node115-tracker-delay-fixture/test_project.py
+test_cli_stages_the_same_bytes_as_the_library (__main__.TrackerDelayTests) ... ok
+test_default_and_binary64_boundaries_preserve_unsigned_words (__main__.TrackerDelayTests) ... ok
+test_empty_malformed_or_unsupported_tokens_are_not_whole_tracker_absence (__main__.TrackerDelayTests) ... ok
+test_independent_acceptance_oracle_over_deterministic_bit_patterns (__main__.TrackerDelayTests) ... ok
+test_projection_modifies_only_the_decoded_word_and_checks_coordinates (__main__.TrackerDelayTests) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.050s
+
+OK
+
+$ PYTHONPATH=/tmp/hl-node115-tracker-delay.xqcRJV/RE-017-node115-tracker-delay-fixture:/tmp/hl-node115-assemble.zpDuLH/RE-017-node115-compact-assemble-fixture python3 -B - <<'PY'
+from hashlib import sha256
+from assemble import assemble, EVM_BLOCK_SIZE
+from project import project_delay, DECODED_SIZE
+
+def digest(data):
+    return sha256(data).hexdigest()
+
+decoded = bytes(DECODED_SIZE)
+evm = bytes(EVM_BLOCK_SIZE)
+def compact(image):
+    return assemble(image, evm, digest(image), digest(evm), 0, bytes(4), bytes(3))
+
+baseline = compact(decoded)
+for token_hex, payload_hex in (
+    ("cb4000000000000000", "0000000000000040"),
+    ("cb8000000000000000", "0000000000000080"),
+    ("cb0000000000000001", "0100000000000000"),
+):
+    result = compact(project_delay(decoded, digest(decoded), 0, bytes.fromhex(token_hex)))
+    assert result[:0x3ed8] == baseline[:0x3ed8]
+    assert result[0x3ed8:0x3ee0] == bytes.fromhex(payload_hex)
+    assert result[0x3ee0:] == baseline[0x3ee0:]
+assert compact(project_delay(decoded, digest(decoded), 0, None)) == baseline
+print("PASS: assembled four tracker-delay cases through decoded 0x23b8 to compact 0x3ed8")
+PY
+PASS: assembled four tracker-delay cases through decoded 0x23b8 to compact 0x3ed8
