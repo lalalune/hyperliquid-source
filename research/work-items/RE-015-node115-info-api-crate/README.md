@@ -51,3 +51,31 @@ CARGO_BUILD_JOBS=4 cargo clippy --offline --locked --manifest-path src/info-api/
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.test_info_api_crate_115 -v
 PYTHONDONTWRITEBYTECODE=1 python3 tools/verify_packets.py research/work-items/RE-015-node115-info-api-crate
 ```
+
+## Perpetual position display values
+
+The public `info_api::position::project_position_values` converts raw post-lookup size,
+mark and entry words into four binary64 fields of a position row, before decimal-string
+formatting. On the ordinary return path the signed size is divided by the asset's size
+scale; the magnitude of the signed mark product and signed PnL both use 1,000,000.
+The optional entry price first discards the integer division remainder, then divides by
+10 to the power six minus the asset's size decimals. A flat position yields no row, and
+a nonzero position with a zero entry word has zero PnL and no entry price.
+
+| Output offset | Value | Producer evidence |
+| --- | --- | --- |
+| +0, +8 | Optional entry price tag and payload | 0x2c800a2..0x2c800df; 0x2c803e5..0x2c803fd |
+| +0x48 | Signed size | input +0x10 at 0x2c7fd94; 0x2c80366..0x2c80387; packed division/store at 0x2c80480 |
+| +0x50 | Absolute position value | signed multiply at 0x2c7ff1a; absolute value at 0x2c800df; saved on both division-width paths at 0x2c80105 and 0x2c80199; unsigned conversion and packing at 0x2c8041e..0x2c8044d |
+| +0x58 | Unrealized PnL | signed subtraction at 0x2c7ff56, zero-entry alternative at 0x2c7ff95; conversion at 0x2c80397 and scalar division/store at 0x2c80459 and 0x2c80489 |
+
+Both indexed tables and the upper packed lane / scalar micro-dollar divisors are
+checked directly against the ELF by `test_position_display_loads_scales_and_output_lanes`.
+The retained full instruction export is in
+[`RE-001-node115-position-response-entry-quotient`](../RE-001-node115-position-response-entry-quotient/README.md).
+The field names are an interpretation of the units and dataflow. The Rust integration
+test independently recreates the four quantities in the published ETH example from
+Hyperliquid's [perpetual account summary](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/perpetuals).
+
+The caller supplies a selected asset row with 0–6 size decimals. Account lookup,
+risk calculations, other fields and the public HTTP handler remain outside this projection.

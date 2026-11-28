@@ -14,6 +14,7 @@ Clean-room MIT Rust integration crate for Hyperliquid node #115's `info_server` 
 - **Complete 55-variant `InfoRequest` schema** (`0x643a9e0` `.data.rel.ro` variant table, `0x2744200` deserializer, `0x273bf30` serializer with jump table `0x5f45d0`), plus the 2-variant `FileSnapshotRequest` (`referrerStates`, `l4Snapshots` at `0x643ad50`).
 - **Strict JSON request `"type"` extraction & error positioning** wired to `node115-json-string-scanner` and `node115-json-error-position`.
 - **HTTP handler, timing, snapshot-guard, and future-state invariants** from `0x2e3ed10`, `0x29698d0`, `0x2979780`, `0x2a52620`, and `0x2a3ceb0`.
+- **Position display values**: `position::project_position_values` computes optional entry price, signed size, absolute position value and unrealized PnL for a selected perpetual asset row.
 - **Position integer prefix & liquidation candidate scan** (`f_types/position.rs`) integrating `node115-position-integer` semantics with `node115-risk-candidate-scan`.
 - **Replica JSON response emission & L4 snapshot options** wrapping `node115-replica-response-json` and `save_l4_snapshots.rs`.
 

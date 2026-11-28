@@ -84,3 +84,62 @@ pub fn project_position_integers(
         division,
     }
 }
+
+/// Binary64 values before the position response's decimal-string formatter.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct PositionValues {
+    pub signed_size: f64,
+    pub position_value: f64,
+    pub unrealized_pnl: f64,
+    pub entry_price: Option<f64>,
+}
+
+/// Boundaries outside the selected normally returning projection.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PositionValueBoundary {
+    MarkOrProduct,
+    EntrySign,
+    Subtraction,
+    AssetDecimals,
+}
+
+/// Project post-lookup perp position display values from raw fixed-point words.
+/// A flat position has no row. Asset size decimals in this projection are 0..=6.
+pub fn project_position_values(
+    size: i64,
+    mark_word: u64,
+    entry_word: u64,
+    size_decimals: u8,
+) -> Result<Option<PositionValues>, PositionValueBoundary> {
+    let Some(size) = NonZeroI64::new(size) else {
+        return Ok(None);
+    };
+    let (product, pnl, division) = match project_position_integers(size, mark_word, entry_word) {
+        PositionIntegerObservation::Normal {
+            product_word,
+            pnl_word,
+            division,
+        } => (product_word as i64, pnl_word as i64, division),
+        PositionIntegerObservation::MarkOrProductBoundary => {
+            return Err(PositionValueBoundary::MarkOrProduct)
+        }
+        PositionIntegerObservation::EntrySignBoundary => {
+            return Err(PositionValueBoundary::EntrySign)
+        }
+        PositionIntegerObservation::SubtractionBoundary => {
+            return Err(PositionValueBoundary::Subtraction)
+        }
+    };
+    const SCALES: [f64; 7] = [1., 10., 100., 1_000., 10_000., 100_000., 1_000_000.];
+    let decimals = usize::from(size_decimals);
+    let size_scale = SCALES
+        .get(decimals)
+        .ok_or(PositionValueBoundary::AssetDecimals)?;
+    let quote_scale = SCALES[6];
+    Ok(Some(PositionValues {
+        signed_size: size.get() as f64 / size_scale,
+        position_value: product.unsigned_abs() as f64 / quote_scale,
+        unrealized_pnl: pnl as f64 / quote_scale,
+        entry_price: division.map(|d| d.quotient as f64 / SCALES[6 - decimals]),
+    }))
+}
