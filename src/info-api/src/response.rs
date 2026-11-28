@@ -1,6 +1,8 @@
 //! Replica JSON response emission (`node115-replica-response-json`) and
 //! `save_l4_snapshots.rs` configuration types for node #115.
 
+pub mod spot;
+
 use std::io::{self, Write};
 
 pub use node115_replica_response_json::{write_response, Response as ReplicaResponse};
