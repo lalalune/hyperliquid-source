@@ -972,3 +972,33 @@ fn e2e_phase5_full_closure_runtime_integration() {
     let _ = fs::remove_dir_all(&mainnet_dir);
     let _ = fs::remove_dir_all(&local_dir);
 }
+
+#[test]
+fn checkpoint_directory_height_must_match_persisted_record() {
+    let data_dir = unique_temp_dir("checkpoint-coordinate");
+    let engine = NodeEngine::open_or_restore(ChainName::Local, &data_dir).unwrap();
+    let correct_path = engine.persist_checkpoint().unwrap();
+    let wrong_path = correct_path.with_file_name("1");
+    drop(engine);
+
+    fs::rename(&correct_path, &wrong_path).unwrap();
+    let moved_restore = NodeEngine::open_or_restore(ChainName::Local, &data_dir);
+
+    fs::rename(&wrong_path, &correct_path).unwrap();
+    let restored = NodeEngine::open_or_restore(ChainName::Local, &data_dir).unwrap();
+    assert_eq!(restored.restored_from_checkpoint(), Some(0));
+    assert_eq!(restored.latest_height(), 0);
+    drop(restored);
+    fs::remove_dir_all(&data_dir).unwrap();
+
+    match moved_restore {
+        Err(err) => assert_eq!(
+            err.to_string(),
+            "checkpoint load error: selected height 1 differs from persisted height 0",
+        ),
+        Ok(engine) => panic!(
+            "mislabelled local checkpoint unexpectedly restored at {}",
+            engine.latest_height(),
+        ),
+    }
+}

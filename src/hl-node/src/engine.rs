@@ -550,6 +550,12 @@ impl NodeEngine {
                 raw.len()
             )));
         }
+        if rec.height != height {
+            return Err(EngineError::CheckpointLoad(format!(
+                "selected height {height} differs from persisted height {}",
+                rec.height,
+            )));
+        }
         let expected_chain = chain_to_u8(chain);
         if rec.chain_id != expected_chain {
             return Err(EngineError::ChainMismatch {
