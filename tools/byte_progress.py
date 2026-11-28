@@ -25,48 +25,104 @@ def unique_object(pairs):
 # source bytes, relaxed target bytes). mov reg,[rip] keeps its ModRM byte at -1.
 RELAXATIONS = {'gotpcrelx-mov-lea': (-2, b'\x8b', b'\x8d'), 'gotpcrelx-call': (-2, b'\xff\x15', b'\x67\xe8')}
 
+# x86-64 ELF TLS psABI relaxations (Ulrich Drepper §4.2.4-4.2.5):
+# - tlsgd-gd-le / tlsgd-gd-ie: kind 19 (R_X86_64_TLSGD) paired with kind 4 (PLT32) at offset + 8
+# - gottpoff-ie-le: kind 22 (R_X86_64_GOTTPOFF) register-preserving mov/add -> mov-imm/lea/add-imm
+TLS_RELAXATIONS = ('tlsgd-gd-le', 'tlsgd-gd-ie', 'gottpoff-ie-le')
+_TLSGD_SRC_PREFIX = b'\x66\x48\x8d\x3d'
+_TLSGD_SRC_CALL = b'\x66\x66\x48\xe8'
+_TLSGD_LE_TARGET = b'\x64\x48\x8b\x04\x25\x00\x00\x00\x00\x48\x8d\x80'
+_TLSGD_IE_TARGET = b'\x64\x48\x8b\x04\x25\x00\x00\x00\x00\x48\x03\x05'
+
 
 def relaxation_bytes(source, target, offset, kind, name):
-    """Byte positions a named GOTPCRELX relaxation rewrites, or None if the site does not fit it.
+    """Byte positions a named GOTPCRELX or TLS psABI relaxation rewrites, or None if invalid.
 
-    mov-lea: kind 41 (no REX) or 42 (REX.W/REX at -3), ModRM at -1 RIP-relative (mod=00, rm=101).
-    call: kind 41, ff 15 -> addr32 call (67 e8).
+    GOTPCRELX:
+      mov-lea: kind 41 (no REX) or 42 (REX.W/REX at -3), ModRM at -1 RIP-relative (mod=00, rm=101).
+      call: kind 41, ff 15 -> addr32 call (67 e8).
+    TLS psABI:
+      tlsgd-gd-le / tlsgd-gd-ie: kind 19, exact 16-byte GD sequence at [offset-4..offset+12);
+        returns the 8 rewritten instruction bytes outside [offset..offset+4) and paired PLT32 [offset+8..offset+12).
+      gottpoff-ie-le: kind 22, exact 3-byte REX+opcode+ModRM register-preserving IE->LE rewrite at [offset-3..offset).
     """
-    if type(kind) is not int or type(name) is not str or name not in RELAXATIONS:
+    if type(kind) is not int or type(name) is not str:
         return None
-    delta, before, after = RELAXATIONS[name]
-    start = offset + delta
-    if start < 0 or source[start:start + len(before)] != before or target[start:start + len(after)] != after:
-        return None
-    if name == 'gotpcrelx-mov-lea':
-        if kind not in (41, 42) or source[offset - 1] & 0xc7 != 0x05 or target[offset - 1] != source[offset - 1]:
+    if name in RELAXATIONS:
+        delta, before, after = RELAXATIONS[name]
+        start = offset + delta
+        if start < 0 or source[start:start + len(before)] != before or target[start:start + len(after)] != after:
             return None
-        if kind == 42 and not (offset >= 3 and 0x40 <= source[offset - 3] <= 0x4f):
+        if name == 'gotpcrelx-mov-lea':
+            if kind not in (41, 42) or source[offset - 1] & 0xc7 != 0x05 or target[offset - 1] != source[offset - 1]:
+                return None
+            if kind == 42 and not (offset >= 3 and 0x40 <= source[offset - 3] <= 0x4f):
+                return None
+        elif kind != 41:
             return None
-    elif kind != 41:
+        return set(range(start, start + len(before)))
+    if name in ('tlsgd-gd-le', 'tlsgd-gd-ie'):
+        if kind != 19 or offset < 4 or offset + 12 > len(source):
+            return None
+        if source[offset - 4:offset] != _TLSGD_SRC_PREFIX or source[offset + 4:offset + 8] != _TLSGD_SRC_CALL:
+            return None
+        expected_target = _TLSGD_LE_TARGET if name == 'tlsgd-gd-le' else _TLSGD_IE_TARGET
+        if target[offset - 4:offset + 8] != expected_target:
+            return None
+        return set(range(offset - 4, offset)) | set(range(offset + 4, offset + 8))
+    if name == 'gottpoff-ie-le':
+        if kind != 22 or offset < 3 or offset + 4 > len(source):
+            return None
+        s3 = source[offset - 3:offset]
+        t3 = target[offset - 3:offset]
+        if s3[0] not in (0x48, 0x4c) or (s3[2] & 0xc7) != 0x05:
+            return None
+        reg = (s3[2] >> 3) & 7
+        if s3[1] == 0x8b:
+            exp_rex = 0x48 if s3[0] == 0x48 else 0x49
+            if t3 != bytes((exp_rex, 0xc7, 0xc0 | reg)):
+                return None
+            return set(range(offset - 3, offset))
+        if s3[1] == 0x03:
+            exp_lea = bytes((0x48 if s3[0] == 0x48 else 0x4d, 0x8d, 0x80 | (reg << 3) | reg))
+            exp_add = bytes((0x48 if s3[0] == 0x48 else 0x49, 0x81, 0xc0 | reg))
+            if t3 not in (exp_lea, exp_add):
+                return None
+            return set(range(offset - 3, offset))
         return None
-    return set(range(start, start + len(before)))
+    return None
 
 
 def compare(source, target, relocations):
     require(len(source) == len(target) and len(target) > 0, 'Unequal/empty comparison extent')
     masks = set()
+    plt32_offsets = {
+        row['offset'] for row in relocations
+        if type(row.get('offset')) is int and row.get('width', 4) == 4 and row.get('kind', row.get('type')) == 4
+    }
     for row in relocations:
         offset, width = row['offset'], row.get('width', 4)
         kind = row.get('kind', row.get('type'))
         # PC32, PLT32, GOTPCREL and GOTPCRELX/REX_GOTPCRELX each occupy one four-byte
-        # PC-relative field; the addend only selects the referenced displacement,
-        # never the masked bytes. A linker-relaxed GOTPCRELX site also rewrites the
-        # opcode byte(s) before the field; those are excluded only when the row names
-        # the relaxation and both captures hold exactly its source/target bytes.
+        # PC-relative field; TLSGD (19) and GOTTPOFF (22) are accepted only with an exact
+        # named psABI TLS relaxation verified byte-for-byte against both captures.
         require(type(offset) is int and type(width) is int and width == 4
-                and kind in (2, 4, 9, 41, 42) and type(row['addend']) is int,
-                'Only recorded four-byte PC32/PLT32/GOTPCREL(X) fields are supported')
+                and kind in (2, 4, 9, 19, 22, 41, 42) and type(row['addend']) is int,
+                'Only recorded four-byte PC32/PLT32/GOTPCREL(X)/TLS-relaxed fields are supported')
         field = set(range(offset, offset + width))
+        if kind in (19, 22):
+            require('relaxation' in row and type(row['relaxation']) is str and row['relaxation'] in TLS_RELAXATIONS,
+                    'TLSGD/GOTTPOFF sites require a named psABI TLS relaxation')
         if 'relaxation' in row:
-            require(kind in (41, 42) and type(row['relaxation']) is str and row['relaxation'] in RELAXATIONS,
-                    'Only named GOTPCRELX relaxations are supported')
-            rewritten = relaxation_bytes(source, target, offset, kind, row['relaxation'])
+            rname = row['relaxation']
+            require(type(rname) is str and (
+                (kind in (41, 42) and rname in RELAXATIONS)
+                or (kind == 19 and rname in ('tlsgd-gd-le', 'tlsgd-gd-ie'))
+                or (kind == 22 and rname == 'gottpoff-ie-le')
+            ), 'Only named GOTPCRELX or TLS psABI relaxations are supported')
+            if kind == 19:
+                require((offset + 8) in plt32_offsets, 'TLSGD relaxation requires paired PLT32 relocation at offset + 8')
+            rewritten = relaxation_bytes(source, target, offset, kind, rname)
             require(rewritten is not None, 'Relaxation bytes differ from the named psABI rewrite')
             field |= rewritten
         require(0 <= min(field) and offset + width <= len(target) and not masks & field,
