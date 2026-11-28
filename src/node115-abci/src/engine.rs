@@ -89,6 +89,22 @@ impl AbciEngine {
             && height.is_multiple_of(self.state.periodic_root_cadence)
     }
 
+    fn validate_replay_pair(&self, block: &EngineBlock) -> Result<(), BlockAdmissionError> {
+        if self.state.inner.loader_seq != block.expected_loader_seq {
+            return Err(BlockAdmissionError::LoaderSeqMismatch {
+                state_seq: self.state.inner.loader_seq,
+                block_seq: block.expected_loader_seq,
+            });
+        }
+        if self.state.inner.copied_round != block.expected_copied_round {
+            return Err(BlockAdmissionError::CopiedRoundMismatch {
+                state_copied: self.state.inner.copied_round,
+                block_copied: block.expected_copied_round,
+            });
+        }
+        Ok(())
+    }
+
     pub fn apply_block<F>(
         &mut self,
         block: &EngineBlock,
@@ -112,18 +128,7 @@ impl AbciEngine {
                 block_prev_round: block.prev_round,
             });
         }
-        if self.state.inner.loader_seq != block.expected_loader_seq {
-            return Err(BlockAdmissionError::LoaderSeqMismatch {
-                state_seq: self.state.inner.loader_seq,
-                block_seq: block.expected_loader_seq,
-            });
-        }
-        if self.state.inner.copied_round != block.expected_copied_round {
-            return Err(BlockAdmissionError::CopiedRoundMismatch {
-                state_copied: self.state.inner.copied_round,
-                block_copied: block.expected_copied_round,
-            });
-        }
+        self.validate_replay_pair(block)?;
 
         // 1. Advance height H -> H+1 and round (`0x54838d3..0x54838f1`)
         self.state.advance_block(block.new_round);
@@ -239,6 +244,8 @@ impl AbciEngine {
                 input.feature_version,
             )
             .map_err(ApplyBlockPipelineError::Precondition)?;
+        self.validate_replay_pair(input.block)
+            .map_err(ApplyBlockPipelineError::Admission)?;
         stages.push(ApplyBlockStage::PreGuards);
 
         // Stage 2: Exchange::begin_block (`0x5a04fe9 -> 0x5483850`)
