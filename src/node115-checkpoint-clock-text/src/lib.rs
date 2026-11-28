@@ -3,6 +3,9 @@
 
 use node115_date_time_display::{Date, Time, render_date, render_time};
 
+mod replay;
+pub use replay::{CheckpointClocks, ClockWords};
+
 pub struct CheckpointClockText {
     bytes: [u8; 32],
     length: usize,
