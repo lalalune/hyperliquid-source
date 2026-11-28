@@ -1,0 +1,57 @@
+Darwin arm64
+Python 3.9.6
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+GNU objdump (GNU Binutils) 2.45
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+
+$ python3 -B research/work-items/RE-017-node115-retained-batch-parent-link/verify.py
+PASS: authenticated a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 164 spans in 5 indexed FDEs
+PASS: first-row continuity word comes from F+0x110 through adapter; no preceding row in this batch
+PASS: accepted predecessor supplies selected saturated successor and 32-byte helper output
+PASS: next row identity is projected through three layouts and all 32 linked bytes compare before onward helper
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x4facfb0 --stop-address=0x4fad011 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 4facfb0: 48 8b 84 24 b8 00 00 00      	mov	rax, qword ptr [rsp + 0xb8]
+ 4facfb8: 48 89 84 24 d8 00 00 00      	mov	qword ptr [rsp + 0xd8], rax
+ 4facfc0: c6 84 24 e8 00 00 00 01      	mov	byte ptr [rsp + 0xe8], 0x1
+ 4facfc8: 0f 28 84 24 20 01 00 00      	movaps	xmm0, xmmword ptr [rsp + 0x120]
+ 4facfd0: 0f 28 8c 24 30 01 00 00      	movaps	xmm1, xmmword ptr [rsp + 0x130]
+ 4facfd8: 48 8d 84 24 e9 00 00 00      	lea	rax, [rsp + 0xe9]
+ 4facfe0: 0f 11 48 10                  	movups	xmmword ptr [rax + 0x10], xmm1
+ 4facfe4: 0f 11 00                     	movups	xmmword ptr [rax], xmm0
+ 4facfe7: 0f 94 84 24 09 01 00 00      	sete	byte ptr [rsp + 0x109]
+ 4facfef: 48 8b 84 24 a8 00 00 00      	mov	rax, qword ptr [rsp + 0xa8]
+ 4facff7: 48 89 84 24 e0 00 00 00      	mov	qword ptr [rsp + 0xe0], rax
+ 4facfff: 48 8d 7c 24 50               	lea	rdi, [rsp + 0x50]
+ 4fad004: 48 8d 8c 24 d8 00 00 00      	lea	rcx, [rsp + 0xd8]
+ 4fad00c: e8 ef e4 b7 00               	call	0x5b2b500 <.text+0x4712200>
+
+$ objdump -d -M intel --insn-width=16 --start-address=0x4fadd31 --stop-address=0x4fadd66 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004fadd31 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9a6ff>:
+ 4fadd31:	f6 42 10 01                                     	test   BYTE PTR [rdx+0x10],0x1
+ 4fadd35:	74 7c                                           	je     4faddb3 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9a67d>
+ 4fadd37:	48 83 c2 11                                     	add    rdx,0x11
+ 4fadd3b:	f3 0f 6f 40 48                                  	movdqu xmm0,XMMWORD PTR [rax+0x48]
+ 4fadd40:	f3 0f 6f 48 58                                  	movdqu xmm1,XMMWORD PTR [rax+0x58]
+ 4fadd45:	f3 0f 6f 12                                     	movdqu xmm2,XMMWORD PTR [rdx]
+ 4fadd49:	66 0f 74 d0                                     	pcmpeqb xmm2,xmm0
+ 4fadd4d:	f3 0f 6f 42 10                                  	movdqu xmm0,XMMWORD PTR [rdx+0x10]
+ 4fadd52:	66 0f 74 c1                                     	pcmpeqb xmm0,xmm1
+ 4fadd56:	66 0f db c2                                     	pand   xmm0,xmm2
+ 4fadd5a:	66 0f d7 c8                                     	pmovmskb ecx,xmm0
+ 4fadd5e:	81 f9 ff ff 00 00                               	cmp    ecx,0xffff
+ 4fadd64:	74 4d                                           	je     4faddb3 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9a67d>
