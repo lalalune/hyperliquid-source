@@ -20,3 +20,16 @@ Closes the previously "not yet implemented in Rust" specifications in `RE-014-bo
 
 - `aggregate_l2_levels` / `bucket_l2_px` implement conservative `n_sig_figs`/`mantissa` L2 bucketing on top of `Book::l2_levels`; exact RPC JSON wire formatting of `L2Book` remains in `info-api`.
 - This packet advances `orderbook` behavioral coverage and does not claim the full `identity` gate.
+
+## Public order-book snapshot compatibility
+
+The official order-book server at [8b4f2379](https://github.com/hyperliquid-dex/order_book_server/blob/8b4f237904f683aca2dba21a07d87e831ead2a97/server/src/order_book/levels.rs#L7-L17) multiplies the price tick by the requested mantissa even when the decimal shift is zero. Its [subscription validator](https://github.com/hyperliquid-dex/order_book_server/blob/8b4f237904f683aca2dba21a07d87e831ead2a97/server/src/types/subscription.rs#L42-L58) permits explicit mantissas 2 and 5 at five significant figures. For example, raw bids 12,346 and 12,347 share bucket 12,345 at mantissa 5; raw asks 12,348 and 12,349 share bucket 12,350. The source of this display behavior is the public consumer. The existing node #115 byte evidence covers other operations in this packet.
+
+With the pinned `upstream/order_book_server` submodule initialized, run from the repository root:
+
+```sh
+python3 research/work-items/RE-006-node115-impact-walk-and-price-shape/compare_public_l2.py
+cargo test --locked --manifest-path src/node115-orderbook/Cargo.toml
+```
+
+The differential check compiles the pinned public bucketing and digit-count functions and compares raw prices 1 through 100,000 on both sides with five significant figures and each valid mantissa setting (absent, 2, 5): 600,000 comparisons. The crate test exercises price, size and order count through the local book's top-level snapshot.

@@ -773,3 +773,28 @@ fn book_not_crossed_invariant_and_books_bounds_closure() {
     assert!(books.get(&PerpAsset(2)).is_none());
     assert!(books.get_mut(&PerpAsset(99)).is_none());
 }
+
+#[test]
+fn five_figure_snapshot_groups_short_prices_by_mantissa() {
+    use node115_orderbook::{L2Level, bucket_l2_px};
+
+    let mut book = Book::new();
+    let mut risk = UnboundedRiskOracle::default();
+    let mut sink = RecordingOverflowSink::default();
+    for (oid, side, price, size) in [
+        (1, Side::Bid, 12_346, 2),
+        (2, Side::Bid, 12_347, 3),
+        (3, Side::Ask, 12_348, 5),
+        (4, Side::Ask, 12_349, 7),
+    ] {
+        let order = order_req(oid, user(1), side, price, size, Tif::Gtc, false);
+        book.insert_order(order, &mut risk, &mut sink).unwrap();
+    }
+    let (bids, asks) = book.l2_snapshot_aggregated(Some(5), Some(5), 1);
+    assert_eq!(bids, [L2Level { px: Px(12_345), sz: Sz(5), n_orders: 2 }]);
+    assert_eq!(asks, [L2Level { px: Px(12_350), sz: Sz(12), n_orders: 2 }]);
+    assert_eq!(bucket_l2_px(Px(123), Side::Bid, 5, Some(2)), Px(122));
+    assert_eq!(bucket_l2_px(Px(123), Side::Ask, 5, Some(2)), Px(124));
+    assert_eq!(bucket_l2_px(Px(1), Side::Bid, 5, Some(5)), Px(0));
+    assert_eq!(bucket_l2_px(Px(123), Side::Bid, 5, None), Px(123));
+}
