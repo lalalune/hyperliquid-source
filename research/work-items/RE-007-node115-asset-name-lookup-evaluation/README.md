@@ -61,7 +61,7 @@ pointer at `+8` and a name length at `+0x10`.
    passes `prod`). At the maximal page the first unreachable position is 1616: a table
    of 1617 records traps before record 1616 is examined even when that record matches,
    position 1615 still returns the index `2^64 - 1`, and a 1616-record table with no
-   match traps instead of returning the miss result.
+   match returns the miss result because there is no further row to inspect.
 5. A hit stores the word `0x1a2` at `[out]` and the global index `prod + position` at
    `[out+8]` and returns. The first matching record wins. Bytes `out+2..out+8` are
    never written.
@@ -136,3 +136,26 @@ python3 -m unittest discover -s tests -p test_pdi_name_lookup115.py -v
 This directory retains the byte-evaluator study. The separate
 [static study](../RE-007-node115-asset-name-lookup/README.md) stays in its own
 packet; both examine the same bounded body and do not supply additive coverage.
+
+## Ordered lookup in the assets crate
+
+The integrated assets crate now exposes `PerpMeta::asset_by_name`. It searches
+the selected PDI's ordered universe by exact UTF-8 bytes, returns the first
+matching global asset ID and preserves the queried suffix in a miss. A checked
+index failure is a typed error. The lookup takes a suffix after the caller
+chooses the PDI. Namespace routing and registration are separate operations.
+
+`metadata_vectors.py` authenticates the release and body and feeds 65
+well-formed cases to the existing instruction evaluator. The Rust integration
+test reads its retained results, including an empty universe, duplicates, case
+and whitespace distinctions, equal-looking Unicode spellings, and three price
+symbol prefixes. Miss vectors also check the bytes returned by the model.
+Checked index boundaries use separate Rust cases and the original recorded
+named outcomes. Reading a returned ID through existing metadata lookup checks
+composition on an ordinary non-main DEX.
+
+```sh
+d=research/work-items/RE-007-node115-asset-name-lookup-evaluation
+python3 -B "$d/metadata_vectors.py" | diff "$d/metadata-vectors.tsv" -
+cargo test --locked --offline --manifest-path src/node115-assets/Cargo.toml
+```
