@@ -1,0 +1,73 @@
+Darwin arm64
+Python 3.9.6
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+GNU objdump (GNU Binutils) 2.45
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+$ python3 -B research/work-items/RE-017-node115-replay-block-parent-round/verify.py
+PASS: SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 97 ranges in indexed FDE 0x5a82670..0x5a89535
+PASS: round offsets (96, 176); parent offsets (96, 88, 232)
+PASS: F+0x110 fallback, 16-byte tail projection, unsigned parent comparison and diagnostic labels
+PASS: synthetic marker arms, empty/tail/equality/lower/unsigned/saturation and corrupted witness controls
+
+$ llvm-objdump --disassemble --x86-asm-syntax=intel --start-address=0x5a87613 --stop-address=0x5a8766c artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 5a87613: 4c 8b 50 10                  	mov	r10, qword ptr [rax + 0x10]
+ 5a87617: 4c 8b 88 10 01 00 00         	mov	r9, qword ptr [rax + 0x110]
+ 5a8761e: 4d 85 d2                     	test	r10, r10
+ 5a87621: 74 3c                        	je	0x5a8765f <.text+0x466e35f>
+ 5a87623: 48 8b 40 08                  	mov	rax, qword ptr [rax + 0x8]
+ 5a87627: 49 c1 e2 04                  	shl	r10, 0x4
+ 5a8762b: 4c 01 d0                     	add	rax, r10
+ 5a8762e: 48 83 c0 f0                  	add	rax, -0x10
+ 5a87632: 48 85 c0                     	test	rax, rax
+ 5a87635: 74 28                        	je	0x5a8765f <.text+0x466e35f>
+ 5a87637: 48 8b 00                     	mov	rax, qword ptr [rax]
+ 5a8763a: 4c 8d 48 50                  	lea	r9, [rax + 0x50]
+ 5a8763e: 48 39 78 28                  	cmp	qword ptr [rax + 0x28], rdi
+ 5a87642: 48 8d 80 a0 00 00 00         	lea	rax, [rax + 0xa0]
+ 5a87649: 49 0f 44 c1                  	cmove	rax, r9
+ 5a8764d: 48 8b 40 10                  	mov	rax, qword ptr [rax + 0x10]
+ 5a87651: 48 ff c0                     	inc	rax
+ 5a87654: 49 c7 c1 ff ff ff ff         	mov	r9, -0x1
+ 5a8765b: 4c 0f 45 c8                  	cmovne	r9, rax
+ 5a8765f: 4d 89 4d 00                  	mov	qword ptr [r13], r9
+ 5a87663: 4d 39 c8                     	cmp	r8, r9
+ 5a87666: 0f 83 e6 03 00 00            	jae	0x5a87a52 <.text+0x466e752>
+
+$ objdump -d -M intel --insn-width=16 --start-address=0x5a87613 --stop-address=0x5a8766c artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000005a87613 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x2c0e1d>:
+ 5a87613:	4c 8b 50 10                                     	mov    r10,QWORD PTR [rax+0x10]
+ 5a87617:	4c 8b 88 10 01 00 00                            	mov    r9,QWORD PTR [rax+0x110]
+ 5a8761e:	4d 85 d2                                        	test   r10,r10
+ 5a87621:	74 3c                                           	je     5a8765f <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x2c0dd1>
+ 5a87623:	48 8b 40 08                                     	mov    rax,QWORD PTR [rax+0x8]
+ 5a87627:	49 c1 e2 04                                     	shl    r10,0x4
+ 5a8762b:	4c 01 d0                                        	add    rax,r10
+ 5a8762e:	48 83 c0 f0                                     	add    rax,0xfffffffffffffff0
+ 5a87632:	48 85 c0                                        	test   rax,rax
+ 5a87635:	74 28                                           	je     5a8765f <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x2c0dd1>
+ 5a87637:	48 8b 00                                        	mov    rax,QWORD PTR [rax]
+ 5a8763a:	4c 8d 48 50                                     	lea    r9,[rax+0x50]
+ 5a8763e:	48 39 78 28                                     	cmp    QWORD PTR [rax+0x28],rdi
+ 5a87642:	48 8d 80 a0 00 00 00                            	lea    rax,[rax+0xa0]
+ 5a87649:	49 0f 44 c1                                     	cmove  rax,r9
+ 5a8764d:	48 8b 40 10                                     	mov    rax,QWORD PTR [rax+0x10]
+ 5a87651:	48 ff c0                                        	inc    rax
+ 5a87654:	49 c7 c1 ff ff ff ff                            	mov    r9,0xffffffffffffffff
+ 5a8765b:	4c 0f 45 c8                                     	cmovne r9,rax
+ 5a8765f:	4d 89 4d 00                                     	mov    QWORD PTR [r13+0x0],r9
+ 5a87663:	4d 39 c8                                        	cmp    r8,r9
+ 5a87666:	0f 83 e6 03 00 00                               	jae    5a87a52 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x2c09de>
