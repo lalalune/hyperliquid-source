@@ -1,0 +1,9 @@
+# RE-009: bind snapshot value cleanup to exception tables
+
+The 88-byte cursor consumer in #7209 and its per-value cleanup in #7210 establish the normal path. This packet binds their exception handling to the pinned #115 FDEs and resolves the remaining-value cleanup reached by the outer landing pad.
+
+The FDE at `0x2481c40` covers the per-value call at `0x2481c7e` with a cleanup-only LSDA entry. That entry selects pad `0x2481c9f`. The pad saves the exception, passes the existing cursor to `0x2433c50`, then passes the saved exception to `_Unwind_Resume@plt`. The helper immediately asks cursor body `0x2442420` for another result and repeats for every non-null result, calling `0x243a250` with `base + 8 + 88*index`. Therefore the cleanup pad reuses the mutated cursor and obtains its next projection from the cursor, with no reload of the failed value's stack result. The helper has an FDE without an LSDA pointer.
+
+The per-value cleanup at `0x243a250` protects the `value+0x40` call at `0x243a25b` with a separate cleanup-only entry. Its pad at `0x243a28b` conditionally releases the word-zero quantity times eight using the pointer at +0x08, calls the +0x20 cleanup at `0x242dfc0`, then resumes the saved exception. The adjacent pair `0x2433cb0` and `0x243a2c0` use the same cursor and projection layout. The second value cleanup's LSDA table has identical relative ranges and pad offsets, while its +0x20 cleanup calls `0x242e150`. This distinction should survive reconstruction.
+
+Run `python3 -B research/work-items/RE-009-node115-snapshot-cursor-unwind/verify.py` from the repository root. The verifier compares complete selected call-site tables, binds the landing pads to static edges, and checks cursor and cleanup dataflow anchors. This establishes metadata and code paths for the five selected FDEs. It does not exercise unwinding or establish runtime reachability.
