@@ -114,3 +114,47 @@ No gate is requested.
 
 Next question: the caller that picks between the two drivers and builds the table holder (the size threshold that selects the u16 table),
 and the decoder-side counterpart for a full round trip.
+
+## Integrated compressor output
+
+The public `net_utils::compress_prepend_size` now follows both driver loops
+above on a fresh dictionary. It increases the probe stride after misses,
+extends a match backward toward the previous match or the start of the source,
+and records the hash at two bytes before the match end. The size-prefixed
+blocks are compared directly because two valid LZ4 encodings of the same
+payload can use different offsets and literal runs.
+
+The later [vendor census](../RE-002-node115-vendor-overflow-census/) attributes
+the two complete driver FDEs to `lz4_flex` 0.14.0.
+The small-table driver has 1,542 fixed bytes in 1,766 total. The large-table
+driver has 1,574 in 1,798. [compare_blocks.py](compare_blocks.py) verifies the
+captured and source-build digests, FDEs and recorded ELF relocations. It calls
+the original packet's pure driver model and compiles the local public API and
+the [upstream crate](https://github.com/PSeitz/lz4_flex/tree/1bffdcbbf906a234b913937cb2f57c0245915038).
+The replay runs the two Rust encoders and both decoders entirely in memory.
+
+The 182 generated payloads include the 12-byte tail boundary, lengths around
+65,535, literal-heavy data, repeating data, and sparse edits. At Git base
+`2da45cb0a761cff6b478e40421699857d87a94df`, 69 of 166 small-table cases
+and 4 of 16 large-table cases produced different compressed bytes. Both
+decoders still recovered the inputs. The corrected API agrees byte-for-byte
+with the public crate and the Python driver model on all 182 in both build
+profiles. Changing only the probe stride, backward extension or end seed in
+the driver model distinguishes 67, 86 and 37 rows respectively. The
+[retained results](block-results.json) include corpus and output hashes.
+These cases exercise complete blocks with fresh dictionaries. Streaming and
+native allocation behavior are outside the comparison.
+
+With Python 3.12+, Git and rustup with Rust 1.95.0, fetch the locked reference
+crate once, then reproduce current and base results offline.
+
+```sh
+packet=research/work-items/transport-lz4-compress-driver-115
+cargo +1.95.0 fetch --locked --manifest-path "$packet/reference/Cargo.toml"
+python3 "$packet/compare_blocks.py"
+python3 "$packet/compare_blocks.py" --baseline
+```
+
+The baseline run reads only the old `src/` tree from Git and writes its build
+to a temporary directory. The comparison requires the pinned node artifact
+for static validation and does not execute its instructions.
