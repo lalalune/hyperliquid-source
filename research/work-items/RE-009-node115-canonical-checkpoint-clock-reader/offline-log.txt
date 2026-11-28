@@ -1,0 +1,38 @@
+Darwin arm64
+Python 3.12.16
+rustc 1.95.0 (59807616e 2026-04-14)
+python3 -B research/work-items/RE-009-node115-canonical-checkpoint-clock-reader/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 25 spans in two FDEs
+PASS: time-format item range 0x6405668..0x6405818 contains 18 items
+Decoded item sequence: [(4, 0), 'space', '-', (4, 6), 'space', '-', (4, 7), 'space', 'T', (4, 14), 'space', ':', (4, 16), 'space', ':', (4, 17), (5, 10), 'space']
+PASS: success requires complete consumption and passes a 12-byte constructed value
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 41 spans in three FDEs
+PASS: fixstr and three explicit length markers converge on the MessagePack Time conversion
+PASS: MessagePack and JSON use the same format table, interpreter, and time constructor
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 46 spans in two FDEs
+PASS: selected table model agrees with Gregorian ordinal for 146097 dates (2000–2399)
+PASS: 2000-02-29 accepted; 2100-02-29 and 2026-04-31 have zero lookup entries
+cargo test --locked --offline --manifest-path src/node115-checkpoint-clock-text/Cargo.toml
+   Compiling node115-date-time-display v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-date-time-display)
+   Compiling node115-checkpoint-clock-text v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-checkpoint-clock-text)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.38s
+     Running unittests src/lib.rs (work/target/node115-canonical-checkpoint-clock/debug/deps/node115_checkpoint_clock_text-0439e6395d22cc17)
+
+running 4 tests
+test parse_tests::rejects_values_outside_the_canonical_checkpoint_boundary ... ok
+test parse_tests::reads_the_selected_checkpoint_clock_words ... ok
+test tests::renders_checkpoint_words_with_literal_t ... ok
+test tests::retains_the_display_domain ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests node115_checkpoint_clock_text
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+cargo clippy --locked --offline --all-targets --manifest-path src/node115-checkpoint-clock-text/Cargo.toml -- -D warnings
+    Checking node115-date-time-display v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-date-time-display)
+    Checking node115-checkpoint-clock-text v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-checkpoint-clock-text)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.26s
