@@ -205,7 +205,7 @@ fn e2e_localhost_http_info_and_evm_rpc_across_restart() {
         )
         .expect("web3_clientVersion");
         assert_eq!(ver.status_code, 200);
-        assert!(ver.body.contains("hl-node/0.1.0-node115"));
+        assert_eq!(ver.body, r#"{"jsonrpc":"2.0","id":3,"result":"hyperliquid evm Testnet"}"#);
 
         let unknown = http_post(
             addr,

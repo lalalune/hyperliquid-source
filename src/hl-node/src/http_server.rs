@@ -392,7 +392,7 @@ fn handle_evm_rpc(body: &[u8], state: &ServerState) -> (u16, &'static str, Strin
     let result_json = match canonical_method {
         "eth_chainId" => format!("\"0x{chain_id_num:x}\""),
         "net_version" => format!("\"{chain_id_num}\""),
-        "web3_clientVersion" => "\"hl-node/0.1.0-node115\"".to_string(),
+        "web3_clientVersion" => format!("\"hyperliquid evm {}\"", eng.chain_display()),
         "eth_blockNumber" => format!("\"0x{:x}\"", eng.latest_height()),
         "eth_syncing" => "false".to_string(),
         "eth_gasPrice" | "eth_bigBlockGasPrice" => "\"0x3b9aca00\"".to_string(),
