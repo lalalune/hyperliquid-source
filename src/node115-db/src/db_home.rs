@@ -112,8 +112,9 @@ impl DbHome {
     /// Exact 3-stage latest-checkpoint loader proven in `db/src/db_home.rs:21:24`
     /// (`0x4468e30`, `0x25d3f20`, `0x59ffa30`):
     /// 1. Verifies `<db_home>/checkpoint` exists (`"checkpoint outer dir does not exist ..."`).
-    /// 2. Scans entries strictly matching unsigned ASCII digits (`+`/`-` rejected at `0x4469183`/`0x4469188`),
-    ///    returning `"no checkpoints to load: ..."` if none exist.
+    /// 2. Parses unsigned decimal heights with an optional leading plus, then
+    ///    renders canonical decimal paths. An empty height list produces
+    ///    `"no checkpoints to load: ..."`.
     /// 3. Sorts descending by height and requires a regular global or EVM completion
     ///    marker plus any supplied `required_subdir`. If none qualify, returns
     ///    `"unable to load any current checkpoint from ..."`.
@@ -132,19 +133,16 @@ impl DbHome {
             let Some(name_str) = name.to_str() else {
                 continue;
             };
-            // Matches `0x4469183` ('+'), `0x4469188` ('-'), and `0x44691d7` (ASCII digits only)
-            if name_str.is_empty() || !name_str.bytes().all(|b| b.is_ascii_digit()) {
-                continue;
-            }
             if let Ok(height) = name_str.parse::<u64>() {
-                parsed.push((height, entry.path()));
+                parsed.push(height);
             }
         }
         if parsed.is_empty() {
             return Err(LoadLatestCheckpointError::NoCheckpointsToLoad { dir: outer });
         }
-        parsed.sort_by_key(|b| std::cmp::Reverse(b.0));
-        for (height, path) in parsed {
+        parsed.sort_unstable_by(|a, b| b.cmp(a));
+        for height in parsed {
+            let path = outer.join(height.to_string());
             if !path.join("CHECKPOINT_COMPLETE").is_file()
                 && !path.join("CHECKPOINT_COMPLETE_EVMSTATE").is_file()
             {

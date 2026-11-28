@@ -1,0 +1,87 @@
+Darwin arm64
+Python 3.12.16
+rustc 1.95.0 (59807616e 2026-04-14)
+python3 -B research/work-items/RE-009-node115-latest-checkpoint-canonical-paths/verify.py
+Target SHA-256: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+FDE 0x4468e30..0x44699c0: primary 0x44692a6, alternate 0x4469308, accept 0x446932b, reject 0x4469394
+FDE 0x59ffa30..0x5a007bb: primary 0x59ffed6, alternate 0x59fff38, accept 0x59fff65, reject 0x59fffce
+PASS: both loader branches use one regular-file predicate and selector 2 fallback
+0x4468e30: zero suffix, canonical provider 0x15623e0; one-byte sign guard skipped for longer names; marker format 0x4469284
+0x59ffa30: zero suffix, canonical provider 0x15623e0; one-byte sign guard skipped for longer names; marker format 0x59ffeb4
+Baseline source cfeaee133 with added regression test
+cargo test --locked --offline --manifest-path src/node115-db/Cargo.toml latest_checkpoint_checks_markers_under_rendered_heights
+   Compiling node115-startup-admission v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-startup-admission)
+   Compiling node115-reverse-path-components v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-reverse-path-components)
+   Compiling node115-indexed-artifact-variant v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-indexed-artifact-variant)
+   Compiling node115-restore-copy v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-owned-db-open/restore-copy)
+   Compiling node115-db-hub-byte-key v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-db-hub-byte-key)
+   Compiling node115-storage-value-decode v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-storage-value-decode)
+   Compiling node115-owned-db-open v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-owned-db-open)
+   Compiling node115-checkpoint-plan v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-owned-db-open/checkpoint-plan)
+   Compiling node115-block-handle-codec v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-block-handle-codec)
+   Compiling node115-replica-end-height v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-replica-end-height)
+   Compiling node115-checkpoint-discovery v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-checkpoint-discovery)
+   Compiling node115-db v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-db)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.71s
+     Running unittests src/lib.rs (work/target/node115-latest-checkpoint-canonical/debug/deps/node115_db-67f71753cdebea54)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration.rs (work/target/node115-latest-checkpoint-canonical/debug/deps/integration-98a29f224e3f155b)
+
+running 1 test
+test latest_checkpoint_checks_markers_under_rendered_heights ... FAILED
+
+failures:
+
+---- latest_checkpoint_checks_markers_under_rendered_heights stdout ----
+
+thread 'latest_checkpoint_checks_markers_under_rendered_heights' (191819234) panicked at tests/integration.rs:509:5:
+assertion failed: matches!(home.load_latest_checkpoint(None),
+    Err(node115_db::db_home::LoadLatestCheckpointError::UnableToLoadAnyCurrentCheckpoint
+    { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    latest_checkpoint_checks_markers_under_rendered_heights
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test integration`
+Fixed source
+cargo test --locked --offline --manifest-path src/node115-db/Cargo.toml
+   Compiling node115-db v0.1.0 (/Users/a1/Documents/Codex/2026-10-31/ni-x/work/hyperliquid-source/src/node115-db)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.34s
+     Running unittests src/lib.rs (work/target/node115-latest-checkpoint-canonical/debug/deps/node115_db-67f71753cdebea54)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration.rs (work/target/node115-latest-checkpoint-canonical/debug/deps/integration-98a29f224e3f155b)
+
+running 13 tests
+test checkpoint_shard_marker_uses_node115_ascii_uppercase ... ok
+test indexed_block_reader_point_and_range_query_inclusive ... ok
+test db_hub_byte_key_storage_decode_and_snapshot_selectors ... ok
+test db_hub_29_kind_prefix_table_and_3_shard_routing ... ok
+test db_home_checkpoint_subdir_lt_hashes_and_74_slot_capture_offsets ... ok
+test owned_db_home_checkpoint_guard_and_live_vs_slow_budgets ... ok
+test rocks_db_niche_block_reader_and_indexed_artifact_variants ... ok
+test rocks_db_owned_db_dir_guard ... ok
+test db_home_guard_discovery_plan_restore_copy_and_replica_height ... ok
+test storage_db_closure_latest_checkpoint_loader_db_hub_path_and_single_run_block_query ... ok
+test latest_checkpoint_checks_both_regular_marker_forms ... ok
+test latest_checkpoint_checks_markers_under_rendered_heights ... ok
+test rocksdb_3_shard_profiles_tcp_ceiling_and_persistent_checkpoint_roundtrip ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+   Doc-tests node115_db
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

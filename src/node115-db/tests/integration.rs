@@ -378,9 +378,9 @@ fn storage_db_closure_latest_checkpoint_loader_db_hub_path_and_single_run_block_
     assert!(matches!(e1, LoadLatestCheckpointError::OuterDirDoesNotExist { .. }));
     assert!(e1.to_string().starts_with("checkpoint outer dir does not exist "));
 
-    // 2. Empty `checkpoint` dir (or only signed/non-digit dirs like "+10", "-5", "tmp") -> NoCheckpointsToLoad
+    // 2. Empty `checkpoint` dir or only invalid names -> NoCheckpointsToLoad
     let outer = home.checkpoint_subdir();
-    fs::create_dir_all(outer.join("+10")).unwrap();
+    fs::create_dir_all(outer.join("+")).unwrap();
     fs::create_dir_all(outer.join("-5")).unwrap();
     fs::create_dir_all(outer.join("tmp")).unwrap();
     let e2 = home.load_latest_checkpoint(Some("EvmState")).unwrap_err();
@@ -484,4 +484,38 @@ fn latest_checkpoint_checks_both_regular_marker_forms() {
     );
 
     let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn latest_checkpoint_checks_markers_under_rendered_heights() {
+    let root = unique_tmp("latest-canonical-height");
+    let home = DbHome::new(&root).unwrap();
+    let outer = home.checkpoint_subdir();
+    for name in ["+", "-5", "18446744073709551616"] {
+        let path = outer.join(name);
+        fs::create_dir_all(&path).unwrap();
+        fs::write(path.join("CHECKPOINT_COMPLETE"), b"").unwrap();
+    }
+    assert!(matches!(
+        home.load_latest_checkpoint(None),
+        Err(node115_db::db_home::LoadLatestCheckpointError::NoCheckpointsToLoad { .. })
+    ));
+
+    for name in ["00099", "+00042"] {
+        let path = outer.join(name);
+        fs::create_dir_all(&path).unwrap();
+        fs::write(path.join("CHECKPOINT_COMPLETE"), b"").unwrap();
+    }
+    assert!(matches!(
+        home.load_latest_checkpoint(None),
+        Err(node115_db::db_home::LoadLatestCheckpointError::UnableToLoadAnyCurrentCheckpoint { .. })
+    ));
+
+    let canonical = outer.join("42");
+    fs::create_dir(&canonical).unwrap();
+    fs::write(canonical.join("CHECKPOINT_COMPLETE"), b"").unwrap();
+    let selected = home.load_latest_checkpoint(None).unwrap();
+    assert_eq!(selected.height, 42);
+    assert_eq!(selected.path, canonical);
+    fs::remove_dir_all(root).unwrap();
 }
