@@ -1,0 +1,65 @@
+RE-017-node115-local-startup-image-rewrite
+Darwin arm64
+Python 3.9.6
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B research/work-items/RE-017-node115-local-replay-hardfork-rewrite/verify.py
+PASS: pinned #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 42 spans in startup FDE
+PASS: startup saves the original pair at future+0x68/+0x70 before the freeze guard
+PASS: equality rewrites materialized +0x18/+0x20; both bypass arms preserve the pair at this boundary
+PASS: stale freeze height reaches a failure arm and ud2 if its helper returns
+PASS: selected replay spawn subsequently reads the materialized object, not the earlier future copy
+
+$ python3 -B research/work-items/RE-017-node115-local-restore-replay-pair/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 49 spans in 3 FDEs
+PASS: local restore builder pointer survives the tagged output selection into R15
+PASS: empty-vector continuation copies restored state +0x18/+0x20 to replay comparison +0x100/+0x108
+PASS: the first inline-state dispatch routes through a separate call and replaces R15 on its selected result
+
+$ python3 -B /tmp/hl-node115-local-rewrite.tLSPdT/RE-017-node115-local-startup-image-rewrite/test_rewrite.py
+test_absent_and_future_freezes_preserve_input_image (__main__.LocalStartupRewriteTests) ... ok
+test_cli_binary_and_report (__main__.LocalStartupRewriteTests) ... ok
+test_equality_changes_only_replay_pair_and_retains_original_copy (__main__.LocalStartupRewriteTests) ... ok
+test_past_and_invalid_fixture_coordinates (__main__.LocalStartupRewriteTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.052s
+
+OK
+
+$ PYTHONPATH=/tmp/hl-node115-local-rewrite.tLSPdT/RE-017-node115-local-startup-image-rewrite FIXTURES=/tmp/hl-node115-named-rmp-startup.NCwJoC OUT=/tmp/hl-node115-local-rewrite.tLSPdT python3 -B - <<'PY'
+from hashlib import sha256
+from os import environ
+from pathlib import Path
+from struct import unpack_from
+from rewrite import rewrite_local
+
+fixtures = Path(environ["FIXTURES"])
+out = Path(environ["OUT"])
+for case, expected_round in [("absent", 99), ("future", 99), ("equal", 105), ("past", None)]:
+    before = (fixtures / (case + ".compact")).read_bytes()
+    try:
+        result = rewrite_local(before, sha256(before).hexdigest(), 41)
+    except ValueError as error:
+        assert case == "past" and "scheduled freeze 40" in str(error)
+    else:
+        assert expected_round is not None
+        assert result.original_pair == ((1 << 64) - 1, 99)
+        assert result.replay_pair == ((1 << 64) - 1, expected_round)
+        assert unpack_from("<QQ", result.image, 0x18) == result.replay_pair
+        assert result.image[0x28:] == before[0x28:]
+        (out / (case + ".output.bin")).write_bytes(result.image)
+    print("PASS:", case, "after upstream named RMP and compact assembly")
+PY
+
+$ /tmp/hl-node115-compact-local-restore.WRBvnD/target/debug/examples/check_local_inputs /tmp/hl-node115-named-rmp-startup.NCwJoC
+PASS: absent after upstream named RMP and compact assembly
+PASS: future after upstream named RMP and compact assembly
+PASS: equal after upstream named RMP and compact assembly
+PASS: past after upstream named RMP and compact assembly
+PASS: compact checkpoint -> local startup input -> absent fixture outcome
+PASS: compact checkpoint -> local startup input -> future fixture outcome
+PASS: compact checkpoint -> local startup input -> equal fixture outcome
+PASS: compact checkpoint -> local startup input -> past fixture outcome
