@@ -16,7 +16,7 @@ an integrated, runnable node remains in progress.
 
 ![Node #115 progress](docs/assets/research-progress.svg)
 
-**299 active Rust implementation areas · 263 top-level Cargo manifests · 5058 #115 research work items.**
+**299 active Rust implementation areas · 263 top-level Cargo manifests · 5059 #115 research work items.**
 
 These inventory counts describe available work, not completed components.
 
@@ -30,16 +30,16 @@ These inventory counts describe available work, not completed components.
 | Components fully built | 23/23 | 100.00% |
 | Components with full behavioral validation | 23/23 | 100.00% |
 | Components with full code/data identity | 0/23 | 0.00% |
-| Target .text bytes compared | 11,046,599/83,719,936 | 13.19471% |
-| Target .text bytes raw-equal | 10,328,493/83,719,936 | 12.33696% |
-| Target .text bytes relocation-qualified | 11,046,599/83,719,936 | 13.19471% |
-| Whole-ELF bytes compared | 11,046,599/105,896,032 | 10.43155% |
-| Whole-ELF bytes raw-equal | 10,328,493/105,896,032 | 9.75343% |
-| First-party .text bytes compared | 799,459/83,719,936 | 0.95492% |
-| Compared windows vs. `.eh_frame_hdr` unwind starts | 17,163/135,313 | 12.68393% |
+| Target .text bytes compared | 11,766,917/83,719,936 | 14.05510% |
+| Target .text bytes raw-equal | 10,981,414/83,719,936 | 13.11684% |
+| Target .text bytes relocation-qualified | 11,766,917/83,719,936 | 14.05510% |
+| Whole-ELF bytes compared | 11,766,917/105,896,032 | 11.11176% |
+| Whole-ELF bytes raw-equal | 10,981,414/105,896,032 | 10.37000% |
+| First-party .text bytes compared | 1,084,362/83,719,936 | 1.29523% |
+| Compared windows vs. `.eh_frame_hdr` unwind starts | 18,328/135,313 | 13.54489% |
 | Component work areas with registered Rust paths | 23/23 | 100.00% |
 | Active `src/` Rust areas registered in `components.json` | 299/299 | 100.00% |
-| Research work items with top-level `MANIFEST.sha256` | 4,936/5,058 | 97.59% |
+| Research work items with top-level `MANIFEST.sha256` | 4,937/5,059 | 97.59% |
 | Tracked research questions with reviewed evidence | 5/5 | 100.00% |
 
 Gate percentages require acceptance of the full component scope.
@@ -58,28 +58,28 @@ Each fragment keeps its own #115 contract; an integrated node executable remains
 
 | Component | Target | Accepted gates | Milestones | Compared implementation bytes | Registered implementation windows |
 | --- | --- | ---: | ---: | ---: | ---: |
-| [Foundation utilities](docs/COMPONENTS.md#foundation) | Node #115 | 3/4 | 75% | 29,548 | 150 |
+| [Foundation utilities](docs/COMPONENTS.md#foundation) | Node #115 | 3/4 | 75% | 36,587 | 163 |
 | [Serialization fork](docs/COMPONENTS.md#serialization) | Node #115 | 3/4 | 75% | 12,932 | 59 |
 | [Storage and snapshots](docs/COMPONENTS.md#storage) | Node #115 | 3/4 | 75% | 4,980 | 26 |
-| [Network transport](docs/COMPONENTS.md#transport) | Node #115 | 3/4 | 75% | 2,935 | 25 |
-| [Consensus](docs/COMPONENTS.md#consensus) | Node #115 | 3/4 | 75% | 16,072 | 89 |
-| [Node runtime and gossip](docs/COMPONENTS.md#node-runtime) | Node #115 | 3/4 | 75% | 5,382 | 30 |
-| [Block execution and state](docs/COMPONENTS.md#abci) | Node #115 | 3/4 | 75% | 10,669 | 68 |
-| [Action wire and signing](docs/COMPONENTS.md#action-wire) | Node #115 | 3/4 | 75% | 174,793 | 271 |
-| [Action dispatch and handlers](docs/COMPONENTS.md#action-dispatch) | Node #115 | 3/4 | 75% | 35,135 | 15 |
-| [Exchange orchestration](docs/COMPONENTS.md#exchange) | Node #115 | 3/4 | 75% | 17,990 | 71 |
-| [Order books and matching](docs/COMPONENTS.md#orderbook) | Node #115 | 3/4 | 75% | 75,080 | 291 |
-| [Clearinghouses and risk](docs/COMPONENTS.md#risk) | Node #115 | 3/4 | 75% | 63,076 | 255 |
-| [Assets and fixed-point quantities](docs/COMPONENTS.md#assets) | Node #115 | 3/4 | 75% | 27,995 | 142 |
-| [Fees and volume](docs/COMPONENTS.md#fees) | Node #115 | 3/4 | 75% | 16,377 | 97 |
-| [Vaults and subaccounts](docs/COMPONENTS.md#vaults) | Node #115 | 3/4 | 75% | 21,955 | 102 |
-| [Bridge and withdrawals](docs/COMPONENTS.md#bridge) | Node #115 | 3/4 | 75% | 37,812 | 98 |
-| [HyperEVM execution](docs/COMPONENTS.md#evm) | Node #115 | 3/4 | 75% | 16,308 | 90 |
-| [Staking and validator lifecycle](docs/COMPONENTS.md#staking) | Node #115 | 3/4 | 75% | 68,074 | 319 |
-| [DEX registry](docs/COMPONENTS.md#dex-registry) | Node #115 | 3/4 | 75% | 104,784 | 205 |
-| [Remaining L1 state helpers](docs/COMPONENTS.md#l1-shared) | Node #115 | 3/4 | 75% | 4,307 | 25 |
-| [Info API](docs/COMPONENTS.md#info-api) | Node #115 | 3/4 | 75% | 10,575 | 79 |
-| [EVM JSON-RPC](docs/COMPONENTS.md#evm-rpc) | Node #115 | 3/4 | 75% | 887 | 10 |
+| [Network transport](docs/COMPONENTS.md#transport) | Node #115 | 3/4 | 75% | 6,868 | 35 |
+| [Consensus](docs/COMPONENTS.md#consensus) | Node #115 | 3/4 | 75% | 81,534 | 211 |
+| [Node runtime and gossip](docs/COMPONENTS.md#node-runtime) | Node #115 | 3/4 | 75% | 13,828 | 53 |
+| [Block execution and state](docs/COMPONENTS.md#abci) | Node #115 | 3/4 | 75% | 18,062 | 86 |
+| [Action wire and signing](docs/COMPONENTS.md#action-wire) | Node #115 | 3/4 | 75% | 203,603 | 393 |
+| [Action dispatch and handlers](docs/COMPONENTS.md#action-dispatch) | Node #115 | 3/4 | 75% | 36,975 | 20 |
+| [Exchange orchestration](docs/COMPONENTS.md#exchange) | Node #115 | 3/4 | 75% | 22,305 | 85 |
+| [Order books and matching](docs/COMPONENTS.md#orderbook) | Node #115 | 3/4 | 75% | 97,660 | 364 |
+| [Clearinghouses and risk](docs/COMPONENTS.md#risk) | Node #115 | 3/4 | 75% | 96,540 | 363 |
+| [Assets and fixed-point quantities](docs/COMPONENTS.md#assets) | Node #115 | 3/4 | 75% | 35,495 | 163 |
+| [Fees and volume](docs/COMPONENTS.md#fees) | Node #115 | 3/4 | 75% | 26,145 | 117 |
+| [Vaults and subaccounts](docs/COMPONENTS.md#vaults) | Node #115 | 3/4 | 75% | 25,703 | 109 |
+| [Bridge and withdrawals](docs/COMPONENTS.md#bridge) | Node #115 | 3/4 | 75% | 39,891 | 104 |
+| [HyperEVM execution](docs/COMPONENTS.md#evm) | Node #115 | 3/4 | 75% | 25,503 | 105 |
+| [Staking and validator lifecycle](docs/COMPONENTS.md#staking) | Node #115 | 3/4 | 75% | 83,009 | 347 |
+| [DEX registry](docs/COMPONENTS.md#dex-registry) | Node #115 | 3/4 | 75% | 123,445 | 244 |
+| [Remaining L1 state helpers](docs/COMPONENTS.md#l1-shared) | Node #115 | 3/4 | 75% | 9,311 | 37 |
+| [Info API](docs/COMPONENTS.md#info-api) | Node #115 | 3/4 | 75% | 40,741 | 148 |
+| [EVM JSON-RPC](docs/COMPONENTS.md#evm-rpc) | Node #115 | 3/4 | 75% | 1,452 | 11 |
 | [Global configuration](docs/COMPONENTS.md#constants) | Node #115 | 3/4 | 75% | 41,793 | 68 |
 
 Accepted gates: **69/92**. Full-component byte and function denominators remain unmeasured.
@@ -95,16 +95,16 @@ Their equality does not establish first-party or whole-node completion.
 
 | Comparison | % of #115 `.text` | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows |
 | --- | ---: | ---: | ---: | ---: |
-| **Node #115 total** | 13.19471% | 10,328,493/11,046,599 (93.50%) | 825/17,163 (4.81%) | 17,163/17,163 (100.00%) |
+| **Node #115 total** | 14.05510% | 10,981,414/11,766,917 (93.32%) | 830/18,328 (4.53%) | 18,328/18,328 (100.00%) |
 | compiler-builtins | 0.00343% | 2,769/2,874 (96.35%) | 5/13 (38.46%) | 13/13 (100.00%) |
 | native-libraries | 8.42793% | 6,597,469/7,055,854 (93.50%) | 617/9,342 (6.60%) | 9,342/9,342 (100.00%) |
-| rust-alloc | 0.90636% | 711,883/758,805 (93.82%) | 31/1,000 (3.10%) | 1,000/1,000 (100.00%) |
-| rust-core | 0.39408% | 306,784/329,927 (92.99%) | 45/830 (5.42%) | 830/830 (100.00%) |
-| rust-std | 0.42731% | 334,801/357,746 (93.59%) | 26/633 (4.11%) | 633/633 (100.00%) |
-| vendored-crates | 2.07778% | 1,623,677/1,739,516 (93.34%) | 88/2,758 (3.19%) | 2,758/2,758 (100.00%) |
+| rust-alloc | 1.02993% | 809,369/862,256 (93.87%) | 31/1,107 (2.80%) | 1,107/1,107 (100.00%) |
+| rust-core | 0.43580% | 340,369/364,854 (93.29%) | 46/868 (5.30%) | 868/868 (100.00%) |
+| rust-std | 0.42946% | 336,379/359,540 (93.56%) | 26/638 (4.08%) | 638/638 (100.00%) |
+| vendored-crates | 2.43044% | 1,889,276/2,034,759 (92.85%) | 91/3,047 (2.99%) | 3,047/3,047 (100.00%) |
 | zstandard | 0.00289% | 2,418/2,418 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
 
-Compared code: **11,046,599/83,719,936 .text bytes (13.19471%)**.
+Compared code: **11,766,917/83,719,936 .text bytes (14.05510%)**.
 
 All active findings bind to node #115. See [detailed progress](docs/PROGRESS.md)
 and [source-built node acceptance](docs/SCOPE.md#source-built-network-node).

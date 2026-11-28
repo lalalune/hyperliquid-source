@@ -32,11 +32,11 @@ class FirstPartyByteCensus115Tests(unittest.TestCase):
         coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', components)
         fp_rows = [r for r in coverage['windows'] if 'dependency' not in r]
         dep_rows = [r for r in coverage['windows'] if 'dependency' in r]
-        self.assertEqual(len(fp_rows), 2585)
+        self.assertEqual(len(fp_rows), 3311)
         self.assertTrue(all(r['id'].startswith('node115-fp-') for r in fp_rows))
         self.assertTrue(all(r['relocation_qualified'] for r in fp_rows))
-        self.assertEqual(len(dep_rows), 14578)
-        self.assertEqual(sum(c['windows'] for c in coverage['components'].values()), 2585)
+        self.assertEqual(len(dep_rows), 15017)
+        self.assertEqual(sum(c['windows'] for c in coverage['components'].values()), 3311)
         self.assertEqual(
             sum(c['bytes'] for c in coverage['components'].values()),
             sum(r['bytes'] for r in fp_rows),
