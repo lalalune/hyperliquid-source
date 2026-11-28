@@ -96,6 +96,23 @@ pub fn compute_reduction_tree_root(rows: &[ReductionRow]) -> Result<[u8; 32], En
     Ok(compute_preimage_root(&preimage))
 }
 
+/// Encode a complete root node, including a leaf at the root.
+pub fn encode_reduction_node(node: &ReductionNode) -> Result<Vec<u8>, EncodeError> {
+    match node {
+        ReductionNode::Nested(rows) => encode_reduction_tree(rows),
+        ReductionNode::Leaf(digest) => {
+            let mut out = Vec::with_capacity(68);
+            push_leaf_hex(&mut out, digest);
+            Ok(out)
+        }
+    }
+}
+
+/// Compute the raw BLAKE3 digest of a complete root node's preimage.
+pub fn compute_reduction_node_root(node: &ReductionNode) -> Result<[u8; 32], EncodeError> {
+    Ok(compute_preimage_root(&encode_reduction_node(node)?))
+}
+
 fn encode_rows_into(out: &mut Vec<u8>, rows: &[ReductionRow]) -> Result<(), EncodeError> {
     push_array_header(out, rows.len())?;
     for row in rows {
