@@ -690,3 +690,43 @@ fn tracker_rounds_fractional_delays_to_nearest_nanosecond() {
     assert!(!timer_is_mature(100, 0.75e-9, 100));
     assert!(timer_is_mature(100, 0.75e-9, 101));
 }
+
+#[test]
+fn daily_evm_archive_completion_prefers_final_regular_file() {
+    use node115_abci::engine::{DailyEvmArchiveCompletion, plan_daily_evm_archive_completion};
+
+    let dir = unique_tmp("archive-completion");
+    std::fs::create_dir_all(&dir).unwrap();
+    let temporary = dir.join("temporary.tar");
+    let final_archive = dir.join("final.tar");
+    let plan = || plan_daily_evm_archive_completion(&temporary, &final_archive);
+
+    assert_eq!(plan(), DailyEvmArchiveCompletion::NoArchive);
+    std::fs::write(&temporary, b"temporary contents").unwrap();
+    assert_eq!(plan(), DailyEvmArchiveCompletion::PromoteTemporary);
+    std::fs::create_dir(&final_archive).unwrap();
+    assert_eq!(plan(), DailyEvmArchiveCompletion::PromoteTemporary);
+    std::fs::remove_dir(&final_archive).unwrap();
+
+    std::fs::write(&final_archive, b"finished contents").unwrap();
+    assert_eq!(
+        plan(),
+        DailyEvmArchiveCompletion::KeepFinal { remove_temporary: true },
+    );
+    assert_eq!(std::fs::read(&temporary).unwrap(), b"temporary contents");
+    assert_eq!(std::fs::read(&final_archive).unwrap(), b"finished contents");
+
+    std::fs::remove_file(&temporary).unwrap();
+    assert_eq!(
+        plan(),
+        DailyEvmArchiveCompletion::KeepFinal { remove_temporary: false },
+    );
+    std::fs::create_dir(&temporary).unwrap();
+    assert_eq!(
+        plan(),
+        DailyEvmArchiveCompletion::KeepFinal { remove_temporary: false },
+    );
+    std::fs::remove_file(&final_archive).unwrap();
+    assert_eq!(plan(), DailyEvmArchiveCompletion::NoArchive);
+    std::fs::remove_dir_all(&dir).unwrap();
+}
