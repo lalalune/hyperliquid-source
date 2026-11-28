@@ -531,13 +531,16 @@ impl NodeEngine {
         let lt_path = db_home.lt_hashes_path(height);
         let meta_path = cp_dir.join("abci_state_meta.json");
 
-        if meta_path.is_file() {
+        let committed_round = if meta_path.is_file() {
             let meta_text = fs::read_to_string(&meta_path)?;
             if let Some(state_hf) = extract_json_u64(&meta_text, "\"hardfork_version\":") {
                 validate_state_hardfork_not_newer(state_hf, BINARY_HARDFORK_VERSION)
                     .map_err(EngineError::StateHardforkNewer)?;
             }
-        }
+            extract_json_u64(&meta_text, "\"committed_round\":")
+        } else {
+            None
+        };
 
         let compressed = fs::read(&cp_path)?;
         let raw = net_utils::decompress_size_prepended(&compressed, MAX_CHECKPOINT_BYTES)
@@ -593,7 +596,7 @@ impl NodeEngine {
             books: Books::new(),
             twap_engine: TwapEngine::new(),
             trigger_book: TriggerBook::new(),
-            commit_store: TwoChainCommitStore::new(rec.round, rec.round),
+            commit_store: TwoChainCommitStore::new(committed_round.unwrap_or(rec.round), rec.round),
             bucket_guard: BucketGuard::new(60_000),
             last_begin_block_phases: Vec::new(),
             next_bole_oid: 1,
