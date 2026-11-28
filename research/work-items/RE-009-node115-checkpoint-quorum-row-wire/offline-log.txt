@@ -1,0 +1,14 @@
+RE-009-node115-checkpoint-quorum-row-wire
+Darwin arm64
+Python 3.12.16
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+$ python3 -B research/work-items/RE-009-node115-checkpoint-quorum-row-wire/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 119 instruction windows
+FDEs: 0x33b2a30..0x33b4fd1, 0x3259070..0x32597de, 0x38a99c0..0x38a9cfa, 0x31eaed0..0x31ebacc, 0x314d020..0x314e92d
+PASS: qrs array reservation is separate from item count and 104-byte publication
+PASS: selected row reads [height, payload]; payload's first field is a 32-byte AbciDigest
+PASS: digest lanes reach row +0x48..+0x67; bad stride and lane-offset controls differ
+$ python3 -B tools/digest_quorum_entry_builder_115.py --check
+builder calls=2 prune calls=2
