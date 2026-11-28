@@ -43,9 +43,9 @@ pub struct RestoredState {
     pub height: u64,
     /// `[S + 0x30]`: persisted round `R`.
     pub round: u64,
-    /// `[S + 0x18]`: incremented with saturation on accepted loader lane (`0x3c128ca`).
+    /// Replay comparison word at `[S + 0x18]`. The selected rewrite saturating-increments it.
     pub loader_seq: u64,
-    /// `[S + 0x20]`: copied from `[S + 0x30]` on accepted loader lane.
+    /// Replay comparison word at `[S + 0x20]`. The selected rewrite copies `[S + 0x30]`.
     pub copied_round: u64,
     /// Initial replay key copied into parent `+0x9a0`/`+0x9a8` with no arithmetic.
     pub replay_initializer: ReplayInitializer,
@@ -65,15 +65,31 @@ pub enum RestoreError {
     HeightMismatch { requested: u64, persisted: u64 },
 }
 
-/// Discover a checkpoint directory via `node115-checkpoint-discovery` and apply the
-/// observed `qcp-first-replay-key` restore field contract.
-pub fn restore_checkpoint(
+/// Selected Context hardfork words at state +0x18 and +0x20.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct HardforkWords {
+    pub version: u64,
+    pub round: u64,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct LocalRestore {
+    pub state: RestoredState,
+    /// The saved pre-rewrite words at startup future +0x68/+0x70.
+    pub startup_pair: HardforkWords,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum LocalRestoreError {
+    Checkpoint(RestoreError),
+    PastFreeze { target: u64, height: u64 },
+}
+
+fn matching_checkpoint(
     checkpoints_dir: &Path,
     requested_height: u64,
     persisted_height: u64,
-    persisted_round: u64,
-    persisted_seq: u64,
-) -> Result<RestoredState, RestoreError> {
+) -> Result<PathBuf, RestoreError> {
     let candidate = find_checkpoint(checkpoints_dir, requested_height)
         .ok_or(RestoreError::CheckpointNotFound { requested_height })?;
     if persisted_height != requested_height {
@@ -82,16 +98,77 @@ pub fn restore_checkpoint(
             persisted: persisted_height,
         });
     }
-    Ok(RestoredState {
-        checkpoint_path: candidate.path,
-        height: persisted_height,
-        round: persisted_round,
-        loader_seq: persisted_seq.saturating_add(1),
-        copied_round: persisted_round,
+    Ok(candidate.path)
+}
+
+fn materialized_fixture(
+    checkpoint_path: PathBuf,
+    height: u64,
+    round: u64,
+    pair: HardforkWords,
+) -> RestoredState {
+    RestoredState {
+        checkpoint_path,
+        height,
+        round,
+        loader_seq: pair.version,
+        copied_round: pair.round,
         replay_initializer: ReplayInitializer {
-            initial_height: persisted_height,
-            initial_round: persisted_round,
+            initial_height: height,
+            initial_round: round,
         },
+    }
+}
+
+/// Discover the checkpoint and model the selected always-rewriting loader at 0x3c12800.
+pub fn restore_checkpoint(
+    checkpoints_dir: &Path,
+    requested_height: u64,
+    persisted_height: u64,
+    persisted_round: u64,
+    persisted_seq: u64,
+) -> Result<RestoredState, RestoreError> {
+    let path = matching_checkpoint(checkpoints_dir, requested_height, persisted_height)?;
+    let pair = HardforkWords {
+        version: persisted_seq.saturating_add(1),
+        round: persisted_round,
+    };
+    Ok(materialized_fixture(
+        path,
+        persisted_height,
+        persisted_round,
+        pair,
+    ))
+}
+
+/// Model the separate local startup projection at 0x2cc1120 after synthetic checkpoint discovery.
+/// An exact active freeze rewrites the later replay pair while preserving the startup copy.
+pub fn restore_local_checkpoint(
+    checkpoints_dir: &Path,
+    requested_height: u64,
+    persisted_height: u64,
+    persisted_round: u64,
+    hardfork: HardforkWords,
+    scheduled_freeze: Option<u64>,
+) -> Result<LocalRestore, LocalRestoreError> {
+    let path = matching_checkpoint(checkpoints_dir, requested_height, persisted_height)
+        .map_err(LocalRestoreError::Checkpoint)?;
+    let replay_pair = match scheduled_freeze {
+        Some(target) if target < persisted_height => {
+            return Err(LocalRestoreError::PastFreeze {
+                target,
+                height: persisted_height,
+            });
+        }
+        Some(target) if target == persisted_height => HardforkWords {
+            version: hardfork.version.saturating_add(1),
+            round: persisted_round,
+        },
+        _ => hardfork,
+    };
+    Ok(LocalRestore {
+        state: materialized_fixture(path, persisted_height, persisted_round, replay_pair),
+        startup_pair: hardfork,
     })
 }
 
