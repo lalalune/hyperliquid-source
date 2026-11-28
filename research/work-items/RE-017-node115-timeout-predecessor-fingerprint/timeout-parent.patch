@@ -1,0 +1,72 @@
+--- a/probe.rs
++++ b/probe.rs
+@@ -1,7 +1,8 @@
+ use node115_certificate_caller::{Block, Parent, Timestamp, block_digest, serialize_variant_zero};
+ use node115_client_block_success::{
+-    AdmittedTimestamp, Header, Parent as WireParent, ReplayPayload, admit_timestamp,
+-    decode_replay_payload_prefix, replay_parent_projection, replay_retained_parent_link,
++    AdmittedTimestamp, Header, Parent as WireParent, QuorumCertificate, ReplayPayload,
++    admit_timestamp, decode_replay_payload_prefix, replay_parent_projection,
++    replay_retained_parent_link,
+ };
+ use node115_nested_certificate_decision::{Certificate, sigmap::SigMap};
+ use std::{env, fs, path::Path};
+@@ -33,27 +34,46 @@
+     }
+ }
+
+-fn canonical_previous(header: Header) -> Block {
+-    let WireParent::QuorumCertificate(qc) = header.parent else {
+-        panic!("previous fixture requires a direct quorum");
+-    };
++fn empty_vote_certificate(qc: QuorumCertificate) -> Certificate {
+     assert!(
+         qc.votes.is_empty(),
+-        "previous fixture requires an empty vote list"
++        "previous fixture requires an empty quorum vote list"
+     );
+     let [first, second, f30, f38, f40] = qc.fields;
++    Certificate {
++        sigs: SigMap::empty_ring(),
++        pair: [first, second],
++        f30,
++        f38,
++        f40,
++        hash: qc.hash,
++    }
++}
++
++fn canonical_previous(header: Header) -> Block {
++    let parent = match header.parent {
++        WireParent::QuorumCertificate(qc) => Parent::Simple(empty_vote_certificate(qc)),
++        WireParent::Timeout {
++            certificate,
++            quorum_certificate,
++        } => {
++            assert!(
++                certificate.votes.is_empty(),
++                "previous fixture requires an empty timeout vote list"
++            );
++            Parent::Composite {
++                primary: empty_vote_certificate(certificate.quorum_certificate),
++                round: certificate.field,
++                timeout_rows: Vec::new(),
++                optional: quorum_certificate.map(empty_vote_certificate),
++            }
++        }
++    };
+     Block {
+         address: header.address,
+         hashes: header.hashes,
+         timestamp: date_to_timestamp(header.timestamp),
+-        parent: Parent::Simple(Certificate {
+-            sigs: SigMap::empty_ring(),
+-            pair: [first, second],
+-            f30,
+-            f38,
+-            f40,
+-            hash: qc.hash,
+-        }),
++        parent,
+     }
+ }
