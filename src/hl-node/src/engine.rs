@@ -86,7 +86,7 @@ use node115_staking::withdrawal_queue::{
 /// Magic header for `checkpoint.bin` written under `DbHome::checkpoint_dir_for_height`.
 const CHECKPOINT_MAGIC: [u8; 8] = *b"HLN115CP";
 
-/// Maximum compressed checkpoint frame size admitted on restore (16 MiB).
+/// Maximum decompressed local checkpoint payload admitted for restore (16 MiB).
 const MAX_CHECKPOINT_BYTES: u64 = 16 * 1024 * 1024;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -1304,6 +1304,12 @@ impl NodeEngine {
 
         let raw = encode_to_vec(&rec, standard())
             .map_err(|e| EngineError::Codec(format!("checkpoint encode failed: {e:?}")))?;
+        if raw.len() as u64 > MAX_CHECKPOINT_BYTES {
+            return Err(EngineError::Codec(format!(
+                "checkpoint payload exceeds restore limit: {} > {MAX_CHECKPOINT_BYTES} bytes",
+                raw.len(),
+            )));
+        }
         let compressed = net_utils::compress_prepend_size(&raw)
             .map_err(|e| EngineError::Codec(format!("checkpoint lz4 failed: {e:?}")))?;
 

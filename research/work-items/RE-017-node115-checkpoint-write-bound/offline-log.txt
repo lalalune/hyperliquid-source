@@ -1,0 +1,50 @@
+2da45cb0a761cff6b478e40421699857d87a94df
+rustc 1.95.0 (59807616e 2026-04-14)
+cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+$ cargo test --offline --locked --manifest-path src/hl-node/Cargo.toml --test checkpoint_write_bound
+   Compiling hl-node v0.1.0 (/private/tmp/hl-node115-checkpoint-write-bound.11T3Gk/src/hl-node)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.22s
+     Running tests/checkpoint_write_bound.rs (/tmp/hl-node115-checkpoint-write-bound.11T3Gk/target/debug/deps/checkpoint_write_bound-17231cf5f9e6bb06)
+
+running 1 test
+test checkpoint_writer_stays_within_its_restore_byte_limit ... FAILED
+
+failures:
+
+---- checkpoint_writer_stays_within_its_restore_byte_limit stdout ----
+restart outcome: codec error: lz4 decompress failed: Decode(Limit)
+
+thread 'checkpoint_writer_stays_within_its_restore_byte_limit' (193840966) panicked at tests/checkpoint_write_bound.rs:37:27:
+writer published a checkpoint its own reader rejects: "/var/folders/73/d2wzvbxd3d34lh0b1fpw3_3m0000gn/T/hl-bound-10294-1795852965966401000/checkpoint/1"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    checkpoint_writer_stays_within_its_restore_byte_limit
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s
+
+error: test failed, to rerun pass `--test checkpoint_write_bound`
+Baseline exit code: 101
+$ python3 -B research/work-items/RE-017-node115-checkpoint-write-bound/verify.py
+PASS: authenticated a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+PASS: native LZ4 adapter checks the declared decoded size against its caller bound before allocation
+$ cargo test --offline --locked --manifest-path src/hl-node/Cargo.toml --test checkpoint_write_bound
+   Compiling hl-node v0.1.0 (/private/tmp/hl-node115-checkpoint-write-bound.11T3Gk/src/hl-node)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.93s
+     Running tests/checkpoint_write_bound.rs (/tmp/hl-node115-checkpoint-write-bound.11T3Gk/target/debug/deps/checkpoint_write_bound-17231cf5f9e6bb06)
+
+running 1 test
+test checkpoint_writer_stays_within_its_restore_byte_limit ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.69s
+
+$ cargo test --offline --locked --manifest-path src/hl-node/Cargo.toml --test e2e_node_runtime e2e_checkpoint_replay_blake3_root_and_restart_persistence
+   Compiling hl-node v0.1.0 (/private/tmp/hl-node115-checkpoint-write-bound.11T3Gk/src/hl-node)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.33s
+     Running tests/e2e_node_runtime.rs (/tmp/hl-node115-checkpoint-write-bound.11T3Gk/target/debug/deps/e2e_node_runtime-a5bcf8f02ba66f4e)
+
+running 1 test
+test e2e_checkpoint_replay_blake3_root_and_restart_persistence ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.05s
