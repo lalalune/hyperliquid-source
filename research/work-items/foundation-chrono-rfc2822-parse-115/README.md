@@ -62,3 +62,9 @@ Metrics are in `measure.json`: cases 43,552, negative controls 433, detected 433
 - No progress gate is requested; this covers one third-party parser, not a component.
 
 Next question: the two callers of the parser through slot 0x64e1b00 - 0x1620be0 (`parse_internal`, 2,888 bytes, an item-list interpreter that also calls the weekday and month scanners) and 0x161ffc0 (3,098 bytes) - and how the parsed record is turned into a timestamp.
+
+## Integrated Rust field reader
+
+The `node115_base::rfc2822::ParsedFields::parse` entry point reads a date prefix into a fresh or partially populated record and returns the unconsumed text. Errors retain earlier field writes, including the separate halves of the hour. The original byte-qualified rules at ELF VA `0x161fa20` constrain this implementation. The safe entry point takes UTF-8 text and the wire zone grammar uses ASCII signs. The native parser's non-character-boundary panic behavior, memory ABI, and conversion of the result into an instant are outside its scope.
+
+From repository root, run `cargo test --offline --locked --manifest-path src/node115-base/Cargo.toml` and `python3 research/work-items/foundation-chrono-rfc2822-parse-115/check_rust_fields.py`. The second command builds only the new Rust source and checks against this packet's independently validated Python rule list. It compares 1,548 complete results (remaining byte index or error code, plus nine partially written fields) across weekday conflicts, year windows, zones, optional seconds, comments and truncated dates. It does not execute the captured node.

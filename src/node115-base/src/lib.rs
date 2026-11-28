@@ -13,6 +13,7 @@ pub mod guards;
 pub mod l1_map;
 pub mod lock_id;
 pub mod log_settings;
+pub mod rfc2822;
 pub mod runtime_utils;
 pub mod short_string;
 pub mod time;
