@@ -1,0 +1,166 @@
+{
+  "rustc_commit": "59807616e1fa2540724bfbac14d7976d7e4a3860",
+  "target": "x86_64-unknown-linux-gnu",
+  "cases": [
+    {
+      "source": "rotate.rs",
+      "rustc_arguments": [
+        "--crate-name",
+        "frame_probe",
+        "--crate-type=lib",
+        "--edition=2021",
+        "--emit=obj",
+        "-C",
+        "opt-level=2",
+        "-C",
+        "panic=abort",
+        "-C",
+        "force-unwind-tables=yes",
+        "-C",
+        "force-frame-pointers=no",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "rotate.rs"
+      ],
+      "object_sha256": "0a749a973bd71b10a8478597e3a3dbb2e5858451eefbdb0c8b64c3336b925fc1",
+      "text_hex": "48c1c707488d4715c3",
+      "entry": "other-entry",
+      "after_setup": null,
+      "cfa_rows": [
+        [
+          0,
+          "RSP+8"
+        ]
+      ]
+    },
+    {
+      "source": "rotate.rs",
+      "rustc_arguments": [
+        "--crate-name",
+        "frame_probe",
+        "--crate-type=lib",
+        "--edition=2021",
+        "--emit=obj",
+        "-C",
+        "opt-level=2",
+        "-C",
+        "panic=abort",
+        "-C",
+        "force-unwind-tables=yes",
+        "-C",
+        "force-frame-pointers=yes",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "rotate.rs"
+      ],
+      "object_sha256": "743f977f8469486f17a47dcec3b5e01315771b88a2d2cc9d7807a49bebe796ed",
+      "text_hex": "554889e548c1c707488d47155dc3",
+      "entry": "push-and-set-rbp",
+      "after_setup": 4,
+      "cfa_rows": [
+        [
+          0,
+          "RSP+8"
+        ],
+        [
+          1,
+          "RSP+16"
+        ],
+        [
+          4,
+          "RBP+16"
+        ],
+        [
+          13,
+          "RSP+8"
+        ]
+      ]
+    },
+    {
+      "source": "aligned.rs",
+      "rustc_arguments": [
+        "--crate-name",
+        "frame_probe",
+        "--crate-type=lib",
+        "--edition=2021",
+        "--emit=obj",
+        "-C",
+        "opt-level=2",
+        "-C",
+        "panic=abort",
+        "-C",
+        "force-unwind-tables=yes",
+        "-C",
+        "force-frame-pointers=no",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "aligned.rs"
+      ],
+      "object_sha256": "8d5f4d9be966f1442cfd3a324983c14f6ac6d916fd01385978be1d8e1e654e26",
+      "text_hex": "554889e54883e4c04881ec800000000f57c00f294424300f294424200f294424100f2904244889e7ff15000000004889ec5dc3",
+      "entry": "push-and-set-rbp",
+      "after_setup": 4,
+      "cfa_rows": [
+        [
+          0,
+          "RSP+8"
+        ],
+        [
+          1,
+          "RSP+16"
+        ],
+        [
+          4,
+          "RBP+16"
+        ],
+        [
+          50,
+          "RSP+8"
+        ]
+      ]
+    },
+    {
+      "source": "aligned.rs",
+      "rustc_arguments": [
+        "--crate-name",
+        "frame_probe",
+        "--crate-type=lib",
+        "--edition=2021",
+        "--emit=obj",
+        "-C",
+        "opt-level=2",
+        "-C",
+        "panic=abort",
+        "-C",
+        "force-unwind-tables=yes",
+        "-C",
+        "force-frame-pointers=yes",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "aligned.rs"
+      ],
+      "object_sha256": "8d5f4d9be966f1442cfd3a324983c14f6ac6d916fd01385978be1d8e1e654e26",
+      "text_hex": "554889e54883e4c04881ec800000000f57c00f294424300f294424200f294424100f2904244889e7ff15000000004889ec5dc3",
+      "entry": "push-and-set-rbp",
+      "after_setup": 4,
+      "cfa_rows": [
+        [
+          0,
+          "RSP+8"
+        ],
+        [
+          1,
+          "RSP+16"
+        ],
+        [
+          4,
+          "RBP+16"
+        ],
+        [
+          50,
+          "RSP+8"
+        ]
+      ]
+    }
+  ]
+}

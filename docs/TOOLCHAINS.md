@@ -20,3 +20,8 @@ for development but cannot establish Linux binary equivalence.
 
 Exact LLD/clang versions above are recorded requirements for a later matched
 build image. Merely matching the Rust release is insufficient for byte identity.
+
+The [node #115 entry-instruction survey](../research/work-items/RE-002-node115-entry-cfa/README.md)
+finds 1,142 FDE entries with immediate RBP setup, including 310 with a leading
+ENDBR64. A controlled Rust 1.95.0 build produced the same aligned-buffer object
+with frame pointers forced on and off. The original frame-pointer setting remains unknown.
