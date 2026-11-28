@@ -120,11 +120,11 @@ pub enum CheckpointFormat {
 }
 
 /// Classify a checkpoint output path identically to `0x26a2cda..0x26a2db7`:
-/// - exact `"/dev/null"` -> `SkipDevNull`
+/// - exactly the raw spelling `"/dev/null"` -> `SkipDevNull`
 /// - extension == `"rmp"` -> `MessagePackRmp`
 /// - everything else (including `".."` or missing/other extension) -> `PrettyJson`
 pub fn classify_checkpoint_path(path: &Path) -> CheckpointFormat {
-    if path == Path::new(CHECKPOINT_DEV_NULL_PATH) {
+    if path.as_os_str() == CHECKPOINT_DEV_NULL_PATH {
         return CheckpointFormat::SkipDevNull;
     }
     if path.extension().and_then(|e| e.to_str()) == Some(CHECKPOINT_RMP_EXTENSION) {
