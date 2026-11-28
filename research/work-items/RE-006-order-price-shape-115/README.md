@@ -79,3 +79,27 @@ Limits:
 - Which callers reach this function and what the status words mean to the user were not traced.
 
 Next question: read the gate slot target `0x44881b0` and the lookup `0x5aed270`, which decide the second word pair `q0`/`q1` and the reference record that this function consumes.
+
+
+## Integrated market tick
+
+The three shape copies call the tick helper after applying their side-specific
+slippage factor. The direct calls at `0x5a2196a` and `0x5a2232a` target
+`0x5a01110`; the call at `0x2d3a5ba` targets `0x2891f50`. Both helpers
+choose the smaller of the five-significant-digit step at the **pre-grid
+price** and the market cap `10^(6 - size decimals)`. The original shaper
+experiments above injected a tick at this edge. The integrated Rust shaper
+now uses the same step calculation as the mid-market builder. [Call sites](../RE-014-mid-market-order-builder-115/callers.tsv) · [Retained tick results](../RE-014-mid-market-order-builder-115/tick_cases.tsv)
+
+With mark 100,000, zero move and five size decimals, the cap is ten. The bid
+pre-grid price 110,000 uses a step of ten and the resulting limit is 110,000.
+The ask pre-grid price 90,000 uses a step of one; the native whole-tick sell
+rule sets the limit to **90,001**. Reusing the same fixed step of ten on both
+sides had produced 90,010 on the ask. The source regression exercises both
+sides at four marks under all seven market caps and two nonzero moves across
+the 100,000 rung, then checks the shared
+calculation against 440 successful retained results from each helper copy.
+
+```sh
+cargo test --locked --manifest-path src/node115-orderbook/Cargo.toml --test price_shape_tick
+```
