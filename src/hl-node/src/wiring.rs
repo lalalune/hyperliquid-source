@@ -1,5 +1,7 @@
 //! Cross-crate offline workspace wiring connecting all landed node #115 first-party crates.
 
+use std::{borrow::Cow, net::Ipv4Addr};
+
 use global_constants::{ChainDisplay, ChainName};
 use node115_base::api_url::ApiUrlKind;
 use node115_base::build_mode::BuildMode;
@@ -9,7 +11,7 @@ use node115_base::time::split_unix_day_seconds;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct WorkspaceHealth {
     pub chain: String,
-    pub api_url: &'static str,
+    pub api_url: Option<Cow<'static, str>>,
     pub bridge_cid: &'static str,
     pub usdc_cid: &'static str,
     pub build_mode: &'static str,
@@ -18,14 +20,22 @@ pub struct WorkspaceHealth {
     pub linked_subsystems: Vec<&'static str>,
 }
 
-/// Runs a deterministic, zero-network, zero-side-effect self-check across every linked
-/// first-party node #115 library crate in the workspace.
-pub fn workspace_health(chain: ChainName) -> WorkspaceHealth {
-    let api_url = match chain {
+/// Resolve the HTTP base selected by the two node #115 API URL consumers.
+/// Sandbox uses the IPv4 address associated with the WebSandbox configuration key.
+pub fn api_base_url(chain: ChainName, sandbox_ip: Option<Ipv4Addr>) -> Option<Cow<'static, str>> {
+    let fixed = match chain {
         ChainName::Mainnet => ApiUrlKind::Mainnet.base_url(),
         ChainName::Testnet => ApiUrlKind::Testnet.base_url(),
-        ChainName::Sandbox | ChainName::Local => ApiUrlKind::WebSandbox.base_url(),
+        ChainName::Local => ApiUrlKind::WebSandbox.base_url(),
+        ChainName::Sandbox => return sandbox_ip.map(|ip| Cow::Owned(format!("http://{ip}:3001/"))),
     };
+    Some(Cow::Borrowed(fixed))
+}
+
+/// Runs a deterministic, zero-network, zero-side-effect self-check across every linked
+/// first-party node #115 library crate in the workspace. It does not read sandbox configuration.
+pub fn workspace_health(chain: ChainName) -> WorkspaceHealth {
+    let api_url = api_base_url(chain, None);
     let (bridge_cid, usdc_cid) = match chain {
         ChainName::Mainnet => (Cid::Bridge2Mainnet.address_hex(), Cid::Usdc2Mainnet.address_hex()),
         ChainName::Testnet | ChainName::Sandbox | ChainName::Local => (
