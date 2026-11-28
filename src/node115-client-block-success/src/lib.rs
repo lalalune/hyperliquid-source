@@ -79,6 +79,35 @@ pub struct Block {
     pub commit_proof: Option<CommitProof>,
 }
 
+/// The fields read from the decoded Block at the selected replay comparison.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ReplayParentProjection {
+    pub comparison_words: [u64; 2],
+    pub successor: u64,
+}
+
+/// Project the two comparison words and the separate saturating successor.
+/// The positional certificate scalars retain the names used by the wire codec.
+pub fn replay_parent_projection(parent: &Parent) -> ReplayParentProjection {
+    let (fields, successor_basis) = match parent {
+        Parent::QuorumCertificate(qc) => (&qc.fields, qc.fields[2]),
+        Parent::Timeout {
+            certificate,
+            quorum_certificate,
+        } => (
+            &quorum_certificate
+                .as_ref()
+                .unwrap_or(&certificate.quorum_certificate)
+                .fields,
+            certificate.field,
+        ),
+    };
+    ReplayParentProjection {
+        comparison_words: [fields[0], fields[1]],
+        successor: successor_basis.saturating_add(1),
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Attachment {
     pub hash: [u8; 32],
