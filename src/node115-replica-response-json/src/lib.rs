@@ -1,4 +1,5 @@
-//! Selected replica response JSON emission. Entry serialization is an explicit boundary.
+//! Selected replica response JSON emission.
+pub mod entry;
 use std::io::{self, Write};
 
 pub enum Response<'a, T> {
@@ -7,7 +8,7 @@ pub enum Response<'a, T> {
     Full(&'a [([u8; 32], Vec<T>)]),
 }
 
-fn hash<W: Write>(out: &mut W, bytes: &[u8; 32]) -> io::Result<()> {
+fn fixed_hex<W: Write>(out: &mut W, bytes: &[u8]) -> io::Result<()> {
     const HEX: &[u8; 16] = b"0123456789abcdef";
     let mut encoded = [0u8; 68];
     encoded[..3].copy_from_slice(b"\"0x");
@@ -15,8 +16,9 @@ fn hash<W: Write>(out: &mut W, bytes: &[u8; 32]) -> io::Result<()> {
         encoded[3 + i * 2] = HEX[(b >> 4) as usize];
         encoded[4 + i * 2] = HEX[(b & 15) as usize];
     }
-    encoded[67] = b'"';
-    out.write_all(&encoded)
+    let closing_quote = 3 + bytes.len() * 2;
+    encoded[closing_quote] = b'"';
+    out.write_all(&encoded[..=closing_quote])
 }
 
 /// Emit the selected response branch, preserving the order of rows and entries.
@@ -32,7 +34,7 @@ pub fn write_response<W: Write, T>(
         Response::Null => out.write_all(b"null"),
         Response::Hash(value) => {
             out.write_all(b"{\"Hash\":")?;
-            hash(out, value)?;
+            fixed_hex(out, value)?;
             out.write_all(b"}")
         }
         Response::Full(rows) => {
@@ -42,7 +44,7 @@ pub fn write_response<W: Write, T>(
                     out.write_all(b",")?;
                 }
                 out.write_all(b"[")?;
-                hash(out, value)?;
+                fixed_hex(out, value)?;
                 out.write_all(b",[")?;
                 for (j, entry) in entries.iter().enumerate() {
                     if j != 0 {
