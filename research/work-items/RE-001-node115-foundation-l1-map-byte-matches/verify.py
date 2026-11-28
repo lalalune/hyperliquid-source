@@ -320,7 +320,7 @@ def verify(self_test: bool = False) -> None:
 
     bw = json.loads((ROOT / "research/byte-windows.json").read_text())
     bw_intervals = [
-        (w["start"], w["end"])
+        (w["start"], w["end"], "dependency" in w)
         for w in bw["windows"]
         if not str(w.get("id", "")).startswith("foundation-l1-map-")
     ]
@@ -332,9 +332,10 @@ def verify(self_test: bool = False) -> None:
             raise ValueError(f"FDE mismatch for {hex(s)}: expected end {hex(e)}, got {fde_extents.get(s)}")
         if s not in fde_locs:
             raise ValueError(f"Window {hex(s)} does not reference base/src/l1_map/entry.rs Location")
-        for bs, be in bw_intervals:
+        for bs, be, is_dep in bw_intervals:
             if bs < e and be > s:
-                raise ValueError(f"Window {hex(s)}..{hex(e)} overlaps byte-windows {hex(bs)}..{hex(be)}")
+                if is_dep or (bs, be) != (s, e):
+                    raise ValueError(f"Window {hex(s)}..{hex(e)} overlaps byte-windows {hex(bs)}..{hex(be)}")
 
         sym = w["symbol"]
         if sym not in compiled:

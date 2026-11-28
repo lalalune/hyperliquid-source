@@ -84,8 +84,8 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual(set(coverage['targets']), {'node115'})
         dep_rows = [r for r in coverage['windows'] if 'dependency' in r]
         fp_rows = [r for r in coverage['windows'] if 'dependency' not in r]
-        self.assertEqual((len(dep_rows), sum(r['bytes'] for r in dep_rows)), (9720, 6621567))
-        self.assertEqual((len(fp_rows), sum(r['bytes'] for r in fp_rows)), (1681, 420811))
+        self.assertEqual((len(dep_rows), sum(r['bytes'] for r in dep_rows)), (12140, 8266329))
+        self.assertEqual((len(fp_rows), sum(r['bytes'] for r in fp_rows)), (1852, 461905))
         self.assertEqual(coverage['totals']['node115']['windows'], len(dep_rows) + len(fp_rows))
         self.assertEqual(coverage['totals']['node115']['bytes'],
                          sum(r['bytes'] for r in dep_rows) + sum(r['bytes'] for r in fp_rows))

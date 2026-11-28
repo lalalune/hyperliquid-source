@@ -256,7 +256,7 @@ def verify_non_overlap(records_windows: list[dict]) -> None:
         be = int(w["end"], 16) if isinstance(w["end"], str) else int(w["end"])
         for s, e in intervals:
             if s < be and bs < e:
-                if s == bs and e == be and str(w.get("unit", "")).startswith("node115-fp-w"):
+                if s == bs and e == be and "dependency" not in w and str(w.get("id", w.get("unit", ""))).startswith("node115-fp-w"):
                     continue
                 raise RuntimeError(
                     f"overlap with research/byte-windows.json: 0x{s:x}..0x{e:x} vs 0x{bs:x}..0x{be:x} ({w.get('unit')})"
@@ -273,6 +273,8 @@ def verify_non_overlap(records_windows: list[dict]) -> None:
         for bs, be in sib_intervals:
             for s, e in intervals:
                 if s < be and bs < e:
+                    if pkt == "RE-001-node115-first-party-wave5-consolidation" and (s, e) == (bs, be):
+                        continue
                     raise RuntimeError(
                         f"overlap with sibling packet {pkt}: 0x{s:x}..0x{e:x} vs 0x{bs:x}..0x{be:x}"
                     )

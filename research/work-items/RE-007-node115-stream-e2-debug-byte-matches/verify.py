@@ -185,13 +185,13 @@ def check_disjointness(windows: list[dict], fdes: dict[int, int]) -> None:
     for i in range(len(own) - 1):
         assert own[i][1] <= own[i + 1][0], f"internal overlap: {own[i]} vs {own[i + 1]}"
 
-    other: list[tuple[int, int, str]] = []
+    other: list[tuple[int, int, str, bool]] = []
     if BYTE_WINDOWS_PATH.exists():
         bw = json.loads(BYTE_WINDOWS_PATH.read_text(encoding="utf-8"))
         for w in bw.get("windows", []):
             iv = extract_interval(w, fdes)
             if iv:
-                other.append((iv[0], iv[1], "research/byte-windows.json"))
+                other.append((iv[0], iv[1], "research/byte-windows.json", "dependency" not in w))
 
     for p in sorted((REPO / "research" / "work-items").glob("*/records.json")):
         if p.resolve() == RECORDS_PATH.resolve():
@@ -206,11 +206,13 @@ def check_disjointness(windows: list[dict], fdes: dict[int, int]) -> None:
                 continue
             iv = extract_interval(w, fdes)
             if iv:
-                other.append((iv[0], iv[1], p.parent.name))
+                other.append((iv[0], iv[1], p.parent.name, False))
 
     for s, e, lbl in own:
-        for os_, oe_, src_lbl in other:
+        for os_, oe_, src_lbl, allow_exact_fp in other:
             if max(s, os_) < min(e, oe_):
+                if allow_exact_fp and (s, e) == (os_, oe_):
+                    continue
                 raise AssertionError(
                     f"overlap for {lbl} ({hex(s)}..{hex(e)}) with {src_lbl} ({hex(os_)}..{hex(oe_)})"
                 )

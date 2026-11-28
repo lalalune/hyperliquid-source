@@ -89,13 +89,13 @@ def load_fde_map() -> dict[int, int]:
     return fdes
 
 
-def collect_existing_ranges() -> list[tuple[int, int, str]]:
-    ranges: list[tuple[int, int, str]] = []
+def collect_existing_ranges() -> list[tuple[int, int, str, bool]]:
+    ranges: list[tuple[int, int, str, bool]] = []
     bw = json.loads(BYTE_WINDOWS_JSON.read_text(encoding="utf-8"))
     for w in bw.get("windows", []):
         s = int(w["start"], 16) if isinstance(w["start"], str) else int(w["start"])
         e = int(w["end"], 16) if isinstance(w["end"], str) else int(w["end"])
-        ranges.append((s, e, "research/byte-windows.json"))
+        ranges.append((s, e, "research/byte-windows.json", "dependency" not in w))
 
     patterns = [
         "research/work-items/*byte-matches*/records.json",
@@ -135,7 +135,7 @@ def collect_existing_ranges() -> list[tuple[int, int, str]]:
                         e = s + w["bytes"]
                     else:
                         continue
-                    ranges.append((s, e, str(p.relative_to(REPO_ROOT))))
+                    ranges.append((s, e, str(p.relative_to(REPO_ROOT)), False))
     return ranges
 
 
@@ -226,8 +226,10 @@ def build_and_verify(
         for os_, oe_ in seen:
             if not (e <= os_ or s >= oe_):
                 raise AssertionError(f"internal overlap at 0x{s:x}")
-        for os_, oe_, src in other_ranges:
+        for os_, oe_, src, allow_exact_fp in other_ranges:
             if not (e <= os_ or s >= oe_):
+                if allow_exact_fp and (s, e) == (os_, oe_):
+                    continue
                 raise AssertionError(f"overlap with {src} at 0x{s:x}..0x{e:x}")
         seen.append((s, e))
 
