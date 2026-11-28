@@ -1,0 +1,68 @@
+RE-009-node115-cadence-image-ingress
+Darwin arm64
+Python 3.9.6
+msgpack 1.1.2
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B research/work-items/RE-009-node115-checkpoint-root-cadence/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 55 spans in 5 FDEs
+PASS: msc.aci uses default 1000 and reaches decoded +0x1ea8, materialized +0x39c8
+
+$ python3 -B research/work-items/RE-009-node115-checkpoint-cadence-export/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 42 spans in 8 FDEs
+PASS: historical +0x1ea8 -> msc.aci through the MessagePack and JSON exporters
+PASS: synthetic cadence 1000 payload -> MessagePack cd03e8 / JSON 1000
+
+$ /tmp/hl-context-rmp-venv/bin/python -B /tmp/hl-node115-cadence-ingress.KTlExy/RE-009-node115-cadence-image-ingress/test_stage.py
+test_cli_writes_only_the_resolved_word_into_a_local_fixture (__main__.CadenceIngressTests) ... ok
+test_default_custom_and_full_u64_words (__main__.CadenceIngressTests) ... ok
+test_independently_pinned_source_and_image_coordinates (__main__.CadenceIngressTests) ... ok
+test_missing_msc_invalid_cadence_and_related_duplicate (__main__.CadenceIngressTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.028s
+
+OK
+
+$ PYTHONPATH=/tmp/hl-node115-cadence-ingress.KTlExy/RE-009-node115-cadence-image-ingress:/tmp/hl-node115-assemble.zpDuLH/RE-017-node115-compact-assemble-fixture:/tmp/hl-node115-root-cadence.dm4Qqk/RE-009-node115-paired-raw-root-preflight /tmp/hl-context-rmp-venv/bin/python -B - <<'PY'
+from hashlib import sha256
+from pathlib import Path
+from struct import pack_into, unpack_from
+from tempfile import TemporaryDirectory
+from assemble import assemble, EVM_BLOCK_SIZE
+from preflight import SelectorState, pair
+from stage import DECODED_SIZE, read_checkpoint, stage
+from test_stage import fixture
+
+def digest(value):
+    return sha256(value).hexdigest()
+
+def state(height, root_field):
+    with TemporaryDirectory() as directory:
+        raw = fixture(height, root_field)
+        source = Path(directory) / "state.rmp"
+        source.write_bytes(raw)
+        cadence = read_checkpoint(source, digest(raw), height)
+    decoded = bytearray(DECODED_SIZE)
+    pack_into("<Q", decoded, 0x28, height)
+    staged = stage(decoded, digest(decoded), height, cadence)
+    evm = bytes(EVM_BLOCK_SIZE)
+    final = assemble(staged, evm, digest(staged), digest(evm), height, bytes(4), bytes(3))
+    compact_cadence, = unpack_from("<Q", final, 0x39c8)
+    assert compact_cadence == cadence
+    print(height, "materialized cadence", compact_cadence, "image SHA-256", digest(final))
+    return SelectorState(0, 0, 0, compact_cadence)
+
+left = state(41, {})
+right_default = state(42, {"aci": 0})
+right_custom = state(42, {"aci": 21})
+assert pair(41, left, right_default) == ("skips-cadence", "skips-cadence")
+assert pair(41, left, right_custom) == ("skips-cadence", "eligible-periodic")
+print("PASS: independent named RMP inputs -> compact +0x39c8 -> paired root eligibility")
+PY
+41 materialized cadence 1000 image SHA-256 ee2b4e3122731c00f3f017fea9eefda1952934b7d82b1ee80c176067f3eef348
+42 materialized cadence 1000 image SHA-256 36342bec789e2c77f6d21bdcee039ab46456c59baf0eda9999aabc538cacb534
+42 materialized cadence 21 image SHA-256 8bc521388550713ca2e41a4b88b37e2c11a806c71f0a6fe94e3a0397742f726e
+PASS: independent named RMP inputs -> compact +0x39c8 -> paired root eligibility
