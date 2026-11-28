@@ -283,7 +283,10 @@ impl PersistentShardKvStore {
             write_kv_file_atomic(&shard_ckpt.join(format!("{cf}.kv")), entries)?;
         }
         write_bytes_atomic(&checkpoint_root.join("CHECKPOINT_COMPLETE"), b"")?;
-        write_bytes_atomic(&self.shard.checkpoint_complete_marker_path(checkpoint_root), b"")?;
+        let shard_marker = self.shard.checkpoint_complete_marker_path(checkpoint_root);
+        if !shard_marker.is_file() {
+            write_bytes_atomic(&shard_marker, b"")?;
+        }
         Ok(shard_ckpt)
     }
 
