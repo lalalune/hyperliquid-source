@@ -3,6 +3,9 @@
 //! Also projects the selected replay payload prefix over the same child readers.
 extern crate alloc;
 
+mod replica_clock;
+pub use replica_clock::{ReplicaClockError, decode_replica_clock};
+
 use alloc::{boxed::Box, vec::Vec};
 use node115_signed_scalar::{Cursor as SignedCursor, DecodeError as SignedError};
 use node115_u32_varint::{ReadError as U32Error, read_u32};
