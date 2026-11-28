@@ -1,5 +1,8 @@
 //! Safe logical projection of the selected node115 heartbeat row classifier.
 
+mod calendar;
+pub use calendar::{HeartbeatTime, TimedSample, classify_at};
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum HeartbeatClass {
     Missing,
@@ -43,6 +46,16 @@ pub fn classify(
     if !found {
         return Ok(HeartbeatClass::Missing);
     }
+    classify_present(numerator, denominator, threshold, config_flag, || age)
+}
+
+fn classify_present(
+    numerator: f64,
+    denominator: f64,
+    threshold: f64,
+    config_flag: bool,
+    age: impl FnOnce() -> f64,
+) -> Result<HeartbeatClass, HeartbeatError> {
     let ratio = if denominator == 0.0 {
         0.0
     } else if denominator <= 0.0 || denominator.is_nan() {
@@ -54,6 +67,7 @@ pub fn classify(
     if ratio > threshold && !config_flag {
         return Ok(HeartbeatClass::Ratio(ratio));
     }
+    let age = age();
     if age > 180.0 {
         return Ok(HeartbeatClass::Age(age));
     }
