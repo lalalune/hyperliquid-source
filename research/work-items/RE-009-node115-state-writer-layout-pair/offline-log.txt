@@ -1,0 +1,26 @@
+RE-009-node115-state-writer-layout-pair
+Host: Darwin arm64; native target: Linux x86-64 ELF
+From repository root, with PACKET set to the staged packet directory:
+PYTHONDONTWRITEBYTECODE=1 python3 "$PACKET/verify.py" --repo . --objdump llvm-objdump
+Python 3.12.16
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+
+FDE 0x5480950..0x548168c (3388 bytes)
+FDE 0x5481900..0x548263c (3388 bytes)
+target=artifacts/node/115/hl-node sha256=a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301 bytes=105896032
+named configuration 0x4e4b8c1; call 0x4e4b8de -> 0x5480950
+named configuration 0x4e4b461; call 0x4e4b480 -> 0x5481900
+internal-edge: 109 instruction pairs
+preserved-state: 2 instruction pairs
+shared-call: 91 instruction pairs
+shared-literal: 41 instruction pairs
+shifted-state: 74 instruction pairs
+unchanged: 439 instruction pairs
+PASS control: change an internal result branch rejected
+PASS control: change an emitted child's dispatch target rejected
+PASS control: change a shared field-literal target rejected
+PASS control: change a shifted layout-B member operand rejected
+PASS control: alter one opcode outside recognized operand fields rejected
+PASS: every in-FDE instruction aligned; zero unexplained bytes
