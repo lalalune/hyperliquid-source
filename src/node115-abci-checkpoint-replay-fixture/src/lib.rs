@@ -432,6 +432,31 @@ impl ReplayEngineFixture {
     where
         F: FnMut(&mut RootSelectorCell, usize) -> u64,
     {
+        self.apply_block_with_history_pruning(
+            block,
+            support,
+            registry,
+            registry_context,
+            None,
+            fallback_cpuid,
+        )
+    }
+
+    /// Run the fixture with the selected local history pruning branch.
+    /// `history_prune_base` is the caller-supplied context word at `ctx + 0x18`
+    /// when pruning is enabled. `None` models the disabled flag at `ctx + 0x10`.
+    pub fn apply_block_with_history_pruning<F>(
+        &mut self,
+        block: &ReplayBlock,
+        support: &SupportContext,
+        registry: &Registry,
+        registry_context: u64,
+        history_prune_base: Option<u64>,
+        fallback_cpuid: F,
+    ) -> Result<BlockExecutionReport, BlockAdmissionError>
+    where
+        F: FnMut(&mut RootSelectorCell, usize) -> u64,
+    {
         // Step 1: Pre-execution header checks (`0x5a04eea..0x5a04f23`).
         if block.new_round <= block.prev_round {
             return Err(BlockAdmissionError::NonAdvancingRound {
@@ -488,6 +513,12 @@ impl ReplayEngineFixture {
 
         // Step 5: Sink-before-comparison (`0x5a05c14..0x5a05e3c`) BEFORE `0x5a07ec0`.
         let handoff = replay_handoff(&drained_rows, &self.local_raw_history);
+
+        // The selected branch removes old local entries after this block's comparison
+        // and before the end selector can insert the next root.
+        if let Some(base) = history_prune_base {
+            self.local_raw_history = self.local_raw_history.split_off(&base.saturating_add(1));
+        }
 
         // Step 6: Post-comparison local root production (`0x5a05fc9 -> 0x5a07ec0 -> 0x5a03fa0`).
         let post_height = self.state.height;

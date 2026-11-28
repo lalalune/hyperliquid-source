@@ -335,6 +335,58 @@ fn comparison_runs_before_end_root_selector_so_same_block_local_root_is_missing(
 }
 
 #[test]
+fn history_pruning_runs_after_comparison_and_before_root_insertion() {
+    let h = 3_000_000;
+    let r = 42;
+    let dir = temp_checkpoint_dir("history-pruning-order", h, true);
+    let restored = restore_checkpoint(&dir, h, h, r, 0).unwrap();
+    let (support, registry, reg_ctx) = sample_support_and_registry();
+    let mut engine = ReplayEngineFixture::from_restored(restored, 1, None);
+    let old_root = [0x11; 32];
+    let next_root = [0x22; 32];
+    let retained_root = [0x33; 32];
+    engine.local_raw_history = BTreeMap::from([(h, old_root), (u64::MAX, retained_root)]);
+
+    let block = ReplayBlock {
+        prev_round: r,
+        new_round: r + 1,
+        expected_loader_seq: 1,
+        expected_copied_round: r,
+        votes: [([0x11; 32], [0xa1; 20]), ([0x22; 32], [0xb2; 20])]
+            .into_iter()
+            .map(|(id32, id20)| ExternalDigestVote {
+                action_tag: ACTION_TAG_ABCI_DIGEST_VOTE,
+                height: h,
+                digest: old_root,
+                voter_32: Some((id32, true)),
+                voter_20: Some((id20, true)),
+            })
+            .collect(),
+        timer_eligible_heights: vec![h],
+        synthetic_local_root: Some(next_root),
+    };
+    let report = engine
+        .apply_block_with_history_pruning(
+            &block,
+            &support,
+            &registry,
+            reg_ctx,
+            Some(u64::MAX),
+            |_, _| 0,
+        )
+        .unwrap();
+
+    assert_eq!(report.handoff.comparisons.len(), 1);
+    assert_eq!(report.handoff.comparisons[0].comparison, Comparison::Equal);
+    assert_eq!(
+        engine.local_raw_history,
+        BTreeMap::from([(h + 1, next_root), (u64::MAX, retained_root)])
+    );
+
+    let _ = fs::remove_dir_all(&dir);
+}
+
+#[test]
 fn root_selector_all_four_arms_fallback_word_distinction_and_repeated_reads() {
     // 1. All 4 stable outputs: 1, 2, 3, 4
     let cases = [
