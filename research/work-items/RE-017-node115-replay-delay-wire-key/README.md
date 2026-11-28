@@ -1,0 +1,9 @@
+# RE-017: bind the replay delay word to checkpoint wire fields
+
+The prior timer study in #7218 mapped historical state `+0x23b8` into the current tracker delay word. The earlier quorum wire packet mapped `adu` within the tracker serializer but left the owning call sites unresolved and had no family-2 JSON body. This packet joins both export paths to that historical word and identifies the JSON number conversion.
+
+- The MessagePack caller at `0x3c15429` passes historical state `+0x2330` to `0x3d376b0`. The wrapper uses the literal key `advt` when its keyed mode is enabled, then forwards the same subrecord to `0x4214250`. The inner keyed route writes `adu` from the literal at `0x7c867f`, and its scalar writer gets the eight-byte load at subrecord `+0x88`. In positional mode that helper still receives the scalar, with no named key at this point.
+- The JSON caller at `0x3c2fd6b` passes the same subrecord offset to `0x3d2d870`. The wrapper writes `advt` and forwards the subrecord to previously unmapped JSON body `0x42146b0`. Its call at `0x42147dc` passes subrecord `+0x88` to `0x4307fa0`, which supplies the same `adu` literal and forwards the word pointer to `0x4643ed0`.
+- The final JSON helper masks the sign bit, compares the remaining word with the positive infinity encoding, and sends words below that threshold to the numeric formatter. Infinity and NaN take the four-byte `null` path. This is an output rule under normal helper returns, with decoding, formatter precision and runtime timer eligibility outside this packet.
+
+Run `python3 -B research/work-items/RE-017-node115-replay-delay-wire-key/verify.py` from the project root. It verifies the pinned ELF, eight FDEs, named key loads, field offsets, and finite and nonfinite paths. It also checks the classifier formula over representative IEEE-754 bit patterns. The offline log and disassembly are attached. No captured code is executed.
