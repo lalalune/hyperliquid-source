@@ -1,0 +1,46 @@
+Darwin arm64
+Python 3.9.6
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+GNU objdump (GNU Binutils) 2.45
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301  artifacts/node/115/hl-node
+
+$ python3 -B research/work-items/RE-017-node115-replay-worker-first-append/verify.py
+PASS: SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 134 ranges in 2 indexed FDEs
+PASS: worker state 0 forwards the actual Block and attachment owners through the pinned helper slot
+PASS: matching Block appends in order; both source-kept and moved/reset vector cases match
+PASS: 0x44 with sentinel completes immediately; moved descriptor enters prior wait setup
+PASS: synthetic preserved prefix, one-row advancement and altered witness controls
+
+$ llvm-objdump -d --x86-asm-syntax=intel --start-address=0x5a89685 --stop-address=0x5a896b4 artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 5a89685: 4d 8b b7 40 03 00 00         	mov	r14, qword ptr [r15 + 0x340]
+ 5a8968c: 48 8b 46 10                  	mov	rax, qword ptr [rsi + 0x10]
+ 5a89690: 48 89 44 24 20               	mov	qword ptr [rsp + 0x20], rax
+ 5a89695: 0f 10 06                     	movups	xmm0, xmmword ptr [rsi]
+ 5a89698: 0f 29 44 24 10               	movaps	xmmword ptr [rsp + 0x10], xmm0
+ 5a8969d: 48 c7 06 00 00 00 00         	mov	qword ptr [rsi], 0x0
+ 5a896a4: 48 c7 46 08 08 00 00 00      	mov	qword ptr [rsi + 0x8], 0x8
+ 5a896ac: 48 c7 46 10 00 00 00 00      	mov	qword ptr [rsi + 0x10], 0x0
+
+$ objdump -d -M intel --insn-width=16 --start-address=0x5a89731 --stop-address=0x5a8974d artifacts/node/115/hl-node
+
+artifacts/node/115/hl-node:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000005a89731 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x2becff>:
+ 5a89731:	4e 89 3c 28                                     	mov    QWORD PTR [rax+r13*1],r15
+ 5a89735:	48 8b 4c 24 08                                  	mov    rcx,QWORD PTR [rsp+0x8]
+ 5a8973a:	4a 89 4c 28 08                                  	mov    QWORD PTR [rax+r13*1+0x8],rcx
+ 5a8973f:	49 ff c6                                        	inc    r14
+ 5a89742:	4c 89 76 10                                     	mov    QWORD PTR [rsi+0x10],r14
+ 5a89746:	4c 89 63 08                                     	mov    QWORD PTR [rbx+0x8],r12
+ 5a8974a:	c6 03 44                                        	mov    BYTE PTR [rbx],0x44
