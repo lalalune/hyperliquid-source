@@ -501,3 +501,40 @@ fn negative_controls_restore_admission_height_limit_and_conflict() {
 
     let _ = fs::remove_dir_all(&dir);
 }
+
+#[test]
+fn checkpoint_cadence_controls_first_block_root_eligibility() {
+    let restored_height = 999;
+    let round = 1042;
+    let seq = 8;
+    let directory = temp_checkpoint_dir("restored-cadence", restored_height, true);
+    let restored = restore_checkpoint(&directory, restored_height, restored_height, round, seq).unwrap();
+    let (support, registry, context) = sample_support_and_registry();
+    let digest = [0x5d; 32];
+    let block = ReplayBlock {
+        prev_round: round,
+        new_round: round + 1,
+        expected_loader_seq: seq + 1,
+        expected_copied_round: round,
+        votes: vec![],
+        timer_eligible_heights: vec![],
+        synthetic_local_root: Some(digest),
+    };
+
+    for (persisted, periodic, expected) in [
+        (None, 1_000, Some(&digest)),
+        (Some(0), 1_000, Some(&digest)),
+        (Some(8), 8, Some(&digest)),
+        (Some(7), 7, None),
+    ] {
+        let mut engine = ReplayEngineFixture::from_checkpoint_cadence(restored.clone(), persisted, None);
+        assert_eq!(engine.periodic_cadence, periodic);
+        let report = engine.apply_block(&block, &support, &registry, context, |cell, _| {
+            cell.write_fallback((1 << 19) | (1 << 25), 0, 0)
+        }).unwrap();
+        assert_eq!(report.post_height, 1_000);
+        assert_eq!(report.local_root_recorded.is_some(), expected.is_some());
+        assert_eq!(engine.local_raw_history.get(&1_000), expected);
+    }
+    fs::remove_dir_all(directory).unwrap();
+}

@@ -305,6 +305,21 @@ impl ReplayEngineFixture {
         }
     }
 
+    /// Start a fixture with the selected persisted ExchangeMisc cadence.
+    /// Missing or zero aci in a present ExchangeMisc selects 1000 on the
+    /// checkpoint decoder's ordinary path.
+    pub fn from_checkpoint_cadence(
+        state: RestoredState,
+        persisted_cadence: Option<u64>,
+        hardfork_height: Option<u64>,
+    ) -> Self {
+        let cadence = match persisted_cadence {
+            None | Some(0) => 1_000,
+            Some(value) => value,
+        };
+        Self::from_restored(state, cadence, hardfork_height)
+    }
+
     fn root_cadence_matches(&self, height: u64) -> bool {
         if height.is_multiple_of(DEFAULT_ROOT_CADENCE_MODULUS) {
             return true;
