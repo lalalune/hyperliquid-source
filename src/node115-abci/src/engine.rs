@@ -356,6 +356,34 @@ pub fn build_daily_evm_tar_command(
     Some(cmd)
 }
 
+/// Read-only decision after successful EVM tar creation and destination preparation.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DailyEvmArchiveCompletion {
+    /// A regular final archive remains in place.
+    KeepFinal { remove_temporary: bool },
+    /// The regular temporary file is eligible for the native move helper.
+    PromoteTemporary,
+    /// Neither path identifies a regular archive file.
+    NoArchive,
+}
+
+/// Classify the existing paths at the post-tar decision (`0x38c4cdf..0x38c4d55`).
+/// This does not run tar or prepare, unlink or move any path.
+pub fn plan_daily_evm_archive_completion(
+    temporary: &Path,
+    final_archive: &Path,
+) -> DailyEvmArchiveCompletion {
+    if final_archive.is_file() {
+        DailyEvmArchiveCompletion::KeepFinal {
+            remove_temporary: temporary.is_file(),
+        }
+    } else if temporary.is_file() {
+        DailyEvmArchiveCompletion::PromoteTemporary
+    } else {
+        DailyEvmArchiveCompletion::NoArchive
+    }
+}
+
 /// Return the path of the `TAR_COMPLETE` marker for a daily archive directory.
 pub fn tar_complete_marker_path(dir: &Path) -> PathBuf {
     dir.join(TAR_COMPLETE_MARKER)
