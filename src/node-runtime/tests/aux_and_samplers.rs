@@ -62,3 +62,24 @@ fn priority_channel_group_sampler_and_block_on_guard() {
     // Guard resets cleanly after exit
     assert_eq!(block_on_sync(|| 99u32).unwrap(), 99);
 }
+
+#[test]
+fn group_sampler_preserves_split_duration_rounding_in_reported_stats() {
+    let mut sampler = GroupAndSeqSampler::new();
+    // 1.118 s and 4.137 s exercise opposite directions of the one-ULP difference.
+    for (group, nanos, expected_bits) in [
+        (7, 1_118_000_000, 0x3ff1_e353_f7ce_d916),
+        (8, 4_137_000_000, 0x4010_8c49_ba5e_3540),
+    ] {
+        sampler.record_nanos(group, nanos);
+        let stats = sampler.stats(group).unwrap();
+        assert_eq!(stats.count, 1);
+        assert_eq!(stats.max_secs.to_bits(), expected_bits);
+        assert_eq!(stats.total_secs.to_bits(), expected_bits);
+    }
+    sampler.record_nanos(7, 1_118_000_000);
+    let repeated = sampler.stats(7).unwrap();
+    assert_eq!(repeated.count, 2);
+    assert_eq!(repeated.total_secs.to_bits(), 0x4001_e353_f7ce_d916);
+    assert_eq!(repeated.max_secs.to_bits(), 0x3ff1_e353_f7ce_d916);
+}
