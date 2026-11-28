@@ -66,7 +66,5 @@ for bad in controls:
     except AssertionError:
         continue
     raise AssertionError(f"mutation at {bad:#x} was accepted")
-for count in range(32):
-    assert 8 * (count + 2 * count) == 24 * count
 print(f"{len(rows)} instructions, {len(targets)} relative targets, {len(controls)} corruption controls")
-print("32 allocation-size fixtures")
+print("Allocation-size interpretation is a static reading, not a target execution test.")
