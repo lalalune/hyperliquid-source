@@ -6,8 +6,7 @@
 /// Maximum `u64` result accepted by `0x434f790` (`floor(2^64 / 100)`).
 pub const PERCENT_DIV_BOUND: u64 = 0x028f_5c28_f5c2_8f5c;
 
-/// Maximum `u64` result accepted by `0x434f910` (`floor(2^63 / 10)`).
-pub const SIGNED_SCALER_BOUND: u64 = 0x0ccc_cccc_cccc_cccc;
+pub use node115_u256_decimal_scale::SIGNED_SCALER_BOUND;
 
 /// Minimal token decimals metadata (`+0x48` sz_decimals, `+0x49` wei_decimals).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -96,60 +95,9 @@ pub fn scaled_percent_div(
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct U256(pub [u64; 4]);
 
-impl U256 {
-    fn checked_mul_u64(self, rhs: u64) -> Option<Self> {
-        let mut out = [0u64; 4];
-        let mut carry = 0u128;
-        for (slot, &limb) in out.iter_mut().zip(self.0.iter()) {
-            let v = u128::from(limb) * u128::from(rhs) + carry;
-            *slot = v as u64;
-            carry = v >> 64;
-        }
-        if carry != 0 {
-            None
-        } else {
-            Some(Self(out))
-        }
-    }
-
-    fn div_u64(self, rhs: u64) -> Self {
-        let mut out = [0u64; 4];
-        let mut rem = 0u128;
-        for (slot, &limb) in out.iter_mut().zip(self.0.iter()).rev() {
-            let cur = (rem << 64) | u128::from(limb);
-            *slot = (cur / u128::from(rhs)) as u64;
-            rem = cur % u128::from(rhs);
-        }
-        Self(out)
-    }
-
-    fn fits_below_bound(self, bound: u64) -> Option<u64> {
-        if self.0[1] == 0 && self.0[2] == 0 && self.0[3] == 0 && self.0[0] < bound {
-            Some(self.0[0])
-        } else {
-            None
-        }
-    }
-}
-
-/// Reconstructs `0x434f910`: signed-exponent 256-bit scaler.
-///
-/// - `exp < 0`: multiplies by `10^(-exp)` (leaves `value` untouched on overflow).
-/// - `exp >= 0`: divides `value` in place by `10^exp` (even if the final bound check refuses).
-/// - Rejects `|exp| >= 20` (including `-128`) and results `>= SIGNED_SCALER_BOUND`.
+/// Reconstructs `0x434f910` through the shared four-limb scaler.
+/// Negative exponents multiply a copy. Nonnegative exponents write the
+/// quotient back before checking the exclusive amount bound.
 pub fn signed_exponent_scale_u256(exp: i8, value: &mut U256) -> Option<u64> {
-    let mag = exp.unsigned_abs();
-    if mag >= 20 {
-        return None;
-    }
-    let factor = 10u64.pow(u32::from(mag));
-    if exp < 0 {
-        let scaled = value.checked_mul_u64(factor)?;
-        *value = scaled;
-        scaled.fits_below_bound(SIGNED_SCALER_BOUND)
-    } else {
-        let quot = value.div_u64(factor);
-        *value = quot;
-        quot.fits_below_bound(SIGNED_SCALER_BOUND)
-    }
+    node115_u256_decimal_scale::scale_amount(&mut value.0, exp)
 }

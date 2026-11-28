@@ -28,3 +28,33 @@ cargo test --offline --manifest-path src/node115-u256-decimal-scale/Cargo.toml
 ```
 
 The first command checks target identity, instruction bytes and relocation bindings using Capstone and pyelftools. The second compares both outputs against 7,266 cases computed by Python arbitrary-precision integers. The corpus covers all 256 exponent bytes, limb carries and remainders, four-limb overflow, strict-bound neighbors, accepted zero and the post-refusal contents of the input. The recorded windows cite existing ranges for reproducibility.
+
+## Integrated exchange regression
+
+The standalone scaler preserved its input during multiplication. At base
+`2da45cb0a761cff6b478e40421699857d87a94df`, the integrated
+`exchange::token_scaling::signed_exponent_scale_u256` wrote the product back.
+With input 50 and exponent -2 both returned 5,000. The integrated caller then
+held 5,000, so dividing its buffer by ten on a second call returned 500.
+The corrected integrated client keeps 50 after multiplication and returns 5
+on the second call. On the division path, narrowing can refuse the result
+after the caller's buffer has already received the quotient.
+
+The [public API client](exchange_client.rs) compares both the returned amount
+and all four resulting limbs against the existing arbitrary-precision oracle.
+Across 7,266 rows, the base differed in 82 successful calls and 501 refusals.
+Its return values agreed on every row. The integrated correction agrees on
+both outputs for every row in debug and release. The [retained results](exchange-results.json)
+include the corpus digest and the two-call example.
+
+From the repository root, use Python 3.12 or later, Git with the base commit
+available, and rustup with Rust 1.95.0 already installed.
+
+```sh
+python3 research/work-items/RE-007-node115-u256-decimal-source/exchange_replay.py
+```
+
+The replay extracts the base commit's `src/` tree into a temporary directory,
+compiles an ordinary `exchange` consumer separately against that tree and the
+current checkout, and verifies the frozen report. Both Cargo profiles run
+offline. The base comparison requires only the repository's source history.

@@ -62,7 +62,10 @@ fn token_decimal_scaling_matches_0x434f660_0x434f790_0x434f910() {
 
     let mut v2 = U256([50, 0, 0, 0]);
     assert_eq!(signed_exponent_scale_u256(-2, &mut v2), Some(5_000));
-    assert_eq!(v2.0[0], 5_000);
+    assert_eq!(v2.0, [50, 0, 0, 0]);
+    // A later division sees the original input, not the previous product.
+    assert_eq!(signed_exponent_scale_u256(1, &mut v2), Some(5));
+    assert_eq!(v2.0, [5, 0, 0, 0]);
 
     // Bound refusal (>= 2^63 / 10) still updates in place on divide path.
     let mut huge = U256([SIGNED_SCALER_BOUND, 0, 0, 0]);
@@ -72,6 +75,29 @@ fn token_decimal_scaling_matches_0x434f660_0x434f790_0x434f910() {
     // Exponent magnitude >= 20 refused.
     assert_eq!(signed_exponent_scale_u256(20, &mut huge), None);
     assert_eq!(signed_exponent_scale_u256(-128, &mut huge), None);
+}
+
+#[test]
+fn signed_scale_ownership_on_narrowing_and_four_limb_overflow() {
+    // The product fits in 256 bits but cannot be returned as an amount.
+    let large = U256([u64::MAX, 3, 2, 1]);
+    let mut input = large;
+    assert_eq!(signed_exponent_scale_u256(-1, &mut input), None);
+    assert_eq!(input, large);
+
+    let maximum = U256([u64::MAX; 4]);
+    let mut input = maximum;
+    assert_eq!(signed_exponent_scale_u256(-1, &mut input), None);
+    assert_eq!(input, maximum);
+
+    // (2^64 + 4) / 10 still exceeds the strict bound. The quotient survives.
+    let mut input = U256([4, 1, 0, 0]);
+    assert_eq!(signed_exponent_scale_u256(1, &mut input), None);
+    assert_eq!(input.0, [1_844_674_407_370_955_162, 0, 0, 0]);
+    assert_eq!(
+        signed_exponent_scale_u256(1, &mut input),
+        Some(184_467_440_737_095_516)
+    );
 }
 
 #[test]
