@@ -240,8 +240,33 @@ The largest Rust contributors are h2, sha2, http, revm-precompile, tokio, rand_c
   (115 bytes).
 
 `census.json` has the per-crate summary and every record. `licenses.json` gives
-each matched crate version's declared license (all permissive); the compiled
-bodies keep those licenses.
+the package-level license declarations from Cargo metadata. Native object members
+can originate in separately licensed bundled C or C++ projects. The table below
+identifies the upstream notices for the compression code in `bodies.bin`.
+
+| Native object provider | Registered windows | Bytes | Source tree and upstream notice |
+| --- | ---: | ---: | --- |
+| bzip2-sys 0.1.13+1.0.8 | 18 | 67,607 | `bzip2-1.0.8`, [libbzip2 license](native-notices/libbzip2-1.0.8.txt) |
+| libz-sys 1.1.22 / 1.1.31 | 32 | 47,183 | `src/zlib`, [1.1.22 notice](native-notices/zlib-1.1.22.txt) and [1.1.31 notice](native-notices/zlib-1.1.31.txt) |
+| lz4-sys 1.11.1+lz4-1.10.0 | 8 | 374 | `liblz4/lib`, [LZ4 library BSD notice](native-notices/lz4-library.txt) |
+| zstd-sys 2.0.15+zstd.1.5.7 / 2.1.2+zstd.1.5.7 | 334 | 527,818 | `zstd/lib`, [Zstandard BSD notice](native-notices/zstandard-bsd.txt); the source headers also offer GPLv2 in `zstd/COPYING` |
+
+These are 392 native windows (642,982 bytes) from the authenticated node #115
+census. Counts use each record once, including records with multiple candidate
+crate versions. Eighteen libz-sys records name only 1.1.22; the other 14 match
+both candidate releases, whose source notices carry different copyright years.
+Both zstd-sys archives contain the same `zstd/LICENSE` text.
+
+The notice files reproduce the crate members `bzip2-1.0.8/LICENSE`,
+`src/zlib/LICENSE`, `liblz4/lib/LICENSE` and `zstd/LICENSE`, respectively.
+To verify a copy, check its candidate archive SHA-256 against the package
+checksum in `org-block-importer/Cargo.lock` or `gcc-rocksdb0210/Cargo.lock`,
+then compare the member bytes. For example, from this packet directory with
+the verified lz4-sys crate in the current directory:
+
+```sh
+tar -xOf lz4-sys-1.11.1+lz4-1.10.0.crate lz4-sys-1.11.1+lz4-1.10.0/liblz4/lib/LICENSE | cmp - native-notices/lz4-library.txt
+```
 
 ## Limitations
 
