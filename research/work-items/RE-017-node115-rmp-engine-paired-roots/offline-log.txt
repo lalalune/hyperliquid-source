@@ -1,0 +1,32 @@
+PASS: pinned #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 101 instruction spans in 2 FDEs
+PASS: hardfork map keys version and round feed the u64 reader and tag-9 payload in order
+PASS: Context map projects the pair at +0x18/+0x20, or zeros both when omitted
+PASS: selected positional Context return projects the same pair at +0x18/+0x20
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 55 spans in 5 FDEs
+PASS: msc.aci uses default 1000 and reaches decoded +0x1ea8, materialized +0x39c8
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 34 spans in the context reader FDE
+PASS: positional height and round use distinct decoders and reach output +0x28/+0x30
+PASS: successful decoding still requires the following required clock slots
+PASS: authenticated a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+PASS: startup and post-comparison enter one selector, keyed by the current state height
+PASS: authenticated a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+PASS: state advance, reference comparison and gated successor-root capture use distinct selected stages
+PASS: authenticated a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+PASS: 59 capture slots; sentinel and tag-2 skips retain later original indices; empty result is a tag-1 vector
+node_calls=2 element_calls=2 example_len=141
+composed H 729f9e30a260e54122cd4da579cdbf9c16de0491, deferred H+1 a55c6d0bdbcb08b8dde8ac3121772b1e2d27ac53, sparse slots f87825aee4afe52323d416e3a0df087bb064eb9c in temporary sources
+     Locking 25 packages to latest Rust 1.95.0 compatible versions
+{"height": 42, "round": 40, "computed_h": "0x8631c5886cd291a60c36dfb48e6d4b497e4e7540c8ccd484bfe51e23061c2642", "successor_height": 43, "successor_round": 41, "computed_h1": "0x370bf83d36582051986cb956b312d01f9c409c7d527a77e39661b7de63a96ee2", "reference_h": "0x8631c5886cd291a60c36dfb48e6d4b497e4e7540c8ccd484bfe51e23061c2642", "reference_h_plus_one": "0x370bf83d36582051986cb956b312d01f9c409c7d527a77e39661b7de63a96ee2", "matches_h": true, "matches_h_plus_one": true}
+{"height": 42, "round": 40, "computed_h": "0x8631c5886cd291a60c36dfb48e6d4b497e4e7540c8ccd484bfe51e23061c2642", "successor_height": 43, "successor_round": 41, "computed_h1": "0x370bf83d36582051986cb956b312d01f9c409c7d527a77e39661b7de63a96ee2", "reference_h": "0x8631c5886cd291a60c36dfb48e6d4b497e4e7540c8ccd484bfe51e23061c2642", "reference_h_plus_one": "0x6cae3ba00ed744e919835d0d55f137f1882a636048b43e958cc5570cc0513475", "matches_h": true, "matches_h_plus_one": false}
+verified two engine-computed roots against independent BLAKE3; only H+1 diverges on alternate valid reference
+{"checkpoint_sha256": "607c8a8b188e508fbdc435ee4c4834e6adbfbe053940a33a99a6dc67447c506d", "restored_checkpoint": {"height": 42, "round": 40, "time": "1969-12-31T23:59:59.999999999", "prev_time": "1969-12-31T23:59:58", "hardfork_words": [5, 40], "cadence": 1}, "height": 42, "round": 40, "computed_h": "0x8631c5886cd291a60c36dfb48e6d4b497e4e7540c8ccd484bfe51e23061c2642", "successor_height": 43, "successor_round": 41, "computed_h1": "0x370bf83d36582051986cb956b312d01f9c409c7d527a77e39661b7de63a96ee2", "reference_h": "0x8631c5886cd291a60c36dfb48e6d4b497e4e7540c8ccd484bfe51e23061c2642", "reference_h_plus_one": "0x370bf83d36582051986cb956b312d01f9c409c7d527a77e39661b7de63a96ee2", "matches_h": true, "matches_h_plus_one": true}
+alternate successor: matches_h=True matches_h_plus_one=False
+verified selected zero cadence projects the restored value 1000
+stopped before engine invocation: projected checkpoint height does not match
+
+thread 'main' (193960245) panicked at probe.rs:70:5:
+assertion `left == right` failed
+  left: [5, 40]
+ right: [5, 39]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+engine probe rejected restored hardfork [5,39] with source Block hardfork [5,40]
