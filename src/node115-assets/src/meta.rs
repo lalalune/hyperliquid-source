@@ -24,7 +24,7 @@
 //!   `token <= 195 && chain == 3` one-time init from `0` and no-reset-to-zero rule).
 
 use crate::pdi::{Pdi, PerpAsset, SpotAsset, Token};
-use crate::qtys::{MAX_PERP_SZ_DECIMALS, POW10_F64, Px};
+use crate::qtys::{MAX_PERP_SZ_DECIMALS, POW10_F64, Px, SPOT_PRICE_DIVISORS};
 
 /// Maximum deployer trading fee share in `1e-5` units (`100_000 == 100%`, `#115` `0x2c5888d`).
 pub const MAX_DEPLOYER_TRADING_FEE_SHARE_E5: u64 = 100_000;
@@ -275,16 +275,12 @@ impl SpotMeta {
                 token: entry.base.0,
                 len: self.tokens.len(),
             })?;
-        let exp = quote.wei_decimals.checked_sub(base.sz_decimals).ok_or(
+        quote.wei_decimals.checked_sub(base.sz_decimals).ok_or(
             MetaError::SpotDecimalUnderflow {
                 quote_wei_decimals: quote.wei_decimals,
                 base_sz_decimals: base.sz_decimals,
             },
-        )?;
-        if usize::from(exp) >= POW10_F64.len() {
-            return Err(MetaError::ExponentOutOfRange(exp));
-        }
-        Ok(exp)
+        )
     }
 
     /// Exact `#115` `0x22f5de0` (`spot_meta.rs:119,590,1055`) dual-price conversion:
@@ -300,13 +296,13 @@ impl SpotMeta {
             0.0
         } else {
             let exp = self.pair_price_decimals(pair)?;
-            (first_raw as f64) / POW10_F64[usize::from(exp)]
+            (first_raw as f64) / SPOT_PRICE_DIVISORS[usize::from(exp)]
         };
         let second = if second_raw == 0 {
             0.0
         } else {
             let exp = self.pair_price_decimals(pair)?;
-            (second_raw as f64) / POW10_F64[usize::from(exp)]
+            (second_raw as f64) / SPOT_PRICE_DIVISORS[usize::from(exp)]
         };
         Ok((first, second))
     }
@@ -342,7 +338,7 @@ impl SpotMeta {
     /// Single-price spot conversion matching `#115` `0x50be9e0` (`l1/src/spot_meta.rs:119,590,1055`).
     pub fn px_to_f64(&self, pair: SpotAsset, px: Px) -> Result<f64, MetaError> {
         let exp = self.pair_price_decimals(pair)?;
-        Ok((px.raw() as f64) / POW10_F64[usize::from(exp)])
+        Ok((px.raw() as f64) / SPOT_PRICE_DIVISORS[usize::from(exp)])
     }
 
     /// First listed spot market for `base_token`, matching `#115` `0x3c47660`

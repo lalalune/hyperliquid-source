@@ -2,7 +2,7 @@
 //! grounded in node #115 `.text` and `.rodata`.
 //!
 //! Binary evidence:
-//! - `.rodata` `0x5ed748`: 20-entry `f64` powers-of-ten table `10^0..=10^19`.
+//! - `.rodata` `0x5ed748`: byte-indexed `f64` powers-of-ten table, also present at VA `0x91b7c0`.
 //! - `0x22e4888`: perp `sz_decimals` strict bound `< 7` (`MAX_PERP_SZ_DECIMALS = 6`).
 //! - `node115-spot-decimal`: spot `sz_decimals` bound `<= 8` (`MAX_SPOT_SZ_DECIMALS = 8`).
 //! - `0x294bcd0` / `0x29dfea0` (`qtys/impl_ntl.rs:682`), `0x22f0280` (`qtys/mod.rs:831,833`):
@@ -17,29 +17,21 @@
 //!   checks non-negative unsigned conversion (`test; js`), signed add overflow (`jo`), and sign-flip
 //!   classification (`cmp` of sign classes `{neg: 1, zero: 2, pos: 0}`).
 
-/// Exact 20-entry `f64` powers-of-10 table located at node #115 `.rodata` VA `0x5ed748`.
-pub const POW10_F64: [f64; 20] = [
-    1.0,
-    10.0,
-    100.0,
-    1_000.0,
-    10_000.0,
-    100_000.0,
-    1_000_000.0,
-    10_000_000.0,
-    100_000_000.0,
-    1_000_000_000.0,
-    10_000_000_000.0,
-    100_000_000_000.0,
-    1_000_000_000_000.0,
-    10_000_000_000_000.0,
-    100_000_000_000_000.0,
-    1_000_000_000_000_000.0,
-    1e16,
-    1e17,
-    1e18,
-    1e19,
-];
+const fn decimal_divisors<const N: usize>() -> [f64; N] {
+    let mut divisors = [1.0; N];
+    let mut index = 1;
+    while index < N {
+        divisors[index] = divisors[index - 1] * 10.0;
+        index += 1;
+    }
+    divisors
+}
+
+/// The first 20 binary64 powers of ten, also usable as unsigned 64-bit scales.
+pub const POW10_F64: [f64; 20] = decimal_divisors();
+
+/// Node #115 indexes this table with a zero-extended one-byte decimal difference.
+pub(crate) static SPOT_PRICE_DIVISORS: [f64; 256] = decimal_divisors();
 
 /// Maximum perp `sz_decimals` enforced at node #115 `0x22e4888` (`cmp $7, %rax; jae`).
 pub const MAX_PERP_SZ_DECIMALS: u8 = 6;
