@@ -1,0 +1,30 @@
+RE-017-node115-replay-forward-byte-boundary
+Host: Darwin arm64; native target: Linux x86-64 ELF
+Command (with PACKET set to the staged work-item directory): PYTHONDONTWRITEBYTECODE=1 python3 "$PACKET/verify.py" --repo .
+target=artifacts/node/115/hl-node sha256=a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301 bytes=105896032
+Python 3.9.6
+FDE 0x5a7c7d0..0x5a7d380
+FDE 0x5a71040..0x5a7172a
+FDE 0x581b4b0..0x581b6ad
+FDE 0x5819960..0x5819b16
+FDE 0x5a7dce0..0x5a7e357
+FDE 0x58610b0..0x586122f
+FDE 0x4e48cc0..0x4e48ed6
+FDE 0x5823750..0x5823892
+FDE 0x581f160..0x581f797
+selected writer table 0x935b40, entry 0 -> 0x581f1e4
+R_X86_64_RELATIVE 0x64b8c58 -> 0x5a71040
+R_X86_64_RELATIVE 0x64b8f38 -> 0x5a7dce0
+PASS control: different downstream future capture rejected
+PASS control: different origin width rejected
+PASS control: different outer variant byte rejected
+PASS control: different owner byte-length field rejected
+PASS: 96 instruction anchors across 9 FDEs
+PASS: selected record wraps the same owner span in origin20, byte 0, and compact U64 length
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+llvm-readelf -r artifacts/node/115/hl-node
+00000000064b8c58  0000000000000008 R_X86_64_RELATIVE                 5a71040
+00000000064b8f38  0000000000000008 R_X86_64_RELATIVE                 5a7dce0
+00000000064df508  0000000700000006 R_X86_64_GLOB_DAT      0000000000000000 memcpy@GLIBC_2.14 + 0
