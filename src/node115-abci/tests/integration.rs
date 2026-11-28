@@ -690,3 +690,80 @@ fn tracker_rounds_fractional_delays_to_nearest_nanosecond() {
     assert!(!timer_is_mature(100, 0.75e-9, 100));
     assert!(timer_is_mature(100, 0.75e-9, 101));
 }
+
+#[test]
+fn first_replay_block_dispatches_the_actual_prepared_rows_after_the_count_guard() {
+    use node115_abci::engine::{ApplyBlockPipelineError, ApplyBlockPipelineInput};
+    use node115_abci::state::{ApplyBlockPreconditionError, REQUIRED_FEATURE_VERSION};
+
+    let dir = unique_tmp("prepared-row-replay");
+    let checkpoint = dir.join("9999");
+    fs::create_dir_all(&checkpoint).unwrap();
+    fs::write(checkpoint.join("CHECKPOINT_COMPLETE"), b"").unwrap();
+    let restored = restore_checkpoint(&dir, 9_999, 9_999, 500, 4).unwrap();
+    fs::remove_dir_all(&dir).unwrap();
+    let mut engine = AbciEngine::new(AbciState::new(restored, 0, None));
+    let (support, registry, reg_ctx) = sample_support_and_registry();
+    let block = EngineBlock {
+        prev_round: 500,
+        new_round: 501,
+        expected_loader_seq: 5,
+        expected_copied_round: 500,
+        external_votes: vec![],
+        timer_eligible_heights: vec![],
+        synthetic_local_root: None,
+    };
+    let mut input = ApplyBlockPipelineInput {
+        block: &block,
+        state_time: (10, 20),
+        block_parent_time: (10, 20),
+        header_actions: 3,
+        payload_actions: 3,
+        feature_version: REQUIRED_FEATURE_VERSION,
+        prune_watermark: None,
+    };
+    let rows = ["fixture-a", "fixture-b"];
+    assert_eq!(
+        engine.apply_block_pipeline_with_rows(
+            &input,
+            &rows,
+            &support,
+            &registry,
+            reg_ctx,
+            |_| panic!("begin before count mismatch"),
+            |_, _| panic!("row dispatched before count mismatch"),
+            |_| panic!("end before count mismatch"),
+            |_, _| panic!("selector entered before count mismatch"),
+        ),
+        Err(ApplyBlockPipelineError::Precondition(
+            ApplyBlockPreconditionError::ActionCountMismatch {
+                header_actions: 3,
+                payload_actions: 2,
+            },
+        )),
+    );
+    assert_eq!(engine.state.height(), 9_999);
+    assert_eq!(engine.state.round(), 500);
+
+    let trace = std::cell::RefCell::new(Vec::new());
+    input.header_actions = 2;
+    let report = engine
+        .apply_block_pipeline_with_rows(
+            &input,
+            &rows,
+            &support,
+            &registry,
+            reg_ctx,
+            |height| trace.borrow_mut().push(format!("begin:{height}")),
+            |index, row| trace.borrow_mut().push(format!("{index}:{row}")),
+            |height| trace.borrow_mut().push(format!("end:{height}")),
+            |_, _| panic!("no candidate local root supplied"),
+        )
+        .unwrap();
+    assert_eq!(
+        trace.into_inner(),
+        ["begin:10000", "0:fixture-a", "1:fixture-b", "end:10000"],
+    );
+    assert_eq!(report.engine_report.height, 10_000);
+    assert_eq!(report.engine_report.round, 501);
+}
