@@ -16,6 +16,24 @@
 3. **`node/src/abci_latency_sampler.rs`** (`.rodata 0x44bf3e`, 3 `Location` records `0x64a3618` L70:38, `0x64a3630` L73:48, `0x64a3648` L60:41):
    - Reconstructed as bounded ring sampler `node_runtime::stream_msg::AbciLatencySampler`.
 
+## Archived replica envelope
+
+The writer at `0x4e09ab0` configures named structures and calls `0x4d6d890`. That writer emits three keys in order. `abci_block` is a six-entry map, `resps` is nil or a response value, and `height` is an unsigned integer. The six block fields are `time`, `signed_action_bundles`, `round`, `parent_round`, `hardfork`, and `proposer`. The hardfork submap contains `version` followed by `round`. The [JSON schema](../RE-017-node115-replica-json-schema/) describes a sibling serializer for the same outer keys.
+
+The map writer at `0x57ce100` and array writer at `0x57ceba0` select the fixed, 16-bit or 32-bit MessagePack headers. The bundle writer calls the array writer at `0x52af2f6`. The block writer delegates numeric fields to `0x57d00b0`, which selects the shortest unsigned representation. The [clock writer](../RE-009-node115-context-clock-string-writer/) at `0x5307510` inserts ASCII `T` between the date and time. The proposer writer passes a 20-byte address and a 42-byte output buffer to the hex formatter through `0x64e4d08`, then writes the resulting string. The response discriminant at `0x4d6db01` selects either the nil writer at `0x52f0080` or the nested writer at `0x4d6d450`. The map keys, lengths, markers, calls, format-mode branch and 11 complete unwind extents are checked against the target file by `compare_replicas.py`. [MessagePack specification](https://github.com/msgpack/msgpack/blob/master/spec.md)
+
+`SharedStreamMsg::from_replica_record` exposes this archive envelope to crate callers. Each passed bundle and the optional response must already be exactly one encoded MessagePack value. The caller supplies these nested encodings. The encoder writes their outer array and record fields, and returns a shared owned buffer. `SharedStreamMsg::encode_bincode` remains available for callers explicitly requesting generic bincode serialization.
+
+The reference comparison creates 88 synthetic records from 11 unsigned integer cases and eight array lengths up to 65,536, including fixarray/array16/array32 transitions. Cases rotate four timestamp fractional precisions, proposer addresses, typed child values, and absent/present responses. Compiled Rust output matched `msgpack-python` 1.1.2 byte-for-byte for all 3,395,536 payload bytes. Independent decoding also recovered all fields. The four-byte lengths in the comparator delimit the observations only. The captured node is read as an ELF file. The comparison does not sample historical blocks or test delivery to subscribers.
+
+From the repository root, authenticate the static evidence and the frozen byte fixture with the first two commands. The third rebuilds and checks all 88 observations, with Rust/Cargo on PATH and Python's pinned reference package supplied by uv.
+
+```sh
+python3 -B -m unittest tests.test_artifact_and_stream_msg_115
+cargo test --offline --locked --manifest-path src/node-runtime/Cargo.toml --test replica_msgpack
+uv run --no-project --with msgpack==1.1.2 python -B research/work-items/RE-012-node115-artifact-and-stream-msg/compare_replicas.py --check
+```
+
 ## Verification
 
 - `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests/test_artifact_and_stream_msg_115.py`

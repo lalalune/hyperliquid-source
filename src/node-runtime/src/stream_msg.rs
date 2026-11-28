@@ -2,12 +2,13 @@
 //! matching node #115 `node/src/{stream_msg,abci_stream,evm_kvs,abci_latency_sampler}.rs`.
 
 use std::net::{SocketAddr, SocketAddrV4};
+use std::num::TryFromIntError;
 use std::sync::Arc;
 
 use bincode_fork::{ByteVec, Encode, encode_to_vec, standard};
-use net_utils::{
-    AbciStreamGreeting, DEFAULT_MAX_FRAME_BYTES, EvmKvsMsg, TcpClient, TcpListener,
-};
+pub use dex_registry::date_time_display::{Date, Time};
+use dex_registry::{date_time_display, format_address_hex, msgpack};
+use net_utils::{AbciStreamGreeting, DEFAULT_MAX_FRAME_BYTES, EvmKvsMsg, TcpClient, TcpListener};
 
 use crate::error::NodeError;
 
@@ -16,7 +17,65 @@ use crate::error::NodeError;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SharedStreamMsg(Arc<Vec<u8>>);
 
+/// Borrowed fields for the named MessagePack replica record observed at `0x4d6d890`.
+/// Each bundle slice and the optional response slice must already contain one complete
+/// encoded MessagePack value, as produced by the corresponding nested value writer.
+#[derive(Clone, Copy, Debug)]
+pub struct ReplicaStreamRecord<'a> {
+    pub date: Date,
+    pub time: Time,
+    pub encoded_bundles: &'a [&'a [u8]],
+    pub round: u64,
+    pub parent_round: u64,
+    pub hardfork_version: u64,
+    pub hardfork_round: u64,
+    pub proposer: [u8; 20],
+    pub encoded_responses: Option<&'a [u8]>,
+    pub height: u64,
+}
+
+fn write_uint_field(bytes: &mut Vec<u8>, name: &[u8], value: u64) {
+    msgpack::write_str(bytes, name);
+    msgpack::write_u64(bytes, value);
+}
+
 impl SharedStreamMsg {
+    /// Encode the named archive envelope and share its owned bytes. The source limit
+    /// for a MessagePack array is `u32::MAX` entries, including on a 64-bit host.
+    pub fn from_replica_record(record: &ReplicaStreamRecord<'_>) -> Result<Self, TryFromIntError> {
+        let bundles = u32::try_from(record.encoded_bundles.len())?;
+        let mut bytes = Vec::new();
+        msgpack::write_map_len(&mut bytes, 3);
+        msgpack::write_str(&mut bytes, b"abci_block");
+        msgpack::write_map_len(&mut bytes, 6);
+        msgpack::write_str(&mut bytes, b"time");
+        let date = date_time_display::render_date(record.date);
+        let time = date_time_display::render_time(record.time);
+        let datetime = format!("{}T{}", date.as_str(), time.as_str());
+        msgpack::write_str(&mut bytes, datetime.as_bytes());
+        msgpack::write_str(&mut bytes, b"signed_action_bundles");
+        msgpack::write_array_len(&mut bytes, bundles as usize);
+        for bundle in record.encoded_bundles {
+            bytes.extend_from_slice(bundle);
+        }
+        write_uint_field(&mut bytes, b"round", record.round);
+        write_uint_field(&mut bytes, b"parent_round", record.parent_round);
+        msgpack::write_str(&mut bytes, b"hardfork");
+        msgpack::write_map_len(&mut bytes, 2);
+        write_uint_field(&mut bytes, b"version", record.hardfork_version);
+        write_uint_field(&mut bytes, b"round", record.hardfork_round);
+        msgpack::write_str(&mut bytes, b"proposer");
+        msgpack::write_str(&mut bytes, format_address_hex(&record.proposer).as_bytes());
+        msgpack::write_str(&mut bytes, b"resps");
+        match record.encoded_responses {
+            Some(response) => bytes.extend_from_slice(response),
+            None => bytes.push(0xc0),
+        }
+        write_uint_field(&mut bytes, b"height", record.height);
+        Ok(Self::from_bytes(bytes))
+    }
+
+    /// Wrap a payload serialized with the explicit bincode-fork configuration.
     pub fn encode_bincode<E: Encode>(msg: &E) -> Result<Self, NodeError> {
         let bytes = encode_to_vec(msg, standard())
             .map_err(|e| NodeError::NvStreamClientBlockSend(e.to_string()))?;
