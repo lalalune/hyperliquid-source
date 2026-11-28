@@ -7,6 +7,7 @@
 
 use std::cell::Cell;
 use std::collections::{BTreeMap, VecDeque};
+use std::time::Duration;
 
 use crate::error::NodeError;
 
@@ -125,7 +126,7 @@ impl GroupAndSeqSampler {
         Self::default()
     }
 
-    /// Normalize elapsed seconds matching `0x5b2996b..0x5b29985` (`nanos / 1e9`, `+inf -> 0.0`).
+    /// Map non-finite or negative external samples to zero.
     pub fn sanitize_elapsed_secs(elapsed_secs: f64) -> f64 {
         if elapsed_secs == f64::INFINITY || elapsed_secs.is_nan() || elapsed_secs < 0.0 {
             0.0
@@ -135,8 +136,8 @@ impl GroupAndSeqSampler {
     }
 
     pub fn record_nanos(&mut self, group_id: u64, elapsed_nanos: u64) {
-        let secs = Self::sanitize_elapsed_secs(elapsed_nanos as f64 / 1_000_000_000.0);
-        self.record_secs(group_id, secs);
+        // Both node #115 samplers divide the subsecond part before adding whole seconds.
+        self.record_secs(group_id, Duration::from_nanos(elapsed_nanos).as_secs_f64());
     }
 
     pub fn record_secs(&mut self, group_id: u64, elapsed_secs: f64) {

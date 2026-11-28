@@ -67,14 +67,15 @@ class TestAuxChannelSamplerUtils115(unittest.TestCase):
 
     def test_manifest_sha256_integrity(self) -> None:
         lines = [ln.strip() for ln in MANIFEST_PATH.read_text(encoding="utf-8").splitlines() if ln.strip()]
-        self.assertEqual(len(lines), 2)
+        expected = {"README.md", "records.json", "observe.rs", "compare_elapsed.py", "elapsed-results.json"}
+        self.assertEqual(len(lines), len(expected))
         seen = set()
         for line in lines:
             expected_hash, rel_name = line.split("  ", 1)
             seen.add(rel_name)
             actual = hashlib.sha256((PACKET_DIR / rel_name).read_bytes()).hexdigest()
             self.assertEqual(actual, expected_hash)
-        self.assertEqual(seen, {"README.md", "records.json"})
+        self.assertEqual(seen, expected)
 
 
 if __name__ == "__main__":
