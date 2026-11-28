@@ -1,0 +1,30 @@
+RE-017-node115-replica-rotation-stem
+Host: Darwin arm64; native target: Linux x86-64 ELF
+Command (with PACKET set to the staged work-item directory): PYTHONDONTWRITEBYTECODE=1 python3 "$PACKET/verify.py" --repo .
+target=artifacts/node/115/hl-node sha256=a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301 bytes=105896032
+Python 3.9.6
+FDE 0x595a6b0..0x595ac25
+FDE 0x595ac30..0x595afec
+FDE 0x5951600..0x59516d5
+FDE 0x1533e80..0x1533fda
+FDE 0x50e2f80..0x50e3104
+R_X86_64_RELATIVE 0x64e0990 -> 0x1629690
+R_X86_64_RELATIVE 0x64e0ab8 -> 0x1629fb0
+R_X86_64_RELATIVE 0x64e0b68 -> 0x150ce90
+R_X86_64_RELATIVE 0x64e0a98 -> 0x1689420
+R_X86_64_RELATIVE 0x64df6e8 -> 0x141e3a0
+R_X86_64_RELATIVE 0x64e0020 -> 0x14c3b30
+R_X86_64_GLOB_DAT 0x64dfe78 -> close
+R_X86_64_GLOB_DAT 0x64dffc0 -> write
+PASS control: different rotation threshold rejected
+PASS control: different stem input rejected
+PASS control: redirect old liner cleanup rejected
+PASS control: change record terminator rejected
+PASS: 82 instruction anchors across 5 FDEs
+PASS: rotated filename receives the bucket marker; the old-liner path attempts flush and close before encoding the incoming row
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+llvm-readelf -r artifacts/node/115/hl-node
+00000000064dfe78  0000001100000006 R_X86_64_GLOB_DAT      0000000000000000 close@GLIBC_2.2.5 + 0
+00000000064dffc0  0000001300000006 R_X86_64_GLOB_DAT      0000000000000000 write@GLIBC_2.2.5 + 0
