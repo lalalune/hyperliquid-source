@@ -36,7 +36,7 @@ These inventory counts describe available work, not completed components.
 | Whole-ELF bytes compared | 11,766,917/105,896,032 | 11.11176% |
 | Whole-ELF bytes raw-equal | 10,981,414/105,896,032 | 10.37000% |
 | First-party .text bytes compared | 1,084,362/83,719,936 | 1.29523% |
-| Compared windows vs. `.eh_frame_hdr` unwind starts | 18,328/135,313 | 13.54489% |
+| Indexed unwind starts with a comparison window at the same address | 18,315/135,313 | 13.53528% |
 | Component work areas with registered Rust paths | 23/23 | 100.00% |
 | Active `src/` Rust areas registered in `components.json` | 299/299 | 100.00% |
 | Research work items with top-level `MANIFEST.sha256` | 4,942/5,064 | 97.59% |

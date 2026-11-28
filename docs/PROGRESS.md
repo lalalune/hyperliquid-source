@@ -63,6 +63,8 @@ Both complete source and target extents are authenticated. These candidates have
 
 Compared .text: 11,766,917/83,719,936 bytes (14.05510%). Raw-equal positions: 10,981,414/83,719,936 (13.11684%). Whole ELF reproduced: no.
 
+Of 135,313 node #115 unwind-index entries, 18,315 start at the address of a compared window. This counts starting addresses regardless of the window's end. The [byte coverage record](../research/catalogue/byte-coverage.json) lists the 13 compared windows that start elsewhere; their 62,925 bytes are included in the .text comparison above. See the [node #115 unwind-gap provider comparison](../research/work-items/RE-001-fde-gap-classes/README.md#source-providers-for-the-gap-islands).
+
 | Whole ELF bytes | .text bytes | Other executable bytes | Allocated data/metadata bytes | Zero-fill bytes |
 | ---: | ---: | ---: | ---: | ---: |
 | 105,896,032 | 83,719,936 | 4,504 | 22,167,981 | 2,266,916 |

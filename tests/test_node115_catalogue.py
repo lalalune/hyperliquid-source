@@ -79,6 +79,18 @@ class CatalogueTests(unittest.TestCase):
                 dest.write_bytes((ROOT / path).read_bytes())
         return root, registry
 
+    def test_index_coverage_counts_coincident_starts_independently_of_the_end(self):
+        # A prefix counts once; a window starting inside an indexed extent does not.
+        index = [{'start': 100}, {'start': 200}, {'start': 300}, {'start': 500}]
+        windows = [{'target': 'node115', 'id': name, 'start': start, 'bytes': size}
+                   for name, start, size in [('prefix', 100, 4), ('interior', 140, 10),
+                                             ('whole', 200, 100), ('outside', 450, 12)]]
+        windows.append({'target': 'visor', 'id': 'different-image', 'start': 300, 'bytes': 8})
+        self.assertEqual(catalogue.unwind_start_coverage(index, windows, 'node115'), {
+            'indexed_starts': 4, 'compared_indexed_starts': 2,
+            'unindexed_window_ids': ['interior', 'outside'], 'unindexed_window_bytes': 22,
+        })
+
     def test_dependency_bytes_do_not_count_as_first_party(self):
         coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', self.components)
         self.assertEqual(set(coverage['targets']), {'node115'})
