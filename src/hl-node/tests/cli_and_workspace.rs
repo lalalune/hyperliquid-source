@@ -2,8 +2,17 @@ use std::process::Command;
 
 use global_constants::ChainName;
 use hl_node::cli::{CliAction, CliError, Subcommand, parse_args};
-use hl_node::wiring::workspace_health;
+use hl_node::wiring::{api_base_url, workspace_health};
 use node115_startup_output::ReplicaStyle;
+
+#[test]
+fn sandbox_health_does_not_report_the_local_chain_address() {
+    let sample = std::net::Ipv4Addr::new(192, 0, 2, 7);
+    assert_eq!(workspace_health(ChainName::Sandbox).api_url, None);
+    assert_eq!(workspace_health(ChainName::Local).api_url.as_deref(), Some("http://localhost:3001/"));
+    assert_eq!(api_base_url(ChainName::Sandbox, Some(sample)).as_deref(), Some("http://192.0.2.7:3001/"));
+    assert_eq!(api_base_url(ChainName::Testnet, Some(sample)).as_deref(), Some("https://api.hyperliquid-testnet.xyz/"));
+}
 
 #[test]
 fn cli_parses_all_14_node115_subcommands_and_aliases() {
@@ -127,7 +136,7 @@ fn cli_rejects_invalid_node115_validator_inputs() {
 fn workspace_health_links_all_26_first_party_crates() {
     let h = workspace_health(ChainName::Mainnet);
     assert_eq!(h.chain, "Mainnet");
-    assert_eq!(h.api_url, "https://api.hyperliquid.xyz/");
+    assert_eq!(h.api_url.as_deref(), Some("https://api.hyperliquid.xyz/"));
     assert_eq!(h.bridge_cid, "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7");
     assert_eq!(h.linked_subsystems.len(), 26);
 }
