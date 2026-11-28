@@ -500,6 +500,36 @@ fn lthash_big_endian_homomorphic_arithmetic_and_hardfork_version_check() {
 }
 
 #[test]
+fn checkpoint_restore_accepts_json_spacing_around_colons() {
+    use node115_abci::lt_hash::LtHashes;
+    use node115_abci::state::AbciCheckpointBundle;
+
+    let dir = unique_tmp("ckpt-bundle-json-layout");
+    let mut lt_hashes = LtHashes::new();
+    lt_hashes.accounts_hash.mix_in(b"observed account");
+    let bundle = AbciCheckpointBundle {
+        height: 9_999,
+        round: 500,
+        hardfork_version: 115,
+        hardfork_height: Some(20_000),
+        lt_hashes,
+    };
+    bundle.save_to_checkpoint_dir(&dir).unwrap();
+    let loaded = (|| {
+        fs::write(
+            dir.join("abci_state_meta.json"),
+            "{\n  \"round\" \t: 500,\n  \"hardfork_version\" : 115,\n  \"height\" \n:9999,\n  \"hardfork_height\" : 20000\n}\n",
+        ).unwrap();
+        let lt_path = dir.join("lt_hashes.json");
+        let hashes = fs::read_to_string(&lt_path).unwrap().replace("\":", "\" \t: ");
+        fs::write(lt_path, hashes).unwrap();
+        AbciCheckpointBundle::load_from_checkpoint_dir(&dir, 115)
+    })();
+    fs::remove_dir_all(&dir).unwrap();
+    assert_eq!(loaded.unwrap(), bundle);
+}
+
+#[test]
 fn snapshot_hardfork_compat_bundle_roundtrip_and_7_stage_apply_block_pipeline() {
     use node115_abci::engine::{
         ApplyBlockPipelineError, ApplyBlockPipelineInput, ApplyBlockStage,

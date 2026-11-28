@@ -260,23 +260,23 @@ impl AbciCheckpointBundle {
             return Err(CheckpointBundleError::MissingCompleteMarker);
         }
         let meta_str = fs::read_to_string(checkpoint_dir.join("abci_state_meta.json"))?;
-        let height = extract_u64_field(&meta_str, "\"height\":")
+        let height = extract_u64_field(&meta_str, "\"height\"")
             .ok_or(CheckpointBundleError::CorruptPayload("height"))?;
-        let round = extract_u64_field(&meta_str, "\"round\":")
+        let round = extract_u64_field(&meta_str, "\"round\"")
             .ok_or(CheckpointBundleError::CorruptPayload("round"))?;
-        let hardfork_version = extract_u64_field(&meta_str, "\"hardfork_version\":")
+        let hardfork_version = extract_u64_field(&meta_str, "\"hardfork_version\"")
             .ok_or(CheckpointBundleError::CorruptPayload("hardfork_version"))?;
         validate_state_hardfork_not_newer(hardfork_version, binary_hardfork_version)
             .map_err(CheckpointBundleError::StateHardforkNewer)?;
-        let hardfork_height = extract_opt_u64_field(&meta_str, "\"hardfork_height\":")
+        let hardfork_height = extract_opt_u64_field(&meta_str, "\"hardfork_height\"")
             .ok_or(CheckpointBundleError::CorruptPayload("hardfork_height"))?;
 
         let lt_str = fs::read_to_string(checkpoint_dir.join("lt_hashes.json"))?;
-        let accounts_hash = parse_lt_hash_section(&lt_str, "\"accounts_hash\":")
+        let accounts_hash = parse_lt_hash_section(&lt_str, "\"accounts_hash\"")
             .ok_or(CheckpointBundleError::CorruptPayload("accounts_hash"))?;
-        let contracts_hash = parse_lt_hash_section(&lt_str, "\"contracts_hash\":")
+        let contracts_hash = parse_lt_hash_section(&lt_str, "\"contracts_hash\"")
             .ok_or(CheckpointBundleError::CorruptPayload("contracts_hash"))?;
-        let storage_hash = parse_lt_hash_section(&lt_str, "\"storage_hash\":")
+        let storage_hash = parse_lt_hash_section(&lt_str, "\"storage_hash\"")
             .ok_or(CheckpointBundleError::CorruptPayload("storage_hash"))?;
 
         Ok(Self {
@@ -316,8 +316,13 @@ fn encode_lt_hash_json(h: &LtHash) -> String {
     )
 }
 
+fn field_value<'a>(src: &'a str, quoted_key: &str) -> Option<&'a str> {
+    let suffix = src.split_once(quoted_key)?.1;
+    Some(suffix.trim_start().strip_prefix(':')?.trim_start())
+}
+
 fn extract_u64_field(src: &str, key: &str) -> Option<u64> {
-    let rest = src.split_once(key)?.1.trim_start();
+    let rest = field_value(src, key)?;
     let end = rest
         .find(|c: char| !c.is_ascii_digit())
         .unwrap_or(rest.len());
@@ -325,7 +330,7 @@ fn extract_u64_field(src: &str, key: &str) -> Option<u64> {
 }
 
 fn extract_opt_u64_field(src: &str, key: &str) -> Option<Option<u64>> {
-    let rest = src.split_once(key)?.1.trim_start();
+    let rest = field_value(src, key)?;
     if rest.starts_with("null") {
         Some(None)
     } else {
@@ -337,12 +342,12 @@ fn extract_opt_u64_field(src: &str, key: &str) -> Option<Option<u64>> {
 }
 
 fn parse_lt_hash_section(src: &str, key: &str) -> Option<LtHash> {
-    let rest = src.split_once(key)?.1;
+    let rest = field_value(src, key)?;
     let obj_end = rest.find('}')?;
     let obj = &rest[..=obj_end];
-    let n_elements = extract_u64_field(obj, "\"n_elements\":")?;
-    let n_bytes = extract_u64_field(obj, "\"n_bytes\":")?;
-    let hex_rest = obj.split_once("\"hash\":\"0x")?.1;
+    let n_elements = extract_u64_field(obj, "\"n_elements\"")?;
+    let n_bytes = extract_u64_field(obj, "\"n_bytes\"")?;
+    let hex_rest = field_value(obj, "\"hash\"")?.strip_prefix("\"0x")?;
     let hex_end = hex_rest.find('"')?;
     let hex_str = &hex_rest[..hex_end];
     if hex_str.len() != LT_HASH_BYTES * 2 {
