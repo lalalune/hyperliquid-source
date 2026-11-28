@@ -1,0 +1,16 @@
+RE-009-node115-checkpoint-quorum-tracker-map
+Darwin arm64
+Python 3.12.16
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+$ python3 -B research/work-items/RE-009-node115-checkpoint-quorum-tracker-map/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 106 instruction windows
+FDEs: 0x33b2a30..0x33b4fd1, 0x303c300..0x303ca53, 0x3c2e860..0x3c2f45b, 0x54897e0..0x548c8e0, 0x5afa030..0x5afa1ee, 0x5afa3b0..0x5afa5cf
+PASS: keyed qrs, htm and highest_quorum_height slots +0x48, +0x60 and +0x80
+PASS: omitted htm initializes {0, 8, 0, 0}; qrs and height use named missing-field routes
+PASS: materialized slots +0x3e98, +0x3eb0, +0x3ed0; drain offsets +0x48/+0x60 and separate +0x80 watermark
+PASS: wrong end-of-map index and wrong watermark offset controls are rejected
+$ python3 -B research/work-items/RE-017-node115-replay-delay-checkpoint-read/verify.py
+PASS: 4 FDEs; Exchange index 57, tracker index 4, shared output +0x23b8
+PASS: absent tracker constructor writes binary64 +0.0; omitted adu takes its own field path
