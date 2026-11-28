@@ -1,0 +1,31 @@
+RE-017-node115-materialized-lthash-lanes
+Artifact: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+Darwin arm64
+Python 3.9.6
+Apple LLVM version 21.0.0
+
+$ git rev-parse origin/main
+2da45cb0a761cff6b478e40421699857d87a94df
+
+$ python3 -B /tmp/hl-node115-lthash-inspect.R6Cqz4/RE-017-node115-materialized-lthash-lanes/verify.py
+PASS: #115 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, 67 exact spans in 8 FDEs
+PASS: ordered selected cache constructors and compact offsets accounts_hash=0x1200, contracts_hash=0x1b08, storage_hash=0x2410
+
+$ python3 -B /tmp/hl-node115-lthash-inspect.R6Cqz4/RE-017-node115-materialized-lthash-lanes/test_lanes.py
+test_a_different_counter_changes_only_its_lane (__main__.MaterializedLtHashTests) ... ok
+test_all_named_records_match (__main__.MaterializedLtHashTests) ... ok
+test_cli_compares_a_real_local_fixture (__main__.MaterializedLtHashTests) ... ok
+test_identity_height_and_length_are_independent_controls (__main__.MaterializedLtHashTests) ... ok
+test_pointer_descriptor_bytes_are_outside_selected_records (__main__.MaterializedLtHashTests) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.047s
+
+OK
+
+$ python3 -B -m unittest tests.test_re011_evm_checkpoint115
+...................................
+----------------------------------------------------------------------
+Ran 35 tests in 0.534s
+
+OK
