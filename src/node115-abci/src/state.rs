@@ -13,6 +13,8 @@ use std::fs::{self, File};
 use std::io::{self, Write};
 use std::path::Path;
 
+use node115_db::db_home::find_checkpoint;
+
 use crate::lt_hash::{LT_HASH_BYTES, LtHash, LtHashes};
 
 pub use node115_abci_checkpoint_replay_fixture::{
@@ -386,6 +388,15 @@ pub fn validate_freeze_height(
     Ok(())
 }
 
+const COMPACT_STATE_BYTES: usize = 0x42c8;
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum PostRestoreImageError {
+    WrongSize { actual: usize },
+    InvalidFreezeTag { tag: u32 },
+    Checkpoint(RestoreError),
+}
+
 /// Checked wrapper around `RestoredState` supporting saturating height advance (`0x54838d3..0x54838f1`).
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AbciState {
@@ -405,6 +416,51 @@ impl AbciState {
             hardfork_height,
             periodic_root_cadence,
         }
+    }
+
+    /// Initialize replay from a caller-pinned compact image after local startup.
+    /// The two pair words have already been materialized and are copied as-is.
+    pub fn from_post_restore_image(
+        checkpoints_dir: &Path,
+        requested_height: u64,
+        image: &[u8],
+    ) -> Result<Self, PostRestoreImageError> {
+        if image.len() != COMPACT_STATE_BYTES {
+            return Err(PostRestoreImageError::WrongSize { actual: image.len() });
+        }
+        let word = |offset: usize| u64::from_le_bytes(image[offset..][..8].try_into().unwrap());
+        let height = word(0x28);
+        if height != requested_height {
+            return Err(PostRestoreImageError::Checkpoint(RestoreError::HeightMismatch {
+                requested: requested_height,
+                persisted: height,
+            }));
+        }
+        let tag = u32::from_le_bytes(image[0x10e8..0x10ec].try_into().unwrap());
+        let hardfork_height = match tag {
+            0 => None,
+            1 => Some(word(0x10f0)),
+            _ => return Err(PostRestoreImageError::InvalidFreezeTag { tag }),
+        };
+        let candidate = find_checkpoint(checkpoints_dir, requested_height).ok_or(
+            PostRestoreImageError::Checkpoint(RestoreError::CheckpointNotFound { requested_height }),
+        )?;
+        let round = word(0x30);
+        Ok(Self::new(
+            RestoredState {
+                checkpoint_path: candidate.path,
+                height,
+                round,
+                loader_seq: word(0x18),
+                copied_round: word(0x20),
+                replay_initializer: ReplayInitializer {
+                    initial_height: height,
+                    initial_round: round,
+                },
+            },
+            word(0x39c8),
+            hardfork_height,
+        ))
     }
 
     pub fn height(&self) -> u64 {
