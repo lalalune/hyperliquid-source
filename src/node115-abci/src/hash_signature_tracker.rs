@@ -2,7 +2,7 @@
 //! - Running unsigned max watermark (`tracker + 0x80`, `0x27605e4`, `0x5afb227`)
 //! - Seal marker (`tracker + 0x90`, `0x2760627`)
 //! - Saturating prune window `50_000` (`0xc350`, `0x276063a`, `0x5afb284`)
-//! - Pending-map cutoff `1_000` (`0x3e8`, `0x5afa04e`)
+//! - Pending-map count allowance `1_000` (`0x3e8`, `0x5afa04e`)
 //! - Pre-insertion admission (`node115-digest-vote-admission`)
 //! - Two-gate support transition (`node115-digest-support-gate`)
 //! - Extraction, registry remap, drain (`node115-digest-reference-handoff`)
@@ -24,8 +24,17 @@ use node115_quorum_line::quorum_log_line;
 /// Saturating prune window observed at `0x276063a` and `0x5afb284` (`0xc350`).
 pub const PRUNE_WINDOW_HEIGHTS: u64 = 50_000;
 
-/// Saturating pending-map cutoff observed at `0x2760048` (live) and `0x5afa04e` (slow) (`0x3e8`).
+/// Pending-map count allowance for the native secondary timer budget.
 pub const PENDING_CUTOFF_WINDOW: u64 = 1_000;
+
+/// Secondary elapsed-time threshold at `0x515233b` (60 seconds).
+const PENDING_TIMER_SECONDARY_NANOS: u64 = 60_000_000_000;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TimedDrainError {
+    InvalidDelay,
+    MissingTimestamp { height: u64 },
+}
 
 /// Exact `qrs` (`tracker + 0x48`) element stride observed at `0x27600f0` (`0x68` = 104 bytes).
 pub const QRS_ENTRY_SIZE_BYTES: usize = 0x68;
@@ -278,6 +287,43 @@ impl HashSignatureTracker {
         (rows, quorum_lines)
     }
 
+    /// Apply the ordinary pending-timer drain to offline, normalized timestamps.
+    /// Primary maturity delivers through the existing drain. Secondary expiry drops
+    /// pending entries without producing a digest, capped by the initial map length.
+    pub fn drain_timed(
+        &mut self,
+        inserted_at_nanos: &BTreeMap<u64, u64>,
+        delay_secs: f64,
+        current_nanos: u64,
+        registry: &Registry,
+        registry_context: u64,
+    ) -> Result<(Vec<ReferenceRow>, Vec<String>), TimedDrainError> {
+        let delay = delay_secs_to_nanos(delay_secs).ok_or(TimedDrainError::InvalidDelay)?;
+        let mut secondary_budget =
+            self.pending_heights.len().saturating_sub(PENDING_CUTOFF_WINDOW as usize);
+        let mut eligible = Vec::new();
+        let mut expired = Vec::new();
+        for &height in &self.pending_heights {
+            let inserted = inserted_at_nanos
+                .get(&height)
+                .copied()
+                .ok_or(TimedDrainError::MissingTimestamp { height })?;
+            let Some(elapsed) = current_nanos.checked_sub(inserted) else {
+                continue;
+            };
+            if elapsed >= delay {
+                eligible.push(height);
+            } else if elapsed >= PENDING_TIMER_SECONDARY_NANOS && secondary_budget != 0 {
+                expired.push(height);
+                secondary_budget -= 1;
+            }
+        }
+        for height in expired {
+            self.pending_heights.remove(&height);
+        }
+        Ok(self.drain_eligible(&eligible, registry, registry_context))
+    }
+
     pub fn selected_digest(&self, height: u64) -> Option<Digest> {
         self.snapshot.get(&height)?.selected
     }
@@ -289,8 +335,8 @@ impl HashSignatureTracker {
         }
     }
 
-    /// Prune pending timer heights below `current_height.saturating_sub(PENDING_CUTOFF_WINDOW)`
-    /// matching live `0x2760048` and slow `0x5afa04e` (`sub rax, 0x3e8; cmovae`).
+    /// Synthetic height-window filter retained for callers supplying their own pruning policy.
+    /// The native secondary timer branch instead uses a count-based budget.
     pub fn prune_pending_window(&mut self, current_height: u64) -> u64 {
         let cutoff = current_height.saturating_sub(PENDING_CUTOFF_WINDOW);
         self.pending_heights.retain(|&h| h >= cutoff);
