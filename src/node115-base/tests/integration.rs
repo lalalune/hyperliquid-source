@@ -275,7 +275,7 @@ fn runtime_utils_cover_remaining_foundation_subsystems() {
     assert_eq!(liner.lines(), &["ok-line"]);
     assert_eq!(
         daily_liner_path(Path::new("/data"), "20261127", "events.log"),
-        Path::new("/data/20261127/events.log")
+        Path::new("/data/events.log/20261127")
     );
 
     let mut cache = DataCache::new(500);
