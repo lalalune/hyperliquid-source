@@ -1,0 +1,27 @@
+RE-017-node115-replay-timed-carrier-handoff
+Host: Darwin arm64; native target: Linux x86-64 ELF
+Command (with PACKET set to the staged work-item directory): PYTHONDONTWRITEBYTECODE=1 python3 "$PACKET/verify.py" --repo .
+target=artifacts/node/115/hl-node sha256=a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301 bytes=105896032
+Python 3.9.6
+FDE 0x5819b20..0x5819d03
+FDE 0x5a71040..0x5a7172a
+FDE 0x581b4b0..0x581b6ad
+FDE 0x5a3ede0..0x5a3ef3e
+FDE 0x5a7c7d0..0x5a7d380
+state table 0x93970c, state 4 -> 0x5a7114e
+R_X86_64_RELATIVE 0x64b8c40 -> 0x5a3ede0
+R_X86_64_RELATIVE 0x64b8c58 -> 0x5a71040
+R_X86_64_RELATIVE 0x64e4cb8 -> 0x5a8e7c0
+PASS control: wrong owner position in dequeue result rejected
+PASS control: wrong retained future owner slot rejected
+PASS control: wrong outbound owner load rejected
+PASS control: wrong destructor owner slot rejected
+PASS: 110 instruction anchors across 5 FDEs
+PASS: timed consumer preserves the owner through pending sleep, then transfers or releases it
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+llvm-readelf -r artifacts/node/115/hl-node
+00000000064b8c40  0000000000000008 R_X86_64_RELATIVE                 5a3ede0
+00000000064b8c58  0000000000000008 R_X86_64_RELATIVE                 5a71040
+00000000064e4cb8  0000000000000008 R_X86_64_RELATIVE                 5a8e7c0
