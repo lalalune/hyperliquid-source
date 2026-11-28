@@ -96,6 +96,18 @@ pub fn compute_reduction_tree_root(rows: &[ReductionRow]) -> Result<[u8; 32], En
     Ok(compute_preimage_root(&preimage))
 }
 
+/// Compute the linked L1 digest used by the #115 hardfork and checkpoint paths
+/// (`0x457cf60`). Pass the exact serialized state span and the raw 32-byte
+/// ABCI digest for the same state. The separate height metadata is outside
+/// this composition. Any height encoded in `serialized_state` is hashed.
+pub fn compute_linked_l1_digest(serialized_state: &[u8], abci_digest: &[u8; 32]) -> [u8; 32] {
+    let state_hash = blake3_hash(serialized_state);
+    let mut preimage = [0; 64];
+    preimage[..32].copy_from_slice(&state_hash);
+    preimage[32..].copy_from_slice(abci_digest);
+    blake3_hash(&preimage)
+}
+
 fn encode_rows_into(out: &mut Vec<u8>, rows: &[ReductionRow]) -> Result<(), EncodeError> {
     push_array_header(out, rows.len())?;
     for row in rows {

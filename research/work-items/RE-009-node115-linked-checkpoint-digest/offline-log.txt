@@ -1,0 +1,59 @@
+RE-009-node115-linked-checkpoint-digest
+Darwin arm64
+Python 3.12.16
+rustc 1.95.0 (59807616e 2026-04-14)
+LLVM (http://llvm.org/):
+  LLVM version 23.1.4
+  Optimized build.
+Reference wheel SHA-256 1257be19f2d381c868a34cc822fc7f12f817ddc49681b6d1a2790bfbda1a9865
+$ python3 -B research/work-items/RE-009-node115-linked-checkpoint-digest/verify.py
+PASS: #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; 72 instruction windows
+FDEs: 0x4e4b860..0x4e4bc20, 0x4e36140..0x4e363bf, 0x4e48ee0..0x4e4910c, 0x5484670..0x54848d5, 0x457cf60..0x457d46f, 0x5480950..0x548168c, 0x452aab0..0x452aeb9
+PASS: exact serializer pointer/length reach the first BLAKE3 update
+PASS: two 32-byte updates bind the state hash then raw ABCI digest
+PASS: changed state length and wrong metadata pointer controls are rejected
+$ python3 -B research/work-items/RE-009-node115-linked-checkpoint-digest/reference.py
+Independent reference: blake3 1.0.8
+len=0 inner=af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262 linked=517935c568392e4fa5ebd476bc11f2b65b034001cbf6df95f706e542a2607afa
+len=9 inner=d8a7c4db836db4daa5e30be798f805105be429bf48500183554cc74aba4e1127 linked=08347eacd591cca8d88e87cda875d7613bd1335081a915bf83f22a0379c288f9
+len=1025 inner=d00278ae47eb27b34faecf67b4fe263f82d5412916c1ffd97c8cb7fb814b8444 linked=5ae7252aa7cc0999668e1472bdb0a274e02b75c0c9ca53e7c3cffb67030cc71c
+Control reversed=522ce9d157a86bd50b39fbec7a7f9015b95f2da480ec84a26bdf0d1884d49289
+Control extra-height=ccede6979919dd062e1b57c1ac538e61b5b5768f6bd007b6f446974fbc333af5
+Control trailing-capacity=1a02cf80de91b980f3cabf14af63375212b7c844a69dae8b246153ce33f6f384
+$ cargo test --locked --offline --manifest-path src/node115-abci/Cargo.toml
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running unittests src/lib.rs (debug/deps/node115_abci-1717a7bea879ea4d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration.rs (debug/deps/integration-d9ca861d3df39de7)
+
+running 10 tests
+test tracker_rounds_fractional_delays_to_nearest_nanosecond ... ok
+test reduction_tree_preimage_matches_re017_msgpack_vectors ... ok
+test state_serialize_buffer_elapsed_seconds_and_zip_exact_slices ... ok
+test tracker_watermark_seal_prune_window_and_recheck ... ok
+test apply_block_six_ordered_guards_and_history_split_off_cutoff ... ok
+test real_blake3_state_root_and_timer_maturity_end_to_end ... ok
+test engine_offline_replay_freeze_guard_and_checkpoint_maintenance ... ok
+test lthash_big_endian_homomorphic_arithmetic_and_hardfork_version_check ... ok
+test tracker_wire_schema_checkpoint_format_and_straggler_filter ... ok
+test snapshot_hardfork_compat_bundle_roundtrip_and_7_stage_apply_block_pipeline ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/linked_checkpoint_digest.rs (debug/deps/linked_checkpoint_digest-0e236d5ebf588d7f)
+
+running 2 tests
+test binds_active_span_and_preserves_raw_digest_order ... ok
+test matches_independent_linked_l1_vectors ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests node115_abci
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
