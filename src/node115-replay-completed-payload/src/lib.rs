@@ -4,7 +4,7 @@
 pub use node115_client_block_success::{ReplayError, ReplayPayload};
 pub use node115_lz4_decode::DecodeError as CompressionError;
 
-use node115_client_block_success::decode_replay_payload_prefix;
+use node115_client_block_success::{decode_replay_payload_prefix, replay_parent_projection};
 use node115_lz4_decode::decode;
 
 /// Selected initial producer value for both decoded capacity and reader charge.
@@ -24,6 +24,39 @@ pub struct DecodedPrefix {
     pub decoder_input_len: usize,
     pub consumed: usize,
     pub charged: u64,
+}
+
+/// Outcome of comparing a completed replay Block with the startup pair.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ReplayBlockCheck {
+    DecodeFailed,
+    Tx,
+    Match { successor: u64 },
+    Mismatch { observed: [u64; 2] },
+}
+
+impl DecodedPrefix {
+    /// Use the caller-supplied startup pair in the observed comparison order.
+    /// The successor is available only on the matching Block continuation.
+    pub fn check_block_identity(&self, expected: [u64; 2]) -> ReplayBlockCheck {
+        let payload = match &self.result {
+            Ok(payload) => payload,
+            Err(_) => return ReplayBlockCheck::DecodeFailed,
+        };
+        let ReplayPayload::Block { block, .. } = payload else {
+            return ReplayBlockCheck::Tx;
+        };
+        let projection = replay_parent_projection(&block.header.parent);
+        if projection.comparison_words == expected {
+            ReplayBlockCheck::Match {
+                successor: projection.successor,
+            }
+        } else {
+            ReplayBlockCheck::Mismatch {
+                observed: projection.comparison_words,
+            }
+        }
+    }
 }
 
 /// Decode the completed payload using the selected initial producer's limit.
