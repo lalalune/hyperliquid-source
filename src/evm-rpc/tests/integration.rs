@@ -187,11 +187,21 @@ fn evm_rpc_boundary_and_corruption_behaviors() {
     assert_eq!(lim.limit(LimiterSelector::FilterLogs), MAX_PERMIT_COUNT);
     lim.release(LimiterSelector::CallOrEstimateGas); // saturating at 0
 
-    // Fee-history edge cases: block_count=0, pending block_count=1 -> None, NaN, overflow
+    // Fee-history edge cases: empty requests, pending ranges, percentiles and overflow
     let latest = parse_number_text("latest").unwrap();
     let pending = parse_number_text("pending").unwrap();
     assert_eq!(compute_fee_history_range(0, latest, 50), Ok(None));
-    assert_eq!(compute_fee_history_range(1, pending, 50), Ok(None));
+    for height in [0, 50, u64::MAX - 1, u64::MAX] {
+        assert_eq!(compute_fee_history_range(0, pending, height), Ok(None));
+        assert_eq!(
+            compute_fee_history_range(1, pending, height),
+            Err(FeeHistoryError::InvalidBlockRange)
+        );
+    }
+    assert_eq!(
+        compute_fee_history_range(2, pending, 50),
+        Ok(Some(FeeHistoryRange { oldest_block: 50, newest_block: 50, count: 1 }))
+    );
     assert_eq!(
         validate_reward_percentiles(&[f64::NAN, 50.0]),
         Err(FeeHistoryError::InvalidRewardPercentiles)

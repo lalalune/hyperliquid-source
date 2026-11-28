@@ -19,3 +19,14 @@ Joins the existing verified node #115 micro-crates (`node115-storage-key-builder
 
 See `research/work-items/RE-011-node115-evm-rpc-crate/README.md` for
 target-bound binary evidence and explicit non-claims.
+
+
+For a valid `pending` selector, a requested count of zero takes the immediate
+empty-result path. A requested count of one decrements to zero after capping,
+then goes through the resolved-height and range-order checks. The inclusive
+range would start one block past its end, so the Rust API returns
+`InvalidBlockRange`. A resolved height of `u64::MAX` reaches the increment
+overflow check first. The [retained range cases](../../research/work-items/RE-011-evm-fee-history-115/synthetic-cases.json)
+and the [branch table](../../research/work-items/RE-011-evm-fee-history-115/branches.tsv)
+record the distinction. The error here is the reconstructed crate's result;
+the RPC wire error representation is a separate boundary.

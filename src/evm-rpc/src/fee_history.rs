@@ -64,11 +64,8 @@ pub fn compute_fee_history_range(
     let height = match selector.raw_mode {
         5 => selector.number.ok_or(FeeHistoryError::InvalidBlockRange)?,
         4 => {
-            // Pending selector decrements capped count by 1 (saturating at 0).
+            // A positive pending request still checks the resolved interval after this decrement.
             capped = capped.saturating_sub(1);
-            if capped == 0 {
-                return Ok(None);
-            }
             latest_height
         }
         _ => latest_height,
