@@ -485,3 +485,36 @@ fn latest_checkpoint_checks_both_regular_marker_forms() {
 
     let _ = fs::remove_dir_all(&root);
 }
+
+#[test]
+fn latest_checkpoint_parses_only_directories() {
+    use node115_db::db_home::LoadLatestCheckpointError;
+
+    let root = unique_tmp("latest-directory-admission");
+    let home = DbHome::new(&root).unwrap();
+    let outer = home.checkpoint_subdir();
+    fs::create_dir_all(&outer).unwrap();
+    fs::write(outer.join("200"), b"ordinary side file").unwrap();
+    fs::write(outer.join("0042"), b"ordinary numeric alias file").unwrap();
+    let only_files = home.load_latest_checkpoint(None);
+
+    fs::create_dir(outer.join("31")).unwrap();
+    let incomplete = home.load_latest_checkpoint(None);
+    let valid = outer.join("42");
+    fs::create_dir(&valid).unwrap();
+    fs::write(valid.join("CHECKPOINT_COMPLETE"), b"").unwrap();
+    let complete = home.load_latest_checkpoint(None);
+    fs::remove_dir_all(&root).unwrap();
+
+    assert!(
+        matches!(only_files, Err(LoadLatestCheckpointError::NoCheckpointsToLoad { dir }) if dir == outer),
+        "regular numeric entries must leave the candidate list empty",
+    );
+    assert!(
+        matches!(incomplete, Err(LoadLatestCheckpointError::UnableToLoadAnyCurrentCheckpoint { dir }) if dir == outer),
+        "an incomplete numeric directory is distinguishable from an empty candidate list",
+    );
+    let chosen = complete.unwrap();
+    assert_eq!(chosen.height, 42);
+    assert_eq!(chosen.path, valid);
+}

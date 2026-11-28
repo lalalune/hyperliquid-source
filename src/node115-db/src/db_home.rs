@@ -112,7 +112,7 @@ impl DbHome {
     /// Exact 3-stage latest-checkpoint loader proven in `db/src/db_home.rs:21:24`
     /// (`0x4468e30`, `0x25d3f20`, `0x59ffa30`):
     /// 1. Verifies `<db_home>/checkpoint` exists (`"checkpoint outer dir does not exist ..."`).
-    /// 2. Scans entries strictly matching unsigned ASCII digits (`+`/`-` rejected at `0x4469183`/`0x4469188`),
+    /// 2. Scans directories strictly matching unsigned ASCII digits (`+`/`-` rejected at `0x4469183`/`0x4469188`),
     ///    returning `"no checkpoints to load: ..."` if none exist.
     /// 3. Sorts descending by height and requires a regular global or EVM completion
     ///    marker plus any supplied `required_subdir`. If none qualify, returns
@@ -126,8 +126,11 @@ impl DbHome {
             return Err(LoadLatestCheckpointError::OuterDirDoesNotExist { dir: outer });
         }
         let mut parsed = Vec::new();
-        for entry in fs::read_dir(&outer).map_err(LoadLatestCheckpointError::Io)? {
-            let entry = entry.map_err(LoadLatestCheckpointError::Io)?;
+        let entries = fs::read_dir(&outer).map_err(LoadLatestCheckpointError::Io)?;
+        for entry in entries.filter_map(Result::ok) {
+            if !entry.path().is_dir() {
+                continue;
+            }
             let name = entry.file_name();
             let Some(name_str) = name.to_str() else {
                 continue;
