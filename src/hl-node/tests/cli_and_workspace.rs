@@ -6,6 +6,21 @@ use hl_node::wiring::workspace_health;
 use node115_startup_output::ReplicaStyle;
 
 #[test]
+fn reconstructed_binary_requires_a_chain_before_running_an_offline_command() {
+    let bin = env!("CARGO_BIN_EXE_hl-node");
+    let out = std::process::Command::new(bin)
+        .args(["run-non-validator", "--dry-run"])
+        .output()
+        .unwrap();
+    assert!(!out.status.success());
+    assert!(String::from_utf8_lossy(&out.stderr).contains("--chain"));
+    assert_eq!(
+        parse_args(["run-non-validator", "--dry-run"]),
+        Err(CliError::MissingRequiredOption("chain"))
+    );
+}
+
+#[test]
 fn cli_parses_all_14_node115_subcommands_and_aliases() {
     assert_eq!(Subcommand::ALL.len(), 14);
 
@@ -32,6 +47,7 @@ fn cli_parses_all_14_node115_subcommands_and_aliases() {
     assert_eq!(settings.replica_style, ReplicaStyle::ActionsAndResponses);
 
     let vp = parse_args([
+        "--chain=Testnet",
         "change-validator-profile",
         "--abci-state-fln",
         "/tmp/state.rmp",
@@ -55,6 +71,7 @@ fn cli_parses_all_14_node115_subcommands_and_aliases() {
 fn cli_rejects_invalid_node115_validator_inputs() {
     assert_eq!(
         parse_args([
+            "--chain=Testnet",
             "change-validator-profile",
             "--abci-state-fln",
             "/tmp/s",
@@ -64,7 +81,7 @@ fn cli_rejects_invalid_node115_validator_inputs() {
         Err(CliError::InvalidNodeIp("999.0.0.1".to_string()))
     );
     assert_eq!(
-        parse_args(["staking-deposit", "--wei", "-10"]),
+        parse_args(["--chain=Testnet", "staking-deposit", "--wei", "-10"]),
         Err(CliError::InvalidU64 {
             option: "wei",
             value: "-10".to_string()
@@ -72,6 +89,7 @@ fn cli_rejects_invalid_node115_validator_inputs() {
     );
     assert_eq!(
         parse_args([
+            "--chain=Testnet",
             "change-validator-profile",
             "--abci-state-fln",
             "/tmp/s",
@@ -85,6 +103,7 @@ fn cli_rejects_invalid_node115_validator_inputs() {
     );
     assert_eq!(
         parse_args([
+            "--chain=Testnet",
             "run-non-validator",
             "--replica-cmds-style",
             "invalid-style"
@@ -94,6 +113,7 @@ fn cli_rejects_invalid_node115_validator_inputs() {
 
     // AuxStreamConfig mutual-exclusion guard (`node/src/aux.rs` `0x51d0aba`).
     let conflict = parse_args([
+        "--chain=Testnet",
         "run-non-validator",
         "--write-fills",
         "--write-trades",
@@ -104,6 +124,7 @@ fn cli_rejects_invalid_node115_validator_inputs() {
     assert!(matches!(conflict, Err(CliError::AuxConfigConflict(_))));
 
     let ok_aux = parse_args([
+        "--chain=Testnet",
         "run-non-validator",
         "--write-fills",
         "--write-trades",
