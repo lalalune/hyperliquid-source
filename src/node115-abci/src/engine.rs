@@ -323,11 +323,11 @@ pub struct ApplyBlockPipelineReport {
     pub pruned_history_entries: usize,
 }
 
-/// Select the lowest checkpoint heights to prune while retaining the newest `keep`
-/// checkpoints (native `0x4d98d51` passes `keep = PRUNE_KEEP_EVM_CHECKPOINTS = 100`).
+/// Select the lowest checkpoint rows by height while retaining the newest `keep` rows.
+/// Equal heights still occupy distinct entries in the count. Returns the selected
+/// heights in ascending order for the offline fixture.
 pub fn select_checkpoints_to_prune(mut heights: Vec<u64>, keep: usize) -> Vec<u64> {
     heights.sort_unstable();
-    heights.dedup();
     if heights.len() <= keep {
         return Vec::new();
     }
