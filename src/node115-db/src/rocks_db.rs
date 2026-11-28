@@ -238,18 +238,28 @@ impl PersistentShardKvStore {
     }
 
     pub fn put(&mut self, cf: &str, key: Vec<u8>, value: Vec<u8>) -> io::Result<()> {
-        let map = self.cf_mut(cf)?;
-        map.insert(key, value);
-        self.flush_cf(cf)
+        let previous = self.cf_mut(cf)?.insert(key.clone(), value);
+        if let Err(error) = self.flush_cf(cf) {
+            let map = self.cf_mut(cf)?;
+            if let Some(previous) = previous {
+                map.insert(key, previous);
+            } else {
+                map.remove(&key);
+            }
+            return Err(error);
+        }
+        Ok(())
     }
 
     pub fn delete(&mut self, cf: &str, key: &[u8]) -> io::Result<bool> {
-        let map = self.cf_mut(cf)?;
-        let existed = map.remove(key).is_some();
-        if existed {
-            self.flush_cf(cf)?;
+        let Some((key, value)) = self.cf_mut(cf)?.remove_entry(key) else {
+            return Ok(false);
+        };
+        if let Err(error) = self.flush_cf(cf) {
+            self.cf_mut(cf)?.insert(key, value);
+            return Err(error);
         }
-        Ok(existed)
+        Ok(true)
     }
 
     /// Apply a batch of put/delete operations and atomically flush all touched column families.
