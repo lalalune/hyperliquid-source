@@ -8,6 +8,8 @@
 //! - `0x3c27f30..0x3c28210`: `LtHash` rebuild (`0xf4240` = 1,000,000 batch) & 32-byte `blake3::hash(&hash[..0x800])` checksum
 //! - `.rodata 0x793711`: `LtHashes` 3 fields (`accounts_hash`, `contracts_hash`, `storage_hash`)
 
+use std::io::{self, Write};
+
 use node115_abci_blake3::{blake3_hash, blake3_xof};
 
 /// Exact `LtHash` accumulator width in bytes (`0x800` = 2048 B, proven at `0x36c61e3` & `0x36c5c79`).
@@ -122,6 +124,37 @@ impl LtHashes {
             contracts_hash: LtHash::new(),
             storage_hash: LtHash::new(),
         }
+    }
+
+    /// Write the named JSON form used by the selected #115 EVM checkpoint writer.
+    ///
+    /// Each hash is emitted as 2,048 unsigned decimal bytes. File placement and
+    /// atomic persistence belong to the caller.
+    pub fn write_native_checkpoint_sidecar(&self, mut writer: impl Write) -> io::Result<()> {
+        let records = [
+            &self.accounts_hash,
+            &self.contracts_hash,
+            &self.storage_hash,
+        ];
+        writer.write_all(b"{")?;
+        for (index, (name, record)) in LT_HASHES_WIRE_FIELDS.into_iter().zip(records).enumerate() {
+            if index != 0 {
+                writer.write_all(b",")?;
+            }
+            write!(
+                writer,
+                "\"{name}\":{{\"n_elements\":{},\"n_bytes\":{},\"hash\":[",
+                record.n_elements, record.n_bytes
+            )?;
+            for (position, byte) in record.hash.iter().enumerate() {
+                if position != 0 {
+                    writer.write_all(b",")?;
+                }
+                write!(writer, "{byte}")?;
+            }
+            writer.write_all(b"]}")?;
+        }
+        writer.write_all(b"}")
     }
 
     pub fn checksums(&self) -> ([u8; 32], [u8; 32], [u8; 32]) {
