@@ -386,8 +386,10 @@ fn handle_evm_rpc(body: &[u8], state: &ServerState) -> (u16, &'static str, Strin
 
     let eng = state.engine.read().expect("engine read lock");
     let chain_id_num: u64 = match eng.chain() {
+        ChainName::Local => 996,
+        ChainName::Sandbox => 997,
+        ChainName::Testnet => 998,
         ChainName::Mainnet => 999,
-        ChainName::Testnet | ChainName::Sandbox | ChainName::Local => 998,
     };
     let result_json = match canonical_method {
         "eth_chainId" => format!("\"0x{chain_id_num:x}\""),
