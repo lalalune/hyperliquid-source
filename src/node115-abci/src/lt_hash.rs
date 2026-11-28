@@ -13,6 +13,9 @@ use node115_abci_blake3::{blake3_hash, blake3_xof};
 /// Exact `LtHash` accumulator width in bytes (`0x800` = 2048 B, proven at `0x36c61e3` & `0x36c5c79`).
 pub const LT_HASH_BYTES: usize = 0x800;
 
+/// Fixed native batch-summary record: payload plus two little-endian u64 counters.
+pub const LT_HASH_RECORD_BYTES: usize = LT_HASH_BYTES + 16;
+
 /// Exact number of 16-bit big-endian homomorphic lanes (`0x400` = 1024, proven at `0x3c27b69`).
 pub const LT_HASH_LANES: usize = LT_HASH_BYTES / 2;
 
@@ -99,6 +102,34 @@ impl LtHash {
             self.mix_out(old);
         }
         self.mix_in(new_encoded);
+    }
+
+    /// Rebuild one cache lane from already computed native batch summaries.
+    ///
+    /// Starts at the zero record used on cache miss. The inputs are complete
+    /// 0x810-byte fold outputs, not DB keys or encoded elements.
+    pub fn from_rebuild_batches<'a>(
+        records: impl IntoIterator<Item = &'a [u8; LT_HASH_RECORD_BYTES]>,
+    ) -> Self {
+        let mut result = Self::new();
+        for record in records {
+            let (hash, counters) = record.split_at(LT_HASH_BYTES);
+            Self::add_be_u16_lanes(&mut result.hash, hash.try_into().unwrap());
+            let n_elements = u64::from_le_bytes(counters[..8].try_into().unwrap());
+            let n_bytes = u64::from_le_bytes(counters[8..].try_into().unwrap());
+            result.n_elements = result.n_elements.saturating_add(n_elements);
+            result.n_bytes = result.n_bytes.saturating_add(n_bytes);
+        }
+        result
+    }
+
+    /// Encode the hash payload and counters in the cache constructor's native layout.
+    pub fn to_record_bytes(&self) -> [u8; LT_HASH_RECORD_BYTES] {
+        let mut record = [0; LT_HASH_RECORD_BYTES];
+        record[..LT_HASH_BYTES].copy_from_slice(&self.hash);
+        record[LT_HASH_BYTES..LT_HASH_BYTES + 8].copy_from_slice(&self.n_elements.to_le_bytes());
+        record[LT_HASH_BYTES + 8..].copy_from_slice(&self.n_bytes.to_le_bytes());
+        record
     }
 
     /// Compute the 32-byte BLAKE3 checksum of the 2,048-byte `hash` buffer (`0x3c2808d..0x3c280af`).
