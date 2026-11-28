@@ -1,0 +1,19 @@
+--- a/cursor.rs
++++ b/cursor.rs
+@@ -27,8 +27,14 @@
+         else {
+             panic!("expected Block in the ordered fixture");
+         };
+-        let Parent::QuorumCertificate(qc) = &block.header.parent else {
+-            panic!("ordinary direct quorum fixture required");
++        let qc = match &block.header.parent {
++            Parent::QuorumCertificate(qc) => qc,
++            Parent::Timeout {
++                certificate,
++                quorum_certificate,
++            } => quorum_certificate
++                .as_ref()
++                .unwrap_or(&certificate.quorum_certificate),
+         };
+         let identity = qc.fields[2];
+         let successor = replay_parent_projection(&block.header.parent).successor;
