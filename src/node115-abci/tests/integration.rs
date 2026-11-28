@@ -690,3 +690,56 @@ fn tracker_rounds_fractional_delays_to_nearest_nanosecond() {
     assert!(!timer_is_mature(100, 0.75e-9, 100));
     assert!(timer_is_mature(100, 0.75e-9, 101));
 }
+
+#[test]
+fn restored_compact_timer_fixture_uses_materialized_delay_word() {
+    use node115_abci::hash_signature_tracker::RestoredTimerDelay;
+
+    let mut state = vec![0xa5; 0x42c8];
+    state[0x28..0x30].copy_from_slice(&412_u64.to_le_bytes());
+    state[0x23b8..0x23c0].copy_from_slice(&0.0_f64.to_le_bytes());
+    state[0x3ed8..0x3ee0].copy_from_slice(&0.75e-9_f64.to_le_bytes());
+    let delay = RestoredTimerDelay::from_compact_checkpoint(&state, 412).unwrap();
+
+    assert_eq!(delay.nanos(), 1);
+    assert!(!delay.is_mature(100, 100));
+    assert!(delay.is_mature(100, 101));
+    assert!(delay.is_mature(u64::MAX, u64::MAX));
+}
+
+#[test]
+fn restored_compact_timer_fixture_checks_layout_height_and_delay() {
+    use node115_abci::hash_signature_tracker::{CompactTimerFixtureError, RestoredTimerDelay};
+
+    let mut state = vec![0; 0x42c8];
+    assert_eq!(
+        RestoredTimerDelay::from_compact_checkpoint(&state[..0x42c7], 0),
+        Err(CompactTimerFixtureError::WrongSize { actual: 0x42c7 }),
+    );
+    assert_eq!(
+        RestoredTimerDelay::from_compact_checkpoint(&state, 1),
+        Err(CompactTimerFixtureError::HeightMismatch {
+            expected: 1,
+            actual: 0,
+        }),
+    );
+
+    for value in [-1.0_f64, f64::NAN, f64::INFINITY] {
+        state[0x3ed8..0x3ee0].copy_from_slice(&value.to_le_bytes());
+        assert_eq!(
+            RestoredTimerDelay::from_compact_checkpoint(&state, 0),
+            Err(CompactTimerFixtureError::InvalidDelay {
+                bits: value.to_bits()
+            }),
+        );
+    }
+    for (value, nanos) in [
+        (-0.0_f64, 0),
+        (f64::from_bits(1), 0),
+        (f64::MAX, i64::MAX as u64),
+    ] {
+        state[0x3ed8..0x3ee0].copy_from_slice(&value.to_le_bytes());
+        let delay = RestoredTimerDelay::from_compact_checkpoint(&state, 0).unwrap();
+        assert_eq!(delay.nanos(), nanos);
+    }
+}
