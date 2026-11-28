@@ -1,0 +1,27 @@
+[package]
+name = "zforks_zf1"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+tikv-jemallocator = "=0.6.0"
+hyper = { version = "=0.14.16", features = ["full"] }
+hyper-tls = "=0.5.0"
+tokio = { version = "=1.44.2", features = ["full"] }
+h2 = "=0.3.26"
+http = "=0.2.12"
+http-body = "=0.4.6"
+tokio-native-tls = "=0.3.1"
+native-tls = "=0.2.14"
+openssl = "=0.10.73"
+bytes = "=1.11.1"
+futures-util = "=0.3.31"
+revm-precompile = { version = "=36.0.3", default-features = false, features = ["std", "blst", "secp256k1", "portable"] }
+alloy-eip7928 = "=0.4.1"
+alloy-primitives = "=1.5.2"
+bincode = { version = "=2.0.1", features = ["derive", "std"] }
+
+[profile.release]
+opt-level = 3
+overflow-checks = true
+lto = "thin"
