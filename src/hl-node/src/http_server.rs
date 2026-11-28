@@ -10,7 +10,7 @@ use std::time::Duration;
 
 use evm_rpc::{
     EVM_RPC_CORE_METHODS, EVM_RPC_EXTRA_METHODS, EVM_RPC_WRITE_FORWARD_METHOD,
-    ExpensiveCallLimiter, JSONRPC_INVALID_PARAMS, JSONRPC_METHOD_NOT_FOUND, LimiterSelector,
+    ExpensiveCallLimiter, FeeHistoryResult, JSONRPC_INVALID_PARAMS, JSONRPC_METHOD_NOT_FOUND, LimiterSelector,
     MethodRouter, PermitOutcome, compute_fee_history_range, decode_raw_tx_hex, parse_number_text,
     validate_log_filter_limits,
 };
@@ -412,16 +412,16 @@ fn handle_evm_rpc(body: &[u8], state: &ServerState) -> (u16, &'static str, Strin
         ),
         "eth_feeHistory" => {
             let selector = parse_number_text("latest").expect("latest selector");
-            match compute_fee_history_range(5, selector, eng.latest_height()) {
-                Ok(Some(range)) => format!(
-                    "{{\"oldestBlock\":\"0x{:x}\",\"baseFeePerGas\":[\"0x3b9aca00\"],\"gasUsedRatio\":[0.0],\"blockCount\":{}}}",
-                    range.oldest_block, range.count
-                ),
-                Ok(None) => "{\"oldestBlock\":\"0x0\",\"baseFeePerGas\":[],\"gasUsedRatio\":[]}"
-                    .to_string(),
-                Err(_) => "{\"oldestBlock\":\"0x0\",\"baseFeePerGas\":[],\"gasUsedRatio\":[]}"
-                    .to_string(),
-            }
+            let history = match compute_fee_history_range(5, selector, eng.latest_height()) {
+                Ok(Some(range)) => FeeHistoryResult {
+                    oldest_block: range.oldest_block,
+                    base_fee_per_gas: vec![1_000_000_000],
+                    gas_used_ratio: vec![0.0],
+                    ..Default::default()
+                },
+                Ok(None) | Err(_) => FeeHistoryResult::default(),
+            };
+            history.to_string()
         }
         "eth_getLogs" => {
             if !validate_log_filter_limits(0, [0, 0, 0, 0]) {

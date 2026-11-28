@@ -19,3 +19,18 @@ Joins the existing verified node #115 micro-crates (`node115-storage-key-builder
 
 See `research/work-items/RE-011-node115-evm-rpc-crate/README.md` for
 target-bound binary evidence and explicit non-claims.
+
+### Fee history result
+
+The loopback node's `/evm` handler uses `FeeHistoryResult` for the inner
+`eth_feeHistory` result. On node #115, the success serializer at ELF VA
+`0x22e0850` always emits `gasUsedRatio` and `oldestBlock`. Three empty vectors
+are omitted independently; an absent reward differs from a present empty
+reward. The existing [branch and field evidence](../../research/work-items/RE-011-evm-fee-history-115/field-gates.tsv)
+and [literal references](../../research/work-items/RE-011-evm-fee-history-115/literals.json)
+identify the guards and order. The [public Alloy representation](https://github.com/alloy-rs/alloy/blob/59174912873b337ea5868c295cefa70997596f29/crates/rpc-types-eth/src/fee.rs)
+provides an independently inspectable reference for the logical types and JSON
+quantities. The Rust result type accepts collected values and imposes no target
+memory layout. The loopback engine still supplies its existing sample fee and
+ratio; a real history source, parameter decoding, and byte-identical formatting
+of all floating-point values remain outside this result serializer.

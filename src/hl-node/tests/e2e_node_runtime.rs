@@ -578,7 +578,7 @@ fn e2e_lthash_homomorphic_persistence_lifecycle_and_live_jsonrpc_endpoints() {
     )
     .expect("eth_feeHistory");
     assert!(fee_hist.body.contains("\"oldestBlock\":\"0x0\""));
-    assert!(fee_hist.body.contains("\"blockCount\":4"));
+    assert_eq!(fee_hist.body, r#"{"jsonrpc":"2.0","id":11,"result":{"baseFeePerGas":["0x3b9aca00"],"gasUsedRatio":[0.0],"oldestBlock":"0x0"}}"#);
 
     let logs = http_post(
         addr,
