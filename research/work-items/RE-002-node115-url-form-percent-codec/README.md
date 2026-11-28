@@ -1,0 +1,5 @@
+# Node #115 form encoding and percent decoding
+
+This RE-002 packet links form URL byte serialization and percent-decoded UTF-8 conversion to released form_urlencoded 1.2.1 and percent-encoding 2.3.2 source. The form serializer passes safe bytes through, maps spaces to plus and percent-encodes others; percent decoding preserves a borrowed value when no decoding is needed and checks UTF-8. Three complete catalogued node bodies match compiled references outside relocation fields. This complements earlier fixed encoding tables; static evidence does not establish exact production crate versions or complete runtime equivalence.
+
+Base `2da45cb0a761cff6b478e40421699857d87a94df`; node #115 SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. The verifier checks both released source checksums and reads the ELF as data. Run from repository root: `python3 -B research/work-items/RE-002-node115-url-form-percent-codec/verify.py /path/to/vendor-source`. Log is actual offline output; manifest covers the packet.
