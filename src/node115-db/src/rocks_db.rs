@@ -365,6 +365,12 @@ fn read_kv_file(path: &Path) -> io::Result<BTreeMap<Vec<u8>, Vec<u8>>> {
         pos += vlen;
         out.insert(key, val);
     }
+    if pos != raw.len() {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "trailing bytes in shard KV snapshot",
+        ));
+    }
     Ok(out)
 }
 
