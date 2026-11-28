@@ -86,21 +86,43 @@ pub struct ReplayParentProjection {
     pub successor: u64,
 }
 
-/// Project the two comparison words and the separate saturating successor.
-/// The positional certificate scalars retain the names used by the wire codec.
-pub fn replay_parent_projection(parent: &Parent) -> ReplayParentProjection {
-    let (fields, successor_basis) = match parent {
-        Parent::QuorumCertificate(qc) => (&qc.fields, qc.fields[2]),
+fn selected_replay_quorum(parent: &Parent) -> &QuorumCertificate {
+    match parent {
+        Parent::QuorumCertificate(certificate) => certificate,
         Parent::Timeout {
             certificate,
             quorum_certificate,
-        } => (
-            &quorum_certificate
-                .as_ref()
-                .unwrap_or(&certificate.quorum_certificate)
-                .fields,
-            certificate.field,
-        ),
+        } => quorum_certificate
+            .as_ref()
+            .unwrap_or(&certificate.quorum_certificate),
+    }
+}
+
+/// The identity and predecessor bytes read from an incoming retained Block.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct RetainedParentLink {
+    pub identity: u64,
+    pub predecessor: [u8; 32],
+}
+
+/// Read the retained-batch comparison operands from the typed incoming parent.
+/// The expected predecessor's bytes are supplied by the previous Block owner
+/// on the native path and are outside this incoming projection.
+pub fn replay_retained_parent_link(parent: &Parent) -> RetainedParentLink {
+    let quorum = selected_replay_quorum(parent);
+    RetainedParentLink {
+        identity: quorum.fields[2],
+        predecessor: quorum.hash,
+    }
+}
+
+/// Project the two comparison words and the separate saturating successor.
+/// The positional certificate scalars retain the names used by the wire codec.
+pub fn replay_parent_projection(parent: &Parent) -> ReplayParentProjection {
+    let fields = &selected_replay_quorum(parent).fields;
+    let successor_basis = match parent {
+        Parent::QuorumCertificate(_) => fields[2],
+        Parent::Timeout { certificate, .. } => certificate.field,
     };
     ReplayParentProjection {
         comparison_words: [fields[0], fields[1]],
