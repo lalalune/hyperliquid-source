@@ -8,15 +8,15 @@ import copy
 import glob
 import hashlib
 import json
-import os
 import struct
-import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
+sys.path.insert(0, str(REPO / "tools"))
+from node115_thinlto import build_objects
+
 RECORDS_PATH = HERE / "records.json"
 FDE_TSV_PATH = REPO / "work" / "index" / "node-115-fde.tsv"
 BYTE_WINDOWS_PATH = REPO / "research" / "byte-windows.json"
@@ -79,20 +79,8 @@ def load_fde_map() -> dict[int, int]:
 
 
 def compile_source(src_path: Path, flags: list[str]) -> dict[str, tuple[bytes, list[int]]]:
-    with tempfile.TemporaryDirectory(prefix="node115-dbg-verify-") as td:
-        out_bin = Path(td) / "storage_abci_dbg"
-        subprocess.run(
-            ["rustc", *flags, str(src_path), "-o", str(out_bin)],
-            cwd=td,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        objs = sorted(glob.glob(os.path.join(td, "storage_abci_dbg.storage_abci_dbg.*.rcgu.o")))
-        if not objs:
-            raise AssertionError("ThinLTO compile produced no rcgu.o object")
-        by_name, _ = parse_obj_sections(Path(objs[0]).read_bytes())
-        return by_name
+    by_name, _ = parse_obj_sections(build_objects(src_path, flags)[0])
+    return by_name
 
 
 def extract_interval(w: dict, fdes: dict[int, int]) -> tuple[int, int] | None:
