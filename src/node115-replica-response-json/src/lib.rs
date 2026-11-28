@@ -56,3 +56,30 @@ pub fn write_response<W: Write, T>(
         }
     }
 }
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MissingPeriodicHash {
+    pub post_height: u64,
+}
+
+/// Select the response for the observed replay worker's archive sink lane.
+///
+/// `mode` is the callback byte at offset +0x6b8 and `post_height` is the
+/// returned height supplied to the same sink. Full rows and the optional
+/// result fingerprint come from independently supplied fixture observations.
+pub fn select_response<'a, T>(
+    mode: u8,
+    post_height: u64,
+    rows: &'a [([u8; 32], Vec<T>)],
+    periodic_hash: Option<&'a [u8; 32]>,
+) -> Result<Response<'a, T>, MissingPeriodicHash> {
+    if mode == 1 {
+        return Ok(Response::Full(rows));
+    }
+    if post_height % 11 == 0 {
+        return periodic_hash
+            .map(Response::Hash)
+            .ok_or(MissingPeriodicHash { post_height });
+    }
+    Ok(Response::Null)
+}
