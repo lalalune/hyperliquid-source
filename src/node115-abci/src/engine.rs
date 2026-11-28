@@ -64,6 +64,7 @@ pub struct AbciEngine {
     pub quorum_sink_log: Vec<String>,
     pub selector_cell: RootSelectorCell,
     pub seal_target: Option<u64>,
+    root_context_mode: u32,
 }
 
 impl AbciEngine {
@@ -75,10 +76,20 @@ impl AbciEngine {
             quorum_sink_log: Vec::new(),
             selector_cell: RootSelectorCell::default(),
             seal_target: None,
+            root_context_mode: 0,
         }
     }
 
+    /// Use the supplied offline context mode for the #115 post-comparison root gate.
+    pub fn with_root_context_mode(mut self, context_mode: u32) -> Self {
+        self.root_context_mode = context_mode;
+        self
+    }
+
     pub fn root_cadence_matches(&self, height: u64) -> bool {
+        if self.root_context_mode == 2 {
+            return false;
+        }
         if height.is_multiple_of(DEFAULT_ROOT_CADENCE_MODULUS) {
             return true;
         }
